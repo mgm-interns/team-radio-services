@@ -1,13 +1,19 @@
 package com.mgmtp.radio.support;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Component
 public class ContentTypeValidator {
+
+    @Value("${radio.image.contentType}")
+    private String[] imageContentType;
 
     public static final String IMAGE_JPEG = "image/jpeg";
 
@@ -19,6 +25,11 @@ public class ContentTypeValidator {
     public boolean isJpeg(final File file) throws IOException
     {
         return IMAGE_JPEG.equals(getContentType(convertStreamToHex(new FileInputStream(file))));
+    }
+
+    public boolean isImage(final MultipartFile imageFile) {
+        List listImageContentTypes = Arrays.asList(imageContentType);
+        return listImageContentTypes.contains(imageFile.getContentType());
     }
 
     private List<String> convertStreamToHex(final InputStream stream) throws IOException
