@@ -7,25 +7,27 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Document(collection = "station")
-@Data
 @NoArgsConstructor
-public class Station {
+@Data
+@Document(collection = "song")
+public class Song {
 	@Id
 	private String id;
-	@Indexed(unique = true)
-	private String name;
-	private boolean isPrivate;
-	private String ownerId;
-	private int startingTime;
-	private boolean isDeleted;
-	private List<String> playlist;
+	private boolean isPlayed;
+	private boolean isSkipped;
+	private String url;
+	private String title;
+	private String thumbnail;
+	private int duration;
+	private String creatorId;
+	private List<String> upvoteUserIdList;
+	private List<String> downvoteUserIdList;
+	private String message;
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate createdAt;
