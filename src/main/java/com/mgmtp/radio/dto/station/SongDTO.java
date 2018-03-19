@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @NoArgsConstructor
 @Data
@@ -18,9 +19,11 @@ public class SongDTO {
 	String title;
 	String thumbnail;
 	int duration;
-	UserDTO creator;
-	int upVoteCount;
-	int downVoteCount;
+    UserDTO creator;
+    int upVoteCount;
+    int downVoteCount;
+	List<UserDTO> upvoteUserList;
+	List<UserDTO> downvoteUserList;
 	String message;
 	LocalDate createdAt;
 }
