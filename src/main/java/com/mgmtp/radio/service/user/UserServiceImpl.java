@@ -38,14 +38,30 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO patchUser(String username, UserDTO userDTO) throws RadioNotFoundException {
         return userRepository.findByUsername(username).map(user -> {
-            user.setName( userDTO.getName());
-            user.setFirstName( userDTO.getFirstName());
-            user.setLastName( userDTO.getLastName());
-            user.setCountry( userDTO.getCountry());
-            user.setCity( userDTO.getCity());
-            user.setBio( userDTO.getBio());
-            user.setAvatarUrl( userDTO.getAvatarUrl());
-            user.setCoverUrl( userDTO.getCoverUrl());
+            user.setName(userDTO.getName());
+            user.setFirstName(userDTO.getFirstName());
+            user.setLastName(userDTO.getLastName());
+            user.setCountry(userDTO.getCountry());
+            user.setCity(userDTO.getCity());
+            user.setBio(userDTO.getBio());
+            user.setAvatarUrl(userDTO.getAvatarUrl());
+            user.setCoverUrl(userDTO.getCoverUrl());
+            return userMapper.userToUserDTO(userRepository.save(user));
+        }).orElseThrow(RadioNotFoundException::new);
+    }
+
+    @Override
+    public UserDTO patchUserAvatar(String username, String avatarUrl) throws RadioNotFoundException {
+        return userRepository.findByUsername(username).map(user -> {
+            user.setAvatarUrl(avatarUrl);
+            return userMapper.userToUserDTO(userRepository.save(user));
+        }).orElseThrow(RadioNotFoundException::new);
+    }
+
+    @Override
+    public UserDTO patchUserCover(String username, String coverUrl) throws RadioNotFoundException {
+        return userRepository.findByUsername(username).map(user -> {
+            user.setCoverUrl(coverUrl);
             return userMapper.userToUserDTO(userRepository.save(user));
         }).orElseThrow(RadioNotFoundException::new);
     }
