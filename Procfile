@@ -1,2 +1,1 @@
-web: java $JAVA_OPTS -Dserver.port=$PORT -jar target/*.jar
-git
+web java -Dserver.port=$PORT $JAVA_OPTS -jar target/radio-services-0.0.1-SNAPSHOT.jar
