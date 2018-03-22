@@ -1,6 +1,6 @@
 package com.mgmtp.radio.dto.station;
 
-import com.mgmtp.radio.sdo.StationPrivacyKeys;
+import com.mgmtp.radio.sdo.StationPrivacy;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,7 +12,7 @@ import java.util.List;
 public class StationDTO {
 	String id;
 	String name;
-	StationPrivacyKeys privacy;
+	StationPrivacy privacy;
 	String ownerId;
 	int startingTime;
 	boolean deleted;

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
-import com.mgmtp.radio.sdo.StationPrivacyKeys;
+import com.mgmtp.radio.sdo.StationPrivacy;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -22,7 +22,7 @@ public class Station {
 	private String id;
 	@Indexed(unique = true)
 	private String name;
-	private StationPrivacyKeys privacy;
+	private StationPrivacy privacy;
 	private String ownerId;
 	private int startingTime;
 	private boolean deleted;

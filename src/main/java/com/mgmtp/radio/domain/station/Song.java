@@ -18,7 +18,8 @@ import java.util.List;
 public class Song {
 	@Id
 	private String id;
-	private String youtubeId;
+	private String songId;
+	private String source;
 	private boolean playing;
 	private boolean skipped;
 	private String url;
