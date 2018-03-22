@@ -18,15 +18,16 @@ import java.util.List;
 public class Song {
 	@Id
 	private String id;
-	private boolean isPlayed;
-	private boolean isSkipped;
+	private String youtubeId;
+	private boolean playing;
+	private boolean skipped;
 	private String url;
 	private String title;
 	private String thumbnail;
 	private int duration;
 	private String creatorId;
-	private List<String> upvoteUserIdList;
-	private List<String> downvoteUserIdList;
+	private List<String> upVoteUserIdList;
+	private List<String> downVoteUserIdList;
 	private String message;
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonSerialize(using = LocalDateSerializer.class)

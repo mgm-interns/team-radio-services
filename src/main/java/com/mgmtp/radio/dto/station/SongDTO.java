@@ -11,15 +11,16 @@ import java.util.List;
 @Data
 public class SongDTO {
 	String id;
-	boolean isPlayed;
-	boolean isSkipped;
+	String youtubeId;
+	boolean playing;
+	boolean skipped;
 	String url;
 	String title;
 	String thumbnail;
 	int duration;
 	String creatorId;
-	List<UserDTO> upvoteUserList;
-	List<UserDTO> downvoteUserList;
+	List<UserDTO> upVoteUserList;
+	List<UserDTO> downVoteUserList;
 	String message;
 	LocalDate createdAt;
 }
