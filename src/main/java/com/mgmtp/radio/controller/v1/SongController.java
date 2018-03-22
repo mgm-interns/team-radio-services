@@ -1,13 +1,17 @@
 package com.mgmtp.radio.controller.v1;
 
+import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
 import com.mgmtp.radio.dto.station.SongDTO;
+import com.mgmtp.radio.exception.*;
 import com.mgmtp.radio.service.station.SongService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -133,5 +137,76 @@ public class SongController {
             return 1;
         }
         return 0;
-    };
+    }
+
+
+
+    @ApiOperation(
+            value = "Add song to station playlist",
+            notes = "Return new song in station playlist"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 400, message = "Error in request parameters", response = RadioBadRequestException.class),
+            @ApiResponse(code = 404, message = "Station or Song not found", response = RadioNotFoundException.class),
+            @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
+    })
+    @PostMapping
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<RadioSuccessResponse<SongDTO>> addSong(
+            @PathVariable String stationId,
+            @RequestBody SongDTO songDTO
+    ) {
+        log.info("POST /api/v1/song  - data: " + songDTO.toString());
+
+        return songService
+                .addSongToStationPlaylist(stationId, songDTO)
+                .flatMap(newSongDTO -> Mono.just(new RadioSuccessResponse<>(newSongDTO)));
+    }
+
+    @ApiOperation(
+            value = "Upvote a song in station playlist",
+            notes = "Return updated song in station playlist"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 400, message = "Error in request parameters", response = RadioBadRequestException.class),
+            @ApiResponse(code = 404, message = "Station or Song not found", response = RadioNotFoundException.class),
+            @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
+    })
+    @PatchMapping("upVote")
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<RadioSuccessResponse<SongDTO>> upvoteSong(
+            @PathVariable String stationId,
+            @RequestBody String songId
+    ) {
+        log.info("POST /api/v1/song/" + stationId + "/upvote  - data: " + songId);
+
+        return songService
+                .upVoteSongInStationPlaylist(stationId, songId, getCurrentUser().getId())
+                .flatMap(updatedSongDTO -> Mono.just(new RadioSuccessResponse<>(updatedSongDTO)));
+    }
+
+    @ApiOperation(
+            value = "Upvote a song in station playlist",
+            notes = "Return updated song in station playlist"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 400, message = "Error in request parameters", response = RadioBadRequestException.class),
+            @ApiResponse(code = 404, message = "Station or Song not found", response = RadioNotFoundException.class),
+            @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
+    })
+    @PatchMapping("downVote")
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<RadioSuccessResponse<SongDTO>> downvoteSong(
+            @PathVariable String stationId,
+            @RequestBody String songId
+    ) {
+        log.info("POST /api/v1/song/" + stationId + "/downvote  - data: " + songId);
+
+        return songService
+                .downVoteSongInStationPlaylist(stationId, songId, getCurrentUser().getId())
+                .flatMap(updatedSongDTO -> Mono.just(new RadioSuccessResponse<>(updatedSongDTO)));
+    }
 }
