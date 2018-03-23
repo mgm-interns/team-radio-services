@@ -38,6 +38,7 @@ public class FavoriteSongController {
 		if (bindingResult.hasErrors()) {
 			return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
 		}
+		// Todo: validate logged in user
 		return favoriteSongService.create(userId, favoriteSongDTO).map(song -> ResponseEntity.status(HttpStatus.CREATED).body(song));
 	}
 }

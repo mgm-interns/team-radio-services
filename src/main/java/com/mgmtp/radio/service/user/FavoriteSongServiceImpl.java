@@ -34,4 +34,9 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
 	public Flux<FavoriteSongDTO> findByUserId(String userId) throws RadioNotFoundException {
 		return favoriteSongRepository.findByUserId(userId).map(favoriteSongMapper::favoriteSongToFavoriteSongDTO).switchIfEmpty(Mono.error(new RadioNotFoundException()));
 	}
+
+	@Override
+	public Mono<FavoriteSongDTO> findByUserIdAndSongId(String userId, String songId) throws RadioNotFoundException {
+		return favoriteSongRepository.findByUserIdAndSongId(userId, songId).map(favoriteSongMapper::favoriteSongToFavoriteSongDTO).switchIfEmpty(Mono.error(new RadioNotFoundException()));
+	}
 }
