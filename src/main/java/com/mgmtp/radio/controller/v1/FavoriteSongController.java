@@ -1,7 +1,9 @@
 package com.mgmtp.radio.controller.v1;
 
+import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
+import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.service.user.FavoriteSongService;
 import com.mgmtp.radio.support.validator.user.CreateFavoriteSongValidator;
 import lombok.extern.log4j.Log4j2;
@@ -16,9 +18,9 @@ import reactor.core.publisher.Mono;
 @Log4j2
 @RestController
 @RequestMapping(FavoriteSongController.BASE_URL)
-public class FavoriteSongController {
+public class FavoriteSongController extends BaseRadioController {
 
-	public static final String BASE_URL = "/api/v1/users/{id}/favorites";
+	public static final String BASE_URL = "/api/v1/users/{userId}/favorites";
 
 	private final FavoriteSongService favoriteSongService;
 	private final CreateFavoriteSongValidator createFavoriteSongValidator;
@@ -34,11 +36,18 @@ public class FavoriteSongController {
 	}
 
 	@PostMapping
-	public Mono<ResponseEntity<FavoriteSongDTO>> create(@PathVariable(value = "id") String userId, @Validated @RequestBody FavoriteSongDTO favoriteSongDTO, BindingResult bindingResult) {
+	public Mono<ResponseEntity<FavoriteSongDTO>> create(@PathVariable(value = "userId") String userId, @Validated @RequestBody FavoriteSongDTO favoriteSongDTO, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
 		}
 		// Todo: validate logged in user
 		return favoriteSongService.create(userId, favoriteSongDTO).map(song -> ResponseEntity.status(HttpStatus.CREATED).body(song));
+	}
+
+	@DeleteMapping("/{id}")
+	public Mono<ResponseEntity<Void>> delete(@PathVariable(value = "id") String favoriteSongId) throws RadioNotFoundException {
+		// Todo: after getting current user: String userId = getCurrentUser().getId();
+		final String userId = "001";
+		return favoriteSongService.delete(favoriteSongId, userId).map(song -> new ResponseEntity<>(HttpStatus.OK));
 	}
 }

@@ -9,4 +9,6 @@ public interface FavoriteSongRepository extends ReactiveMongoRepository<Favorite
 	Flux<FavoriteSong> findByUserId(String id);
 
 	Mono<FavoriteSong> findByUserIdAndSongId(String userId, String songId);
+
+	Mono<FavoriteSong> findByIdAndUserId(String id, String userId);
 }

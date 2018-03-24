@@ -11,4 +11,6 @@ public interface FavoriteSongService {
 	Flux<FavoriteSongDTO> findByUserId(String id) throws RadioNotFoundException;
 
 	Mono<FavoriteSongDTO> findByUserIdAndSongId(String userId, String songId) throws RadioNotFoundException;
+
+	Mono<FavoriteSongDTO> delete(String favoriteSongId, String userId) throws RadioNotFoundException;
 }
