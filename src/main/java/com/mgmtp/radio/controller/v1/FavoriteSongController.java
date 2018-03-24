@@ -13,6 +13,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Log4j2
@@ -34,6 +35,13 @@ public class FavoriteSongController extends BaseRadioController {
 	protected void initBinder(WebDataBinder binder) {
 		binder.addValidators(this.createFavoriteSongValidator);
 	}
+
+	@GetMapping
+	public Flux<ResponseEntity<FavoriteSongDTO>> index(@PathVariable(value = "userId") String userId) {
+		// Todo: validate logged in user
+		return favoriteSongService.findByUserId(userId).map(favoriteSong -> ResponseEntity.status(HttpStatus.OK).body(favoriteSong));
+	}
+
 
 	@PostMapping
 	public Mono<ResponseEntity<FavoriteSongDTO>> create(@PathVariable(value = "userId") String userId, @Validated @RequestBody FavoriteSongDTO favoriteSongDTO, BindingResult bindingResult) {

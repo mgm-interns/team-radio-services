@@ -6,9 +6,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface FavoriteSongService {
+
 	Mono<FavoriteSongDTO> create(String userId, FavoriteSongDTO favoriteSongDTO);
 
-	Flux<FavoriteSongDTO> findByUserId(String id) throws RadioNotFoundException;
+	Flux<FavoriteSongDTO> findByUserId(String userId);
 
 	Mono<FavoriteSongDTO> findByUserIdAndSongId(String userId, String songId) throws RadioNotFoundException;
 
