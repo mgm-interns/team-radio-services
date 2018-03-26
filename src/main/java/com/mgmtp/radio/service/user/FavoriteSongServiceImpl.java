@@ -36,8 +36,8 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
 	}
 
 	@Override
-	public Mono<FavoriteSongDTO> findByUserIdAndSongId(String userId, String songId) throws RadioNotFoundException {
-		return favoriteSongRepository.findByUserIdAndSongId(userId, songId).map(favoriteSongMapper::favoriteSongToFavoriteSongDTO).switchIfEmpty(Mono.error(new RadioNotFoundException()));
+	public Mono<Boolean> existsByUserIdAndSongId(String userId, String songId) {
+		return favoriteSongRepository.findByUserIdAndSongId(userId, songId).map(song -> true).switchIfEmpty(Mono.just(false));
 	}
 
 	@Override

@@ -85,12 +85,7 @@ public class CreateFavoriteSongValidator implements Validator {
 	 *
 	 */
 	private boolean isFavoriteSongExisted(String userId, String songId) {
-		try {
-			favoriteSongService.findByUserIdAndSongId(userId, songId);
-			return true;
-		} catch (RadioNotFoundException exception) {
-			return false;
-		}
+	    return favoriteSongService.existsByUserIdAndSongId(userId, songId).block();
 	}
 
 }
