@@ -49,4 +49,10 @@ public class SongServiceImpl implements SongService {
             return result;
         }).switchIfEmpty(Mono.error(new RadioNotFoundException("Not found song in station")));
     }
+
+    @Override
+    public Flux<SongDTO> getAllSongById(List<String> idList) {
+        return songRepository.findAll()
+                .map( song -> songMapper.songToSongDTO(song) );
+    }
 }
