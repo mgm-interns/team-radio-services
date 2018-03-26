@@ -1,5 +1,6 @@
 package com.mgmtp.radio.dto.station;
 
+import com.mgmtp.radio.dto.user.UserDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -17,7 +18,7 @@ public class SongDTO {
 	String title;
 	String thumbnail;
 	int duration;
-	String creatorId;
+	UserDTO creator;
 	int upVoteCount;
 	int downVoteCount;
 	String message;
