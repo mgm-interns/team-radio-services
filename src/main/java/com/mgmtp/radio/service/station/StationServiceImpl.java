@@ -7,35 +7,28 @@ import reactor.core.publisher.Mono;
 
 import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.domain.station.Station;
-import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.StationDTO;
-import com.mgmtp.radio.dto.user.UserDTO;
-import com.mgmtp.radio.exception.RadioNotFoundException;
+import com.mgmtp.radio.mapper.station.SongMapper;
 import com.mgmtp.radio.mapper.station.StationMapper;
-import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
-import com.mgmtp.radio.respository.user.UserRepository;
-import com.mgmtp.radio.service.station.StationService;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class StationServiceImpl implements StationService {
 
     private final StationMapper stationMapper;
     private final StationRepository stationRepository;
+    private final SongRepository songRepository;
+    private final SongMapper songMapper;
 
-    public StationServiceImpl(StationRepository stationRepository, StationMapper stationMapper) {
+    public StationServiceImpl(SongRepository songRepository, StationRepository stationRepository, StationMapper stationMapper, SongMapper songMapper) {
         this.stationMapper = stationMapper;
         this.stationRepository = stationRepository;
+        this.songRepository = songRepository;
+        this.songMapper = songMapper;
     }
 
     @Override
@@ -45,12 +38,22 @@ public class StationServiceImpl implements StationService {
 
     public Flux<StationDTO> getStations() {
         return stationRepository.findAll()
-                .map(station -> stationMapper.stationToStationDTO(station));
+                .map(station -> {
+                    StationDTO result = stationMapper.stationToStationDTO(station);
+                    result.setPlaylist(songRepository.findAll().map(song -> songMapper.songToSongDTO(song)).collectList().block());
+
+                    return result;
+                });
     }
 
     public Mono<StationDTO> getStation(String id) {
         return stationRepository.findById(id)
-                .map(station -> stationMapper.stationToStationDTO(station));
+                .map(station -> {
+                    StationDTO result = stationMapper.stationToStationDTO(station);
+                    songRepository.findAll().collectList().block();
+//                    result.setPlaylist(songRepository.findAll().map(song -> songMapper.songToSongDTO(song)).collectList().block());
+                    return result;
+                });
     }
 
     public Mono<StationDTO> createStation(String userId, StationDTO stationDTO){

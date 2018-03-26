@@ -117,14 +117,6 @@ public class StationController extends BaseRadioController {
         return stationService.updateStation(id, stationDTO)
                 .map(updatedStation -> new ResponseEntity<>(updatedStation, HttpStatus.OK))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-//        return stationRepository.findById(id)
-//                .flatMap(station -> {
-//                    station.setName(stationDTO.getName());
-//                    return stationRepository.save(station);
-//                })
-//                .map(station -> stationMapper.stationToStationDTO(station))
-//                .map(updatedStation -> new ResponseEntity<>(updatedStation, HttpStatus.OK))
-//                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
 }

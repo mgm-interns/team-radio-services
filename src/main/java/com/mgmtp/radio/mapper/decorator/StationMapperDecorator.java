@@ -22,13 +22,13 @@ public abstract class StationMapperDecorator implements StationMapper {
     @Autowired
     private SongService songService;
 
-    @Override
-    public StationDTO stationToStationDTO(Station station){
-        StationDTO stationDTO = delegate.stationToStationDTO(station);
-
-        Flux<SongDTO> playlist = songService.getAllSongById(station.getPlaylist());
-
-        stationDTO.setPlaylist(playlist);
-        return stationDTO;
-    };
+//    @Override
+//    public StationDTO stationToStationDTO(Station station){
+//        StationDTO stationDTO = delegate.stationToStationDTO(station);
+//
+//        Flux<SongDTO> playlist = songService.getAllSongById(station.getPlaylist());
+//
+//        stationDTO.setPlaylist(playlist.collectList().block());
+//        return stationDTO;
+//    };
 }

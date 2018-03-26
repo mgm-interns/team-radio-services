@@ -15,11 +15,11 @@ public class CreateStationImplTest {
 
     StationService stationService;
 
-    @Before
-    public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        stationService = new StationServiceImpl(stationRepository, stationMapper);
-    }
+//    @Before
+//    public void setUp() throws Exception {
+//        MockitoAnnotations.initMocks(this);
+//        stationService = new StationServiceImpl(stationRepository, stationMapper);
+//    }
 
     @Test
     public void createSuccess() {
