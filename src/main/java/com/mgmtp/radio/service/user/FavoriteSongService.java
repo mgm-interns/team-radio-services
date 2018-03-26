@@ -1,7 +1,6 @@
 package com.mgmtp.radio.service.user;
 
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
-import com.mgmtp.radio.exception.RadioNotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -13,5 +12,5 @@ public interface FavoriteSongService {
 
 	Mono<Boolean> existsByUserIdAndSongId(String userId, String songId);
 
-	Mono<FavoriteSongDTO> delete(String favoriteSongId, String userId) throws RadioNotFoundException;
+	Mono<FavoriteSongDTO> delete(String favoriteSongId, String userId);
 }

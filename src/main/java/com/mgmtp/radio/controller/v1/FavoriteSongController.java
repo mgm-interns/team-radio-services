@@ -3,7 +3,6 @@ package com.mgmtp.radio.controller.v1;
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
-import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.service.user.FavoriteSongService;
 import com.mgmtp.radio.support.validator.user.CreateFavoriteSongValidator;
 import lombok.extern.log4j.Log4j2;
@@ -53,7 +52,7 @@ public class FavoriteSongController extends BaseRadioController {
 	}
 
 	@DeleteMapping("/{id}")
-	public Mono<ResponseEntity<Void>> delete(@PathVariable(value = "id") String favoriteSongId) throws RadioNotFoundException {
+	public Mono<ResponseEntity<Void>> delete(@PathVariable(value = "id") String favoriteSongId) {
 		// Todo: after getting current user: String userId = getCurrentUser().getId();
 		final String userId = "001";
 		return favoriteSongService.delete(favoriteSongId, userId).map(song -> new ResponseEntity<>(HttpStatus.OK));

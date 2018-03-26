@@ -1,4 +1,4 @@
-package com.mgmtp.radio.service.user.service.favorite;
+package com.mgmtp.radio.service.user.favorite;
 
 import com.mgmtp.radio.domain.user.FavoriteSong;
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;

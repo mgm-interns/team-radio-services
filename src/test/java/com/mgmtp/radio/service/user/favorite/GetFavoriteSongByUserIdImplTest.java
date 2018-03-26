@@ -1,8 +1,7 @@
-package com.mgmtp.radio.service.user.service.favorite;
+package com.mgmtp.radio.service.user.favorite;
 
 import com.mgmtp.radio.domain.user.FavoriteSong;
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
-import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.user.FavoriteSongMapper;
 import com.mgmtp.radio.respository.user.FavoriteSongRepository;
 import com.mgmtp.radio.service.user.FavoriteSongService;
@@ -11,11 +10,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
-import static org.mockito.Mockito.*;
+import java.util.UUID;
 
-public class DeleteFavoriteSongImplTest {
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+
+public class GetFavoriteSongByUserIdImplTest {
 
     @Mock
     FavoriteSongRepository favoriteSongRepository;
@@ -31,10 +35,10 @@ public class DeleteFavoriteSongImplTest {
     }
 
     @Test
-    public void deleteSuccess() {
+    public void getFavoriteListByUserIdSuccess() {
         //given
         FavoriteSongDTO favoriteSongDTO = new FavoriteSongDTO();
-        favoriteSongDTO.setId("001");
+        favoriteSongDTO.setId(UUID.randomUUID().toString());
         favoriteSongDTO.setUserId("001");
         favoriteSongDTO.setSongId("001");
 
@@ -43,33 +47,30 @@ public class DeleteFavoriteSongImplTest {
         favoriteSong.setUserId(favoriteSongDTO.getUserId());
         favoriteSong.setSongId(favoriteSongDTO.getSongId());
 
-        when(favoriteSongRepository.findByIdAndUserId(anyString(), anyString())).thenReturn(Mono.just(favoriteSong));
+        when(favoriteSongRepository.findByUserId(anyString())).thenReturn(Flux.just(favoriteSong));
 
         // when
-        favoriteSongRepository.delete(favoriteSong);
+        Flux<FavoriteSongDTO> result = favoriteSongService.findByUserId(favoriteSongDTO.getUserId());
+        FavoriteSongDTO expected = result.log().next().block();
 
-        //then
-        verify(favoriteSongRepository, times(1)).delete(any(FavoriteSong.class));
+        // then
+        assertEquals(favoriteSongDTO, expected);
     }
 
-    @Test(expected = Exception.class)
-    public void deleteFailureWithWrongUserId() throws RadioNotFoundException {
+    @Test
+    public void getEmptyFavoriteListByUserId() {
         //given
         FavoriteSongDTO favoriteSongDTO = new FavoriteSongDTO();
-        favoriteSongDTO.setId("001");
+        favoriteSongDTO.setId(UUID.randomUUID().toString());
         favoriteSongDTO.setUserId("001");
         favoriteSongDTO.setSongId("001");
 
-        FavoriteSong favoriteSong = new FavoriteSong();
-        favoriteSong.setId(favoriteSongDTO.getId());
-        favoriteSong.setUserId(favoriteSongDTO.getUserId());
-        favoriteSong.setSongId(favoriteSongDTO.getSongId());
-
-
-        when(favoriteSongRepository.findByIdAndUserId(anyString(), anyString())).thenThrow(new RadioNotFoundException());
-        when(favoriteSongRepository.delete(any(FavoriteSong.class)));
+        when(favoriteSongRepository.findByUserId(anyString())).thenReturn(Flux.empty());
 
         // when
-        favoriteSongService.delete(favoriteSongDTO.getId(), favoriteSongDTO.getUserId());
+        Flux<FavoriteSongDTO> result = favoriteSongService.findByUserId(favoriteSongDTO.getUserId());
+
+        // then
+        assertNull(result.log().next().block());
     }
 }
