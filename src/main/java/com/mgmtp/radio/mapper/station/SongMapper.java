@@ -14,7 +14,6 @@ import org.mapstruct.factory.Mappers;
 @DecoratedWith(SongMapperDecorator.class)
 public interface SongMapper {
 	SongMapper INSTANCE = Mappers.getMapper(SongMapper.class);
-	StationMapperDecorator StationMapperDecorator(SongService songService, SongMapper songMapper);
 
 	@Mapping(target = "upVoteCount", ignore = true)
 	@Mapping(target = "downVoteCount", ignore = true)

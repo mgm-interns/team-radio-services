@@ -9,6 +9,7 @@ import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.service.station.SongService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
@@ -18,23 +19,14 @@ public abstract class StationMapperDecorator implements StationMapper {
     @Qualifier("delegate")
     private StationMapper delegate;
 
+    @Autowired
     private SongService songService;
-
-    public StationMapperDecorator(StationMapper delegate) {
-        this.delegate = delegate;
-    }
-
-    public StationMapperDecorator(SongService songService, SongMapper songMapper) {
-        this.songService = songService;
-        this.songMapper = songMapper;
-
-    }
 
     @Override
     public StationDTO stationToStationDTO(Station station){
         StationDTO stationDTO = delegate.stationToStationDTO(station);
 
-        List<SongDTO> playlist = songService.getAllSongById(station.getPlaylist()).collectList().block();
+        Flux<SongDTO> playlist = songService.getAllSongById(station.getPlaylist());
 
         stationDTO.setPlaylist(playlist);
         return stationDTO;

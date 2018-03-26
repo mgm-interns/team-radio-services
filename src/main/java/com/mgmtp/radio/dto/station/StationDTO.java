@@ -23,6 +23,6 @@ public class StationDTO {
 	String ownerId;
 	int startingTime;
 	boolean deleted;
-	List<SongDTO> playlist;
+	Flux<SongDTO> playlist;
 	LocalDate createdAt;
 }
