@@ -1,6 +1,7 @@
 package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.RadioApplicationTests;
+import com.mgmtp.radio.config.YouTubeConfig;
 import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.user.User;
@@ -11,6 +12,9 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
+import com.mgmtp.radio.support.DateHelper;
+import com.mgmtp.radio.support.TransferHelper;
+import com.mgmtp.radio.support.YouTubeHelper;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,6 +55,15 @@ public class UpVoteAndDownVoteSongServiceImplTest {
 
     private SongServiceImpl songService;
 
+    private YouTubeHelper youTubeHelper;
+
+    private TransferHelper transferHelper;
+
+    private DateHelper dateHelper;
+
+    @Autowired
+    YouTubeConfig youTubeConfig;
+
     private User user;
 
     private Station station;
@@ -60,7 +73,24 @@ public class UpVoteAndDownVoteSongServiceImplTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        songService = new SongServiceImpl(songMapper, userMapper, songRepository, stationRepository, userRepository);
+
+        youTubeHelper = new YouTubeHelper();
+
+        transferHelper = new TransferHelper();
+
+        dateHelper = new DateHelper();
+
+        songService = new SongServiceImpl(
+                songMapper,
+                userMapper,
+                songRepository,
+                stationRepository,
+                userRepository,
+                youTubeHelper,
+                transferHelper,
+                dateHelper,
+                youTubeConfig
+        );
 
         //given
         user = new User();

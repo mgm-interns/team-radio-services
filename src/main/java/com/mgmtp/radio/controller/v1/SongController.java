@@ -29,6 +29,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import java.io.IOException;
+
 @Log4j2
 @RestController
 @RequestMapping(SongController.BASE_URL)
@@ -143,7 +145,7 @@ public class SongController {
 
     @ApiOperation(
             value = "Add song to station playlist",
-            notes = "Return new song in station playlist"
+            notes = "Return a new song"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
@@ -155,13 +157,14 @@ public class SongController {
     @ResponseStatus(HttpStatus.OK)
     public Mono<RadioSuccessResponse<SongDTO>> addSong(
             @PathVariable String stationId,
-            @RequestBody SongDTO songDTO
+            @RequestParam String videoId,
+            @RequestParam(value = "message", required = false) String message
     ) {
-        log.info("POST /api/v1/song  - data: " + songDTO.toString());
+        log.info("POST /api/v1/song  - data: " + videoId.toString());
 
-        return songService
-                .addSongToStationPlaylist(stationId, songDTO)
-                .flatMap(newSongDTO -> Mono.just(new RadioSuccessResponse<>(newSongDTO)));
+        Mono<SongDTO> newSongDTO = songService.addSongToStationPlaylist(stationId, videoId, message, getCurrentUser().getId());
+
+        return newSongDTO.flatMap(songDTO1 -> Mono.just(new RadioSuccessResponse<>(songDTO1)));
     }
 
     @ApiOperation(

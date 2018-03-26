@@ -26,7 +26,7 @@ public class Song {
 	private String url;
 	private String title;
 	private String thumbnail;
-	private int duration;
+	private long duration;
 	private String creatorId;
 	private List<String> upVoteUserIdList = Collections.emptyList();
 	private List<String> downVoteUserIdList = Collections.emptyList();

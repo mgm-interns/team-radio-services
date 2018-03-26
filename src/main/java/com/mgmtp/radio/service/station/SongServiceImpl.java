@@ -1,5 +1,7 @@
 package com.mgmtp.radio.service.station;
 
+import com.google.api.services.youtube.model.Video;
+import com.mgmtp.radio.config.YouTubeConfig;
 import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.user.User;
@@ -7,6 +9,7 @@ import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.SongNotFoundException;
+import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.exception.StationNotFoundException;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.SongDTO;
@@ -17,6 +20,9 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
+import com.mgmtp.radio.support.DateHelper;
+import com.mgmtp.radio.support.TransferHelper;
+import com.mgmtp.radio.support.YouTubeHelper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -25,20 +31,39 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Date;
 
 @Service("songService")
 public class SongServiceImpl implements SongService {
     private final StationRepository stationRepository;
     private final SongRepository songRepository;
     private final UserRepository userRepository;
+    private final YouTubeHelper youTubeHelper;
+    private final TransferHelper transferHelper;
+    private final DateHelper dateHelper;
+    private final YouTubeConfig youTubeConfig;
     private final SongMapper songMapper;
     private final UserMapper userMapper;
 
-    public SongServiceImpl(StationRepository stationRepository, SongRepository songRepository, UserRepository userRepository,
-                           SongMapper songMapper, UserMapper userMapper) {
+    public SongServiceImpl(
+            SongMapper songMapper,
+            UserMapper userMapper,
+            SongRepository songRepository,
+            StationRepository stationRepository,
+            UserRepository userRepository,
+            YouTubeHelper youTubeHelper,
+            TransferHelper transferHelper,
+            DateHelper dateHelper,
+            YouTubeConfig youTubeConfig
+    ) {
+        this.songRepository = songRepository;
         this.stationRepository = stationRepository;
         this.songRepository = songRepository;
         this.userRepository = userRepository;
+        this.youTubeHelper = youTubeHelper;
+        this.transferHelper = transferHelper;
+        this.dateHelper = dateHelper;
+        this.youTubeConfig = youTubeConfig;
         this.songMapper = songMapper;
         this.userMapper = userMapper;
     }
@@ -70,21 +95,39 @@ public class SongServiceImpl implements SongService {
     @Override
     public Mono<SongDTO> addSongToStationPlaylist(
             String stationId,
-            SongDTO songDTO
+            String videoId,
+            String message,
+            String creatorId
     ) {
+        Song song = new Song();
+        Video video = youTubeHelper.getYouTubeVideoById(videoId);
 
-        Song song = songMapper.songDtoToSong(songDTO);
+        song.setSongId(video.getId());
+        song.setTitle(video.getSnippet().getTitle());
+        song.setCreatedAt(dateHelper.convertDateToLocalDate(new Date()));
+        song.setMessage(message);
+        song.setThumbnail(video.getSnippet().getThumbnails().getDefault().getUrl());
+        song.setUrl(youTubeConfig.getUrl() + videoId + "&t=0");
+        song.setCreatorId(creatorId);
+        song.setSource(video.getKind().split("#")[0]);
+        song.setDuration(transferHelper.transferVideoDuration(video.getContentDetails().getDuration()));
 
         return songRepository.save(song).flatMap(newSong ->
-                findStation(stationId).flatMap(station -> {
+                stationRepository.findById(stationId)
+                        .switchIfEmpty(Mono.error(new RadioNotFoundException()))
+                        .flatMap(station -> {
+                            if (station.getPlaylist() == null) {
+                                station.setPlaylist(new ArrayList<>());
+                            }
 
-                    // Update station playlist
-                    station.getPlaylist().add(newSong.getId());
+                            station.getPlaylist().add(newSong.getId());
 
-                    return stationRepository
-                            .save(station)
-                            .then(mapSongToSongDTO(newSong));
-                })
+                            log.info(station.toString());
+
+                            return stationRepository
+                                    .save(station)
+                                    .then(Mono.just(songMapper.songToSongDTO(newSong)));
+                        })
         );
     }
 
