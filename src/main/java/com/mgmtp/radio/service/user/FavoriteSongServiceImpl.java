@@ -27,7 +27,7 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
 		favoriteSongDTO.setUserId(userId);
 		favoriteSongDTO.setCreatedAt(LocalDate.now());
 		FavoriteSong favoriteSong = favoriteSongMapper.favoriteSongDtoToFavoriteSong(favoriteSongDTO);
-		return favoriteSongRepository.save(favoriteSong).map(song -> favoriteSongMapper.favoriteSongToFavoriteSongDTO(song));
+		return favoriteSongRepository.save(favoriteSong).map(favoriteSongMapper::favoriteSongToFavoriteSongDTO);
 	}
 
 	@Override
