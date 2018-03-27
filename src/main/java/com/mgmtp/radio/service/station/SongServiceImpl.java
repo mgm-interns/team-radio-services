@@ -34,16 +34,19 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public Flux<SongDTO> getListSongBy(String stationId) {
+    public Flux<SongDTO> getListSongByStationId(String stationId) {
         return stationRepository.findByIdAndDeletedFalse(stationId).flatMapMany(station -> {
-            List<String> playList = station.getPlaylist();
-
-            return songRepository.findByIdIn(playList).map(song -> {
-                SongDTO result = songMapper.songToSongDTO(song);
-                Optional<User> creator = userRepository.findById(song.getCreatorId());
-                result.setCreator(creator.isPresent() ? userMapper.userToUserDTO(creator.get()) : null);
-                return result;
-            }).switchIfEmpty(Mono.error(new RadioNotFoundException("Not found song in station")));
+            List<String> listSongId = station.getPlaylist();
+            return getListSongByListSongId(listSongId);
         }).switchIfEmpty(Mono.error(new RadioBadRequestException("Invalid station ID!")));
+    }
+
+    private Flux<SongDTO> getListSongByListSongId(List<String> listSongId) {
+        return songRepository.findByIdIn(listSongId).map(song -> {
+            SongDTO result = songMapper.songToSongDTO(song);
+            Optional<User> creator = userRepository.findById(song.getCreatorId());
+            result.setCreator(creator.isPresent() ? userMapper.userToUserDTO(creator.get()) : null);
+            return result;
+        }).switchIfEmpty(Mono.error(new RadioNotFoundException("Not found song in station")));
     }
 }

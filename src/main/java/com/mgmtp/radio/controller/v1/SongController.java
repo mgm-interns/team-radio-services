@@ -11,6 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuple3;
+import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
 import java.time.Duration;
@@ -45,21 +48,16 @@ public class SongController {
     @GetMapping("/sse/listSong")
     public Flux<ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> getListSong(@RequestParam("stationId") String stationId) {
         return Flux.interval(Duration.ofSeconds(1))
-                .map(tick -> Tuples.of(tick, songService.getListSongBy(stationId)))
-                .map(tuple2 -> {
-                    return ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
-                            .event("fetch")
-                            .id(Long.toString(tuple2.getT1()))
-                            .data(
-                                    new RadioSuccessResponse<>(
-                                            tuple2
-                                                    .getT2()
-                                                    .collectList()
-                                                    .block()
-                                    )
-                            ).build();
-                });
+                .map(thisSecond -> Tuples.of(thisSecond, songService.getListSongByStationId(stationId)))
+                .map(createDataForGetListSong);
     }
+
+    private Function<Tuple2<Long, Flux<SongDTO>>, ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> createDataForGetListSong =
+        dataOfTuple -> ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
+            .event("fetch")
+            .id(Long.toString(dataOfTuple.getT1()))
+            .data(new RadioSuccessResponse<>(dataOfTuple.getT2().collectList().block()))
+            .build();
 
     @ApiOperation(
             value = "Get list available song",
@@ -73,24 +71,23 @@ public class SongController {
     @ResponseStatus(HttpStatus.OK)
     public Flux<ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> getAvailableListSong(@RequestParam("stationId") String stationId) {
         return Flux.interval(Duration.ofSeconds(1))
-                .map(tick -> Tuples.of(tick, songService.getListSongBy(stationId)))
-                .map(tuple2 -> {
-                    return ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
-                            .event("fetch")
-                            .id(Long.toString(tuple2.getT1()))
-                            .data(
-                                    new RadioSuccessResponse<>(
-                                            tuple2
-                                                    .getT2()
-                                                    .collectList()
-                                                    .block()
-                                                    .stream()
-                                                    .filter(songDTO -> songDTO.isPlaying())
-                                                    .collect(Collectors.toList())
-                                    )
-                            ).build();
-                });
+                .map(thisSecond -> Tuples.of(thisSecond, songService.getListSongByStationId(stationId)))
+                .map(createDataForGetAvailableListSong);
     }
+
+    private Function<Tuple2<Long, Flux<SongDTO>>, ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> createDataForGetAvailableListSong =
+        dataOfTuple -> ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
+            .event("fetch")
+            .id(Long.toString(    dataOfTuple.getT1()))
+            .data(new RadioSuccessResponse<>(
+                    dataOfTuple
+                    .getT2()
+                    .collectList()
+                    .block()
+                    .stream()
+                    .filter(songDTO -> songDTO.isPlaying())
+                    .collect(Collectors.toList())))
+            .build();
 
     @ApiOperation(
             value = "Get list history song",
@@ -104,25 +101,25 @@ public class SongController {
     @ResponseStatus(HttpStatus.OK)
     public Flux<ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> getListSongHistory(@RequestParam(value = "stationId") String stationId, @RequestParam(value = "limit") Integer limit) {
         return Flux.interval(Duration.ofSeconds(1))
-                .map(tick -> Tuples.of(tick, songService.getListSongBy(stationId)))
-                .map(tuple2 -> {
-                    return ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
-                            .event("fetch")
-                            .id(Long.toString(tuple2.getT1()))
-                            .data(
-                                    new RadioSuccessResponse<>(
-                                            tuple2
-                                                    .getT2()
-                                                    .collectList()
-                                                    .block().stream().filter(songDTO -> !songDTO.isPlaying())
-                                                    .sorted(songDTODateDescComparator)
-                                                    .filter(distinctUrl(SongDTO::getUrl))
-                                                    .limit(limit)
-                                                    .collect(Collectors.toList())
-                                    )
-                            ).build();
-                });
+                .map(thisSecond -> Tuples.of(thisSecond, songService.getListSongByStationId(stationId), limit, songDTODateDescComparator))
+                .map(createDataForGetListHistorySong);
     }
+
+    private Function<Tuple4<Long, Flux<SongDTO>, Integer, Comparator<SongDTO>>, ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> createDataForGetListHistorySong =
+        dataOfTuple -> ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
+            .event("fetch")
+            .id(Long.toString(dataOfTuple.getT1()))
+            .data(
+                new RadioSuccessResponse<>(
+                    dataOfTuple
+                        .getT2()
+                        .collectList()
+                        .block().stream().filter(songDTO -> !songDTO.isPlaying())
+                        .sorted(dataOfTuple.getT4())
+                        .filter(distinctUrl(SongDTO::getUrl))
+                        .limit(dataOfTuple.getT3())
+                        .collect(Collectors.toList())))
+            .build();
 
     private Predicate<SongDTO> distinctUrl(Function<SongDTO, String> getUrl) {
         Set<String> uniqueUrl = ConcurrentHashMap.newKeySet();

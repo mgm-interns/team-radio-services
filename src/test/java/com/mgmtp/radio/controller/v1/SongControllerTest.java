@@ -81,7 +81,7 @@ public class SongControllerTest {
         Flux<SongDTO> resultSearchSong = Flux.just(songDTO1, songDTO2);
 
         //when song service call
-        when(songService.getListSongBy(STATION_ID)).thenReturn(resultSearchSong);
+        when(songService.getListSongByStationId(STATION_ID)).thenReturn(resultSearchSong);
 
         //test
         webTestClient.get()
@@ -122,7 +122,7 @@ public class SongControllerTest {
         final String STATION_ID = "5ab0c35c04a97f2c08954fa6";
 
         //given this Flux SongDTO
-        when(songService.getListSongBy(STATION_ID)).thenReturn(Flux.empty());
+        when(songService.getListSongByStationId(STATION_ID)).thenReturn(Flux.empty());
 
         //test
         webTestClient.get()
@@ -165,7 +165,7 @@ public class SongControllerTest {
         Flux<SongDTO> resultSearchSong = Flux.just(songDTO1, songDTO2);
 
         //when song service call
-        when(songService.getListSongBy(STATION_ID)).thenReturn(resultSearchSong);
+        when(songService.getListSongByStationId(STATION_ID)).thenReturn(resultSearchSong);
 
         //test
         webTestClient.get()
@@ -204,7 +204,7 @@ public class SongControllerTest {
         final String STATION_ID = "5ab0c35c04a97f2c08954fa6";
 
         //given this Flux SongDTO
-        when(songService.getListSongBy(STATION_ID)).thenReturn(Flux.empty());
+        when(songService.getListSongByStationId(STATION_ID)).thenReturn(Flux.empty());
 
         //test
         webTestClient.get()
@@ -264,7 +264,7 @@ public class SongControllerTest {
         Flux<SongDTO> resultSearchSong = Flux.just(songDTO1, songDTO2, songDTO3, songDTO4);
 
         //when song service call
-        when(songService.getListSongBy(STATION_ID)).thenReturn(resultSearchSong);
+        when(songService.getListSongByStationId(STATION_ID)).thenReturn(resultSearchSong);
 
         //test
         webTestClient.get()
@@ -307,7 +307,7 @@ public class SongControllerTest {
         final String STATION_ID = "5ab0c35c04a97f2c08954fa6";
 
         //given this Flux SongDTO
-        when(songService.getListSongBy(STATION_ID)).thenReturn(Flux.empty());
+        when(songService.getListSongByStationId(STATION_ID)).thenReturn(Flux.empty());
 
         //test
         webTestClient.get()
