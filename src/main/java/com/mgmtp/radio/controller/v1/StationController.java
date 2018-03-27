@@ -23,7 +23,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping(StationController.BASE_URL)
 public class StationController extends BaseRadioController {
-//
+
     public static final String BASE_URL = "/api/v1/stations";
 
     private final StationService stationService;

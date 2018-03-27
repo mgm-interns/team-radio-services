@@ -22,10 +22,6 @@ public abstract class SongMapperDecorator implements SongMapper {
 		return songDTO;
 	}
 
-	/**
-	 * Count number of vote
-	 *
-	 */
 	private int getVoteCount(List<String> voteList) {
 		if (voteList == null) return 0;
 		return voteList.size();

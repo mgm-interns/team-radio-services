@@ -39,7 +39,6 @@ public class CreateStationImplTest {
         stationDTO.setId("station1");
         stationDTO.setName("ST0");
         stationDTO.setPrivacy(StationPrivacy.station_private);
-        //Dummy userId
         String userId = "user1";
 
         Station savedStation = new Station();
