@@ -52,7 +52,8 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public Flux<SongDTO> getAllSongById(List<String> idList) {
-        return songRepository.findAll()
-                .map( song -> songMapper.songToSongDTO(song) );
+        return songRepository.findAllById(idList)
+                .map( song -> songMapper.songToSongDTO(song) ).defaultIfEmpty(new SongDTO());
+
     }
 }

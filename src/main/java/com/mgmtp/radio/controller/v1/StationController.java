@@ -2,36 +2,22 @@ package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
-import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.dto.station.StationDTO;
-import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
-import com.mgmtp.radio.mapper.station.StationMapper;
-import com.mgmtp.radio.respository.station.StationRepository;
-import com.mgmtp.radio.respository.user.UserRepository;
-import com.mgmtp.radio.sdo.CloudinaryDataKeys;
 import com.mgmtp.radio.service.station.StationService;
-import com.mgmtp.radio.support.CloudinaryHelper;
-import com.mgmtp.radio.support.ContentTypeValidator;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.server.ServerRequest;
-import org.springframework.web.reactive.function.server.ServerResponse;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
-import java.io.IOException;
-import java.util.Map;
 
 @Log4j2
 @RestController
@@ -40,21 +26,12 @@ public class StationController extends BaseRadioController {
 //
     public static final String BASE_URL = "/api/v1/stations";
 
-    private StationRepository stationRepository;
-
     private final StationService stationService;
-    private final CloudinaryHelper cloudinaryHelper;
-    private final ContentTypeValidator contentTypeValidator;
-    private final StationMapper stationMapper;
 
-    public StationController(StationRepository stationRepository, StationMapper stationMapper, StationService stationService, CloudinaryHelper cloudinaryHelper, ContentTypeValidator contentTypeValidator) {
+    public StationController(StationService stationService) {
         this.stationService = stationService;
-        this.cloudinaryHelper = cloudinaryHelper;
-        this.contentTypeValidator = contentTypeValidator;
-        this.stationMapper = stationMapper;
-        this.stationRepository = stationRepository;
-
     }
+
 
     @ApiOperation(
             value = "GET all station",
@@ -67,7 +44,7 @@ public class StationController extends BaseRadioController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Flux<ResponseEntity<StationDTO>> getAllStation() {
-        return this.stationService.getStations()
+        return this.stationService.getAll()
                 .map(station -> ResponseEntity.status(HttpStatus.OK).body(station));
     }
 
@@ -82,7 +59,7 @@ public class StationController extends BaseRadioController {
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<StationDTO>> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
-        return this.stationService.getStation(stationId)
+        return this.stationService.getOne(stationId)
                 .map((station) -> ResponseEntity.ok(station))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -98,7 +75,7 @@ public class StationController extends BaseRadioController {
     })
     @PostMapping
     public Mono<ResponseEntity<StationDTO>> createStation(@Valid @RequestBody StationDTO stationDTO) {
-        return stationService.createStation("string", stationDTO)
+        return stationService.create("string", stationDTO)
                 .map(station -> ResponseEntity.status(HttpStatus.CREATED).body(station));
     }
 
@@ -114,7 +91,7 @@ public class StationController extends BaseRadioController {
     @PutMapping("{id}")
     public Mono<ResponseEntity<StationDTO>> updateStation(@PathVariable(value = "id") final String id,
                                                    @Valid @RequestBody final StationDTO stationDTO) {
-        return stationService.updateStation(id, stationDTO)
+        return stationService.update(id, stationDTO)
                 .map(updatedStation -> new ResponseEntity<>(updatedStation, HttpStatus.OK))
                 .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }

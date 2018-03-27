@@ -3,8 +3,6 @@ package com.mgmtp.radio.mapper.station;
 import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.mapper.decorator.SongMapperDecorator;
-import com.mgmtp.radio.mapper.decorator.StationMapperDecorator;
-import com.mgmtp.radio.service.station.SongService;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

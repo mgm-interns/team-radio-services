@@ -8,9 +8,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface StationService {
-    Flux<StationDTO> getStations();
-    Mono<StationDTO> getStation(String id) throws RadioNotFoundException;;
-    Mono<StationDTO> createStation(String userId, StationDTO stationDTO);
-    Mono<StationDTO> updateStation(String id, StationDTO stationDTO);
+    Flux<StationDTO> getAll();
+    Mono<StationDTO> getOne(String id) throws RadioNotFoundException;;
+    Mono<StationDTO> create(String userId, StationDTO stationDTO);
+    Mono<StationDTO> update(String id, StationDTO stationDTO);
     Mono<Station> findStationByIdAndDeletedFalse(String stationId);
 }
