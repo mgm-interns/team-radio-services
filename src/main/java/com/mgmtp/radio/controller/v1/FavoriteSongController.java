@@ -1,13 +1,13 @@
 package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.controller.BaseRadioController;
+import com.mgmtp.radio.controller.response.RadioSuccessResponse;
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.service.user.FavoriteSongService;
 import com.mgmtp.radio.support.validator.user.CreateFavoriteSongValidator;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
@@ -36,25 +36,28 @@ public class FavoriteSongController extends BaseRadioController {
 	}
 
 	@GetMapping
-	public Flux<ResponseEntity<FavoriteSongDTO>> index(@PathVariable(value = "userId") String userId) {
+	@ResponseStatus(HttpStatus.OK)
+	public Flux<RadioSuccessResponse<FavoriteSongDTO>> index(@PathVariable(value = "userId") String userId) {
 		// Todo: validate logged in user
-		return favoriteSongService.findByUserId(userId).map(favoriteSong -> ResponseEntity.status(HttpStatus.OK).body(favoriteSong));
+		return favoriteSongService.findByUserId(userId).map(favoriteSong -> new RadioSuccessResponse<>(favoriteSong));
 	}
 
 
 	@PostMapping
-	public Mono<ResponseEntity<FavoriteSongDTO>> create(@PathVariable(value = "userId") String userId, @Validated @RequestBody FavoriteSongDTO favoriteSongDTO, BindingResult bindingResult) {
+	@ResponseStatus(HttpStatus.OK)
+	public Mono<RadioSuccessResponse<FavoriteSongDTO>> create(@PathVariable(value = "userId") String userId, @Validated @RequestBody FavoriteSongDTO favoriteSongDTO, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
 		}
 		// Todo: validate logged in user
-		return favoriteSongService.create(userId, favoriteSongDTO).map(song -> ResponseEntity.status(HttpStatus.CREATED).body(song));
+		return favoriteSongService.create(userId, favoriteSongDTO).map(song -> new RadioSuccessResponse<>(song));
 	}
 
 	@DeleteMapping("/{id}")
-	public Mono<ResponseEntity<Void>> delete(@PathVariable(value = "id") String favoriteSongId) {
+	@ResponseStatus(HttpStatus.OK)
+	public Mono<RadioSuccessResponse<Void>> delete(@PathVariable(value = "id") String favoriteSongId) {
 		// Todo: after getting current user: String userId = getCurrentUser().getId();
 		final String userId = "001";
-		return favoriteSongService.delete(favoriteSongId, userId).map(song -> new ResponseEntity<>(HttpStatus.OK));
+		return favoriteSongService.delete(favoriteSongId, userId).map(song -> new RadioSuccessResponse<>());
 	}
 }
