@@ -109,7 +109,7 @@ public class SongServiceImplTest {
         when(userRepository.findById(playListCreatorId.get(1))).thenReturn(Optional.of(user2));
 
         //test
-        Flux<SongDTO> result = songService.getListSongIn(STATION_ID);
+        Flux<SongDTO> result = songService.getListSongBy(STATION_ID);
 
         //then
         List<SongDTO> convertResult = result.log().collectList().block();

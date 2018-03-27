@@ -45,7 +45,7 @@ public class SongController {
     @GetMapping("/sse/listSong")
     public Flux<ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> getListSong(@RequestParam("stationId") String stationId) {
         return Flux.interval(Duration.ofSeconds(1))
-                .map(tick -> Tuples.of(tick, songService.getListSongIn(stationId)))
+                .map(tick -> Tuples.of(tick, songService.getListSongBy(stationId)))
                 .map(tuple2 -> {
                     return ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
                             .event("fetch")
@@ -73,7 +73,7 @@ public class SongController {
     @ResponseStatus(HttpStatus.OK)
     public Flux<ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> getAvailableListSong(@RequestParam("stationId") String stationId) {
         return Flux.interval(Duration.ofSeconds(1))
-                .map(tick -> Tuples.of(tick, songService.getListSongIn(stationId)))
+                .map(tick -> Tuples.of(tick, songService.getListSongBy(stationId)))
                 .map(tuple2 -> {
                     return ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
                             .event("fetch")
@@ -104,7 +104,7 @@ public class SongController {
     @ResponseStatus(HttpStatus.OK)
     public Flux<ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> getListSongHistory(@RequestParam(value = "stationId") String stationId, @RequestParam(value = "limit") Integer limit) {
         return Flux.interval(Duration.ofSeconds(1))
-                .map(tick -> Tuples.of(tick, songService.getListSongIn(stationId)))
+                .map(tick -> Tuples.of(tick, songService.getListSongBy(stationId)))
                 .map(tuple2 -> {
                     return ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
                             .event("fetch")

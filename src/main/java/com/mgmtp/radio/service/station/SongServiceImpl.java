@@ -34,7 +34,7 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
-    public Flux<SongDTO> getListSongIn(String stationId) {
+    public Flux<SongDTO> getListSongBy(String stationId) {
         return stationRepository.findByIdAndDeletedFalse(stationId).flatMapMany(station -> {
             List<String> playList = station.getPlaylist();
 
