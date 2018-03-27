@@ -65,4 +65,9 @@ public class UserServiceImpl implements UserService {
             return userMapper.userToUserDTO(userRepository.save(user));
         }).orElseThrow(RadioNotFoundException::new);
     }
+
+    @Override
+    public UserDTO getUserById(String id) throws RadioNotFoundException {
+        return userRepository.findById(id).map(userMapper::userToUserDTO).orElseThrow(RadioNotFoundException::new);
+    }
 }

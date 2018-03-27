@@ -9,4 +9,5 @@ public interface UserService {
     UserDTO patchUser(String username, UserDTO userDTO) throws RadioNotFoundException;
     UserDTO patchUserAvatar(String username, String avatarUrl) throws RadioNotFoundException;
     UserDTO patchUserCover(String username, String coverUrl) throws RadioNotFoundException;
+    UserDTO getUserById(String id) throws RadioNotFoundException;
 }

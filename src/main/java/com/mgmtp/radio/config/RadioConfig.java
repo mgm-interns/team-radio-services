@@ -5,6 +5,7 @@ import org.springframework.context.annotation.PropertySource;
 
 @Configuration
 @PropertySource(value = {"classpath:local.properties"}, ignoreResourceNotFound = true)
+@PropertySource(value = {"classpath:messages.properties"})
 public class RadioConfig {
 
 }
