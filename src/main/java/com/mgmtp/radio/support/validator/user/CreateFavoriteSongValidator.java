@@ -4,22 +4,24 @@ import com.mgmtp.radio.dto.user.FavoriteSongDTO;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.service.user.FavoriteSongService;
 import com.mgmtp.radio.service.user.UserService;
-import org.springframework.core.env.Environment;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
+
+import java.util.Locale;
 
 @Component
 public class CreateFavoriteSongValidator implements Validator {
 
 	private final FavoriteSongService favoriteSongService;
 	private final UserService userService;
-	private final Environment env;
+	private final MessageSource messageSource;
 
-	public CreateFavoriteSongValidator(FavoriteSongService favoriteSongService, UserService userService, Environment env) {
+	public CreateFavoriteSongValidator(FavoriteSongService favoriteSongService, UserService userService, MessageSource messageSource) {
 		this.favoriteSongService = favoriteSongService;
 		this.userService = userService;
-		this.env = env;
+		this.messageSource = messageSource;
 	}
 
 	@Override
@@ -40,11 +42,11 @@ public class CreateFavoriteSongValidator implements Validator {
 	 */
 	private void validateExists(FavoriteSongDTO favoriteSongDTO, Errors errors) {
 		if (!isUserExisted(favoriteSongDTO.getUserId())) {
-			errors.rejectValue("userId", "", env.getProperty("user.favorite.error.exist.userId"));
+			errors.rejectValue("userId", "", messageSource.getMessage("user.favorite.error.exist.userId", new String[]{}, Locale.getDefault()));
 		}
 
 		if (!isSongExisted(favoriteSongDTO.getSongId())) {
-			errors.rejectValue("songId", "", env.getProperty("user.favorite.error.exist.songId"));
+			errors.rejectValue("songId", "", messageSource.getMessage("user.favorite.error.exist.songId", new String[]{}, Locale.getDefault()));
 		}
 	}
 
@@ -54,7 +56,7 @@ public class CreateFavoriteSongValidator implements Validator {
 	 */
 	private void validateUnique(FavoriteSongDTO favoriteSongDTO, Errors errors) {
 		if (isFavoriteSongExisted(favoriteSongDTO.getUserId(), favoriteSongDTO.getSongId())) {
-			errors.rejectValue("id", "", env.getProperty("user.favorite.error.exist.song"));
+			errors.rejectValue("id", "", messageSource.getMessage("user.favorite.error.exist.song", new String[]{}, Locale.getDefault()));
 		}
 	}
 

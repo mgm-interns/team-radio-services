@@ -5,7 +5,7 @@ import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.exception.RadioServiceException;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.core.env.Environment;
+import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,14 +15,16 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.util.Locale;
+
 @Log4j2
 @ControllerAdvice
 public class RadioResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
-    private final Environment env;
+    private final MessageSource messageSource;
 
-    public RadioResponseExceptionHandler(Environment env) {
-        this.env = env;
+    public RadioResponseExceptionHandler(MessageSource messageSource) {
+        this.messageSource = messageSource;
     }
 
     // return 500 INTERNAL_SERVER_ERROR
@@ -63,7 +65,7 @@ public class RadioResponseExceptionHandler extends ResponseEntityExceptionHandle
         String message;
 
         if (StringUtils.isEmpty(exception.getMessage())) {
-            message = env.getProperty("exception.not_found");
+            message = messageSource.getMessage("exception.not_found", new String[]{}, Locale.getDefault());
         } else {
             message = exception.getMessage();
         }
