@@ -63,7 +63,7 @@ public class GetStationByIdImplTest {
         StationDTO stationDTO = new StationDTO();
         stationDTO.setId("001");
         stationDTO.setName("001");
-        stationDTO.setPrivacy(StationPrivacy.station_private);
+        stationDTO.setPrivacy(StationPrivacy.station_public);
         stationDTO.setOwnerId("user1");
         stationDTO.setPlaylist(listSongDTO);
 
