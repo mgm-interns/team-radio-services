@@ -39,7 +39,7 @@ public class FavoriteSongController extends BaseRadioController {
 	@ResponseStatus(HttpStatus.OK)
 	public Flux<RadioSuccessResponse<FavoriteSongDTO>> getAll() {
 		String userId = getCurrentUser().getId();
-		return favoriteSongService.findByUserId(userId).map(favoriteSong -> new RadioSuccessResponse<>(favoriteSong));
+		return favoriteSongService.findByUserId(userId).map(RadioSuccessResponse::new);
 	}
 
 
@@ -50,7 +50,7 @@ public class FavoriteSongController extends BaseRadioController {
 			return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
 		}
 		String userId = getCurrentUser().getId();
-		return favoriteSongService.create(userId, favoriteSongDTO).map(song -> new RadioSuccessResponse<>(song));
+		return favoriteSongService.create(userId, favoriteSongDTO).map(RadioSuccessResponse::new);
 	}
 
 	@DeleteMapping("/{id}")
