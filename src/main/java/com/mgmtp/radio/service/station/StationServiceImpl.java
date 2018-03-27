@@ -40,6 +40,7 @@ public class StationServiceImpl implements StationService {
                 .map(station -> stationMapper.stationToStationDTO(station));
     }
 
+    @Override
     public Mono<StationDTO> findById(String id) {
         Mono<Station> stationMono = stationRepository.findById(id);
         Station station = stationMono.block();
@@ -52,6 +53,7 @@ public class StationServiceImpl implements StationService {
         });
     }
 
+    @Override
     public Mono<StationDTO> create(String userId, StationDTO stationDTO){
         stationDTO.setOwnerId(userId);
         stationDTO.setCreatedAt(LocalDate.now());
@@ -59,6 +61,7 @@ public class StationServiceImpl implements StationService {
         return stationRepository.save(station).map( item -> stationMapper.stationToStationDTO(item) );
     }
 
+    @Override
     public Mono<StationDTO>  update(String stationId, StationDTO stationDTO){
         return stationRepository.findById(stationId)
                 .flatMap(station -> {
