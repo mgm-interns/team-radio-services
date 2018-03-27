@@ -3,20 +3,20 @@ package com.mgmtp.radio.controller.v1;
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
 import com.mgmtp.radio.dto.station.SongDTO;
-import com.mgmtp.radio.exception.*;
+import com.mgmtp.radio.exception.RadioBadRequestException;
+import com.mgmtp.radio.exception.RadioException;
+import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.service.station.SongService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Mono;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
-import reactor.util.function.Tuple3;
 import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
@@ -29,12 +29,10 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import java.io.IOException;
-
 @Log4j2
 @RestController
 @RequestMapping(SongController.BASE_URL)
-public class SongController {
+public class SongController extends BaseRadioController  {
     public static final String BASE_URL = "/api/v1/songs";
 
     private final SongService songService;
@@ -139,9 +137,7 @@ public class SongController {
             return 1;
         }
         return 0;
-    }
-
-
+    };
 
     @ApiOperation(
             value = "Add song to station playlist",
@@ -156,7 +152,7 @@ public class SongController {
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
     public Mono<RadioSuccessResponse<SongDTO>> addSong(
-            @PathVariable String stationId,
+            @RequestParam String stationId,
             @RequestParam String videoId,
             @RequestParam(value = "message", required = false) String message
     ) {
@@ -164,7 +160,7 @@ public class SongController {
 
         Mono<SongDTO> newSongDTO = songService.addSongToStationPlaylist(stationId, videoId, message, getCurrentUser().getId());
 
-        return newSongDTO.flatMap(songDTO1 -> Mono.just(new RadioSuccessResponse<>(songDTO1)));
+        return newSongDTO.flatMap(songDTO -> Mono.just(new RadioSuccessResponse<>(songDTO)));
     }
 
     @ApiOperation(
@@ -180,7 +176,7 @@ public class SongController {
     @PatchMapping("upVote")
     @ResponseStatus(HttpStatus.OK)
     public Mono<RadioSuccessResponse<SongDTO>> upvoteSong(
-            @PathVariable String stationId,
+            @RequestParam String stationId,
             @RequestBody String songId
     ) {
         log.info("POST /api/v1/song/" + stationId + "/upvote  - data: " + songId);
@@ -203,7 +199,7 @@ public class SongController {
     @PatchMapping("downVote")
     @ResponseStatus(HttpStatus.OK)
     public Mono<RadioSuccessResponse<SongDTO>> downvoteSong(
-            @PathVariable String stationId,
+            @RequestParam String stationId,
             @RequestBody String songId
     ) {
         log.info("POST /api/v1/song/" + stationId + "/downvote  - data: " + songId);

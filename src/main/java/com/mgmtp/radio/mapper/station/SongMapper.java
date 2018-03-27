@@ -15,9 +15,11 @@ public interface SongMapper {
 
 	@Mapping(target = "upVoteCount", ignore = true)
 	@Mapping(target = "downVoteCount", ignore = true)
+	@Mapping(target = "creatorId", ignore = true)
 	SongDTO songToSongDTO(Song song);
 
 	@Mapping(target = "upVoteUserIdList", ignore = true)
 	@Mapping(target = "downVoteUserIdList", ignore = true)
+	@Mapping(target = "creatorId", ignore = true)
 	Song songDtoToSong(SongDTO songDTO);
 }

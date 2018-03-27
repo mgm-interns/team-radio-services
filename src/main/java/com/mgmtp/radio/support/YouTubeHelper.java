@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class YouTubeHelper {
@@ -27,14 +28,14 @@ public class YouTubeHelper {
             VideoListResponse response;
             youTube = getYouTube();
 
-            HashMap<String, String> parameters = new HashMap<>();
+            Map<String, String> parameters = new HashMap<>();
             parameters.put("part", "id,snippet,contentDetails");
             parameters.put("id", videoId);
 
             YouTube.Videos.List videosListByIdRequest = youTube.videos().list(parameters.get("part").toString());
             videosListByIdRequest.setKey(youTubeConfig.getApiKey());
-            if (parameters.containsKey("id") && parameters.get("id") != "") {
-                videosListByIdRequest.setId(parameters.get("id").toString());
+            if (parameters.containsKey("id") && parameters.get("id").isEmpty()) {
+                videosListByIdRequest.setId(parameters.get("id"));
             }
 
             response = videosListByIdRequest.execute();

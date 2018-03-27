@@ -25,7 +25,6 @@ public class SongMapperTest {
     private final static String TITLE = "";
     private final static String THUMBNAIL = "";
     private final static int DURATION = 50000;
-    private final static String CREATOR_ID = "";
     private final static String MESSAGE = "This is for you.";
 
     @Test
@@ -37,7 +36,6 @@ public class SongMapperTest {
         song.setTitle(TITLE);
         song.setThumbnail(THUMBNAIL);
         song.setDuration(DURATION);
-        song.setCreatorId(CREATOR_ID);
         song.setMessage(MESSAGE);
 
         SongDTO songDTO = songMapper.songToSongDTO(song);
@@ -48,7 +46,6 @@ public class SongMapperTest {
         assertEquals(song.getTitle(), songDTO.getTitle());
         assertEquals(song.getThumbnail(), songDTO.getThumbnail());
         assertEquals(song.getDuration(), songDTO.getDuration());
-        assertEquals(song.getCreatorId(), songDTO.getCreatorId());
         assertEquals(song.getMessage(), songDTO.getMessage());
     }
 
@@ -61,7 +58,6 @@ public class SongMapperTest {
         songDTO.setTitle(TITLE);
         songDTO.setThumbnail(THUMBNAIL);
         songDTO.setDuration(DURATION);
-        songDTO.setCreatorId(CREATOR_ID);
         songDTO.setMessage(MESSAGE);
 
         Song song = songMapper.songDtoToSong(songDTO);
@@ -72,7 +68,6 @@ public class SongMapperTest {
         assertEquals(songDTO.getTitle(), song.getTitle());
         assertEquals(songDTO.getThumbnail(), song.getThumbnail());
         assertEquals(songDTO.getDuration(), song.getDuration());
-        assertEquals(songDTO.getCreatorId(), song.getCreatorId());
         assertEquals(songDTO.getMessage(), song.getMessage());
     }
 }

@@ -18,7 +18,5 @@ public interface SongService {
 
     Mono<SongDTO> downVoteSongInStationPlaylist(String stationId, String songId, String userId);
 
-    Mono<SongDTO> getSongById(String songId);
-
     Mono<SongDTO> addSongToStationPlaylist(String stationId, String videoId, String message, String creatorId) ;
 }

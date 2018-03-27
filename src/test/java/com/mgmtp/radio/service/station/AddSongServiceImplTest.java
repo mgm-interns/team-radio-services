@@ -123,7 +123,7 @@ public class AddSongServiceImplTest {
         songDTO.setUrl("https://www.youtube.com/watch?v=mNh6MCoMPis");
         songDTO.setTitle("Chelsea - What Do You Want From Me (The Voice Kids 2013: The Blind Auditions)");
         songDTO.setDuration(50000);
-        songDTO.setCreatorId("35535");
+        songDTO.setCreatorId(userMapper.userToUserDTO(user));
 
         Song savedSong = new Song();
         savedSong.setPlaying(songDTO.isPlaying());
@@ -131,7 +131,7 @@ public class AddSongServiceImplTest {
         savedSong.setUrl(songDTO.getUrl());
         savedSong.setTitle(songDTO.getTitle());
         savedSong.setDuration(songDTO.getDuration());
-        savedSong.setCreatorId(songDTO.getCreatorId());
+        savedSong.setCreatorId(songDTO.getCreatorId().getId());
 
         Video video = new Video();
         VideoSnippet videoSnippet = new VideoSnippet();

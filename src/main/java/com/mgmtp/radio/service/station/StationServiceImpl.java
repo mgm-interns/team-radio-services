@@ -52,7 +52,7 @@ public class StationServiceImpl implements StationService {
     public Mono<StationDTO> create(String userId, StationDTO stationDTO){
         stationDTO.setOwnerId(userId);
         stationDTO.setCreatedAt(LocalDate.now());
-        Station station = stationMapper.stationDtoToStation(stationDTO);
+        Station station = stationMapper.stationDTOToStation(stationDTO);
         return stationRepository.save(station).map( stationMapper::stationToStationDTO);
     }
 

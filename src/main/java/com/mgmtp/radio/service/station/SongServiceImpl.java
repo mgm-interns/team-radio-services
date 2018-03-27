@@ -58,7 +58,6 @@ public class SongServiceImpl implements SongService {
     ) {
         this.songRepository = songRepository;
         this.stationRepository = stationRepository;
-        this.songRepository = songRepository;
         this.userRepository = userRepository;
         this.youTubeHelper = youTubeHelper;
         this.transferHelper = transferHelper;
@@ -80,7 +79,7 @@ public class SongServiceImpl implements SongService {
         return songRepository.findByIdIn(listSongId).map(song -> {
             SongDTO result = songMapper.songToSongDTO(song);
             Optional<User> creator = userRepository.findById(song.getCreatorId());
-            result.setCreator(creator.isPresent() ? userMapper.userToUserDTO(creator.get()) : null);
+            result.setCreatorId(creator.isPresent() ? userMapper.userToUserDTO(creator.get()) : null);
             return result;
         }).switchIfEmpty(Mono.error(new RadioNotFoundException("Not found song in station")));
     }
@@ -90,7 +89,6 @@ public class SongServiceImpl implements SongService {
         return songRepository.findAllById(idList)
                 .map(songMapper::songToSongDTO).defaultIfEmpty(new SongDTO());
     }
-
 
     @Override
     public Mono<SongDTO> addSongToStationPlaylist(
@@ -121,8 +119,6 @@ public class SongServiceImpl implements SongService {
                             }
 
                             station.getPlaylist().add(newSong.getId());
-
-                            log.info(station.toString());
 
                             return stationRepository
                                     .save(station)
