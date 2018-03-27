@@ -41,8 +41,8 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
 	}
 
 	@Override
-	public Mono<FavoriteSongDTO> delete(String favoriteSongId, String userId) {
-		return favoriteSongRepository.findByIdAndUserId(favoriteSongId, userId).flatMap(song -> {
+	public Mono<FavoriteSongDTO> delete(String id, String userId) {
+		return favoriteSongRepository.findByIdAndUserId(id, userId).flatMap(song -> {
 			return favoriteSongRepository.delete(song).then(Mono.just(favoriteSongMapper.favoriteSongToFavoriteSongDTO(song)));
 		}).switchIfEmpty(Mono.error(new RadioNotFoundException()));
 	}

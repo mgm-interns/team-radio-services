@@ -12,5 +12,5 @@ public interface FavoriteSongService {
 
 	Mono<Boolean> existsByUserIdAndSongId(String userId, String songId);
 
-	Mono<FavoriteSongDTO> delete(String favoriteSongId, String userId);
+	Mono<FavoriteSongDTO> delete(String id, String userId);
 }

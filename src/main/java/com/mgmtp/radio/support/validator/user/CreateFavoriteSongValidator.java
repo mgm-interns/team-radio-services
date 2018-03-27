@@ -36,10 +36,6 @@ public class CreateFavoriteSongValidator implements Validator {
 		this.validateUnique(favoriteSongDTO, errors);
 	}
 
-	/**
-	 * Validate exist logic
-	 *
-	 */
 	private void validateExists(FavoriteSongDTO favoriteSongDTO, Errors errors) {
 		if (!isUserExisted(favoriteSongDTO.getUserId())) {
 			errors.rejectValue("userId", "", messageSource.getMessage("user.favorite.error.exist.userId", new String[]{}, Locale.getDefault()));
@@ -50,20 +46,12 @@ public class CreateFavoriteSongValidator implements Validator {
 		}
 	}
 
-	/**
-	 * Validate unique logic
-	 *
-	 */
 	private void validateUnique(FavoriteSongDTO favoriteSongDTO, Errors errors) {
 		if (isFavoriteSongExisted(favoriteSongDTO.getUserId(), favoriteSongDTO.getSongId())) {
 			errors.rejectValue("id", "", messageSource.getMessage("user.favorite.error.exist.song", new String[]{}, Locale.getDefault()));
 		}
 	}
 
-	/**
-	 * Check if user exists or not
-	 *
-	 */
 	private boolean isUserExisted(String userId) {
 		try {
 			userService.getUserById(userId);
@@ -73,19 +61,11 @@ public class CreateFavoriteSongValidator implements Validator {
 		}
 	}
 
-	/**
-	 * Check if song exists or not
-	 *
-	 */
 	private boolean isSongExisted(String songId) {
 //		Todo: check song id
 		return true;
 	}
 
-	/**
-	 * Check if favorite song exists or not
-	 *
-	 */
 	private boolean isFavoriteSongExisted(String userId, String songId) {
 	    return favoriteSongService.existsByUserIdAndSongId(userId, songId).block();
 	}

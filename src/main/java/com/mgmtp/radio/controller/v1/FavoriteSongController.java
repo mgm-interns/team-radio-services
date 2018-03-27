@@ -20,7 +20,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping(FavoriteSongController.BASE_URL)
 public class FavoriteSongController extends BaseRadioController {
 
-	public static final String BASE_URL = "/api/v1/users/{userId}/favorites";
+	public static final String BASE_URL = "/api/v1/users/me/favorites";
 
 	private final FavoriteSongService favoriteSongService;
 	private final CreateFavoriteSongValidator createFavoriteSongValidator;
@@ -37,27 +37,26 @@ public class FavoriteSongController extends BaseRadioController {
 
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
-	public Flux<RadioSuccessResponse<FavoriteSongDTO>> index(@PathVariable(value = "userId") String userId) {
-		// Todo: validate logged in user
+	public Flux<RadioSuccessResponse<FavoriteSongDTO>> getAll() {
+		String userId = getCurrentUser().getId();
 		return favoriteSongService.findByUserId(userId).map(favoriteSong -> new RadioSuccessResponse<>(favoriteSong));
 	}
 
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.OK)
-	public Mono<RadioSuccessResponse<FavoriteSongDTO>> create(@PathVariable(value = "userId") String userId, @Validated @RequestBody FavoriteSongDTO favoriteSongDTO, BindingResult bindingResult) {
+	public Mono<RadioSuccessResponse<FavoriteSongDTO>> store(@Validated @RequestBody FavoriteSongDTO favoriteSongDTO, BindingResult bindingResult) {
 		if (bindingResult.hasErrors()) {
 			return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
 		}
-		// Todo: validate logged in user
+		String userId = getCurrentUser().getId();
 		return favoriteSongService.create(userId, favoriteSongDTO).map(song -> new RadioSuccessResponse<>(song));
 	}
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public Mono<RadioSuccessResponse<Void>> delete(@PathVariable(value = "id") String favoriteSongId) {
-		// Todo: after getting current user: String userId = getCurrentUser().getId();
-		final String userId = "001";
-		return favoriteSongService.delete(favoriteSongId, userId).map(song -> new RadioSuccessResponse<>());
+	public Mono<RadioSuccessResponse<Void>> delete(@PathVariable(value = "id") String id) {
+		String userId = getCurrentUser().getId();
+		return favoriteSongService.delete(id, userId).map(song -> new RadioSuccessResponse<>());
 	}
 }
