@@ -40,7 +40,7 @@ public class StationServiceImpl implements StationService {
                 .map(station -> stationMapper.stationToStationDTO(station));
     }
 
-    public Mono<StationDTO> getOne(String id) {
+    public Mono<StationDTO> findById(String id) {
         Mono<Station> stationMono = stationRepository.findById(id);
         Station station = stationMono.block();
         StationDTO stationDTO = stationMono.map(stationMapper::stationToStationDTO).block();
