@@ -30,7 +30,7 @@ public class MailgunConfig {
     private String from;
 
     @NotBlank
-    private String registerSubject;
+    private String registerMailSubject;
 
     @Bean
     public WebResource getWebResource() {

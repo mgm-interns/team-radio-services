@@ -29,7 +29,7 @@ public class MailgunHelper {
     static{
         subjectMailMap = new HashMap<>();
         try {
-            subjectMailMap.put(REGISTER_SUBJECT_KEY, MailgunConfig.class.getMethod("getRegisterSubject"));
+            subjectMailMap.put(REGISTER_SUBJECT_KEY, MailgunConfig.class.getMethod("getRegisterMailSubject"));
         } catch (NoSuchMethodException e) {
             log.error("Not found method", e);
         }
