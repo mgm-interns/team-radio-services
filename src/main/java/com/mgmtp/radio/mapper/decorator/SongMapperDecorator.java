@@ -23,7 +23,6 @@ public abstract class SongMapperDecorator implements SongMapper {
 	}
 
 	private int getVoteCount(List<String> voteList) {
-		if (voteList == null) return 0;
-		return voteList.size();
+		return (voteList == null ? 0 : voteList.size());
 	}
 }

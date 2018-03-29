@@ -37,7 +37,7 @@ public class StationServiceImpl implements StationService {
 
     public Flux<StationDTO> getAll() {
         return stationRepository.findAll()
-                .map(station -> stationMapper.stationToStationDTO(station));
+                .map(stationMapper::stationToStationDTO);
     }
 
     @Override
@@ -46,7 +46,9 @@ public class StationServiceImpl implements StationService {
         Station station = stationMono.block();
         StationDTO stationDTO = stationMono.map(stationMapper::stationToStationDTO).block();
         List<String> playlistIdList = station.getPlaylist();
-        if (playlistIdList == null || playlistIdList.isEmpty()) return Mono.just(stationDTO);
+        if (playlistIdList == null || playlistIdList.isEmpty()){
+            return Mono.just(stationDTO);
+        }
         return songService.getAllSongById(playlistIdList).collectList().map(songs -> {
             stationDTO.setPlaylist(songs);
             return stationDTO;
@@ -58,16 +60,16 @@ public class StationServiceImpl implements StationService {
         stationDTO.setOwnerId(userId);
         stationDTO.setCreatedAt(LocalDate.now());
         Station station = stationMapper.stationDtoToStation(stationDTO);
-        return stationRepository.save(station).map( item -> stationMapper.stationToStationDTO(item) );
+        return stationRepository.save(station).map( stationMapper::stationToStationDTO);
     }
 
     @Override
-    public Mono<StationDTO>  update(String stationId, StationDTO stationDTO){
+    public Mono<StationDTO> update(String stationId, StationDTO stationDTO){
         return stationRepository.findById(stationId)
                 .flatMap(station -> {
                     station.setName(stationDTO.getName());
                     return stationRepository.save(station);
                 })
-                .map(station -> stationMapper.stationToStationDTO(station));
+                .map(stationMapper::stationToStationDTO);
     }
 }

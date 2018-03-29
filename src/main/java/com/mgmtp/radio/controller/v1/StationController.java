@@ -60,7 +60,7 @@ public class StationController extends BaseRadioController {
     @ResponseStatus(HttpStatus.OK)
     public Mono<ResponseEntity<StationDTO>> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
         return this.stationService.findById(stationId)
-                .map((station) -> ResponseEntity.ok(station))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -75,7 +75,8 @@ public class StationController extends BaseRadioController {
     })
     @PostMapping
     public Mono<ResponseEntity<StationDTO>> createStation(@Valid @RequestBody StationDTO stationDTO) {
-        return stationService.create("string", stationDTO)
+        String userId = getCurrentUser().getId();
+        return stationService.create(userId, stationDTO)
                 .map(station -> ResponseEntity.status(HttpStatus.CREATED).body(station));
     }
 
