@@ -36,7 +36,7 @@ public class MailgunHelper {
     }
 
     @Value("classpath:mailTemplate/register_template.html")
-    private Resource templateMail;
+    private Resource registerTemplateMail;
 
     private final MailgunConfig mailgunConfig;
 
@@ -55,7 +55,7 @@ public class MailgunHelper {
         email.getCc().stream().forEach(ccAddress -> formData.add("cc", ccAddress));
         email.getBcc().stream().forEach(bccAddress -> formData.add("bcc", bccAddress));
 
-        String mailContent = String.format(IOUtils.toString(templateMail.getInputStream()),
+        String mailContent = String.format(IOUtils.toString(registerTemplateMail.getInputStream()),
                 email.getContentParams().get(USER_NAME_INDEX), email.getContentParams().get(USER_PROFILE_INDEX));
         formData.add("html", mailContent);
 
