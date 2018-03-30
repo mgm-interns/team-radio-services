@@ -1,5 +1,7 @@
 package com.mgmtp.radio.service.station;
 
+import com.mgmtp.radio.dto.station.ConfigurationDTO;
+import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
@@ -16,7 +18,41 @@ import java.util.Optional;
 @Service
 public class StationServiceImpl implements StationService {
 
-    private final StationMapper stationMapper;
+	private final StationMapper stationMapper;
+	private static final double ONE_HUNDRED_PERCENT = 1;
+	private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
+
+	@Override
+	public int getOnlineUsersNumber(StationDTO stationDTO) {
+		//TODO Get number of online users id here
+		return 0;
+	}
+
+	@Override
+	public void skipCurrentSong(StationDTO stationDTO) {
+		stationDTO.getPlaylist().get(0).setSkipped(true);
+	}
+
+	private double calcCurrentSongDislikePercent(StationDTO stationDTO, String userId) {
+		if (stationDTO.getConfigurationDTO().getSkipRuleDTO().isBasic()
+			&& stationDTO.getOwnerId().equals(userId)) {
+			return ONE_HUNDRED_PERCENT;
+		} else {
+			final int numberOnline = getOnlineUsersNumber(stationDTO);
+			double currentSongDislikePercent = 0;
+			if(numberOnline > 0) {
+				currentSongDislikePercent = (stationDTO.getNumberOfUpvote() - stationDTO.getNumberOfUpvote())
+					/ (float) numberOnline;
+			}
+			return currentSongDislikePercent;
+		}
+	}
+
+	private void checkAndSkipSongIfNeeded(StationDTO stationDTO, String userId) {
+		if(calcCurrentSongDislikePercent(stationDTO, userId) > DOWN_VOTE_THRES_PERCENT){
+			skipCurrentSong(stationDTO);
+		}
+	}
     private final StationRepository stationRepository;
     private final SongService songService;
 
