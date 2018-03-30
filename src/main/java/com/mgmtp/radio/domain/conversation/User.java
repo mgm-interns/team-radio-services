@@ -1,4 +1,4 @@
-package com.mgmtp.radio.domain.chat;
+package com.mgmtp.radio.domain.conversation;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,5 +7,5 @@ import lombok.NoArgsConstructor;
 @Data
 public class User {
     private String username;
-    private String avatar;
+    private String avatarUrl;
 }

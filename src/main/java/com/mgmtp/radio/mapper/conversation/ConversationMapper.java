@@ -1,0 +1,21 @@
+package com.mgmtp.radio.mapper.conversation;
+
+import com.mgmtp.radio.domain.conversation.Conversation;
+import com.mgmtp.radio.dto.conversation.ConversationDTO;
+import com.mgmtp.radio.mapper.decorator.ConversationMapperDecorator;
+import org.mapstruct.DecoratedWith;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+
+@Mapper
+@DecoratedWith(ConversationMapperDecorator.class)
+public interface ConversationMapper {
+    ConversationMapper INSTANCE = Mappers.getMapper(ConversationMapper.class);
+
+    @Mapping(target = "messages", ignore = true)
+    ConversationDTO conversationToConversationDTO(Conversation conversation);
+
+    @Mapping(target = "messageIdList", ignore = true)
+    Conversation conversationDtoToConversation(ConversationDTO conversationDTO);
+}
