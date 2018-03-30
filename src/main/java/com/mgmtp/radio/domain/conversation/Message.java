@@ -1,4 +1,4 @@
-package com.mgmtp.radio.domain.chat;
+package com.mgmtp.radio.domain.conversation;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -13,14 +13,12 @@ import java.time.LocalDate;
 
 @NoArgsConstructor
 @Data
-@Document(collection = "conversation")
-public class Conversation {
+@Document(collection = "message")
+public class Message {
     @Id
     private String id;
     private User from;
-    private User to;
-    private String message;
-    private String uid;
+    private String content;
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate createdAt;

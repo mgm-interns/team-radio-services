@@ -1,4 +1,4 @@
-package com.mgmtp.radio.domain.chat;
+package com.mgmtp.radio.domain.conversation;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
