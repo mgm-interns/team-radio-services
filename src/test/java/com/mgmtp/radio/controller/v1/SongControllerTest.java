@@ -97,12 +97,8 @@ public class SongControllerTest {
                     if (event != null) {
                         assertEquals("fetch", data.event());
                     }
-                    String id = data.id();
-                    if (id != null) {
-                        assertEquals("0", id);
-                    }
                     Object responseData = data.data();
-                    if (((LinkedHashMap) responseData) != null) {
+                    if (responseData != null) {
                         assertTrue((boolean) ((LinkedHashMap) responseData).get("success"));
                         ArrayList<LinkedHashMap> dataMap = (ArrayList<LinkedHashMap>) ((LinkedHashMap) responseData).get("data");
 
@@ -181,12 +177,8 @@ public class SongControllerTest {
                     if (event != null) {
                         assertEquals("fetch", data.event());
                     }
-                    String id = data.id();
-                    if (id != null) {
-                        assertEquals("0", id);
-                    }
                     Object responseData = data.data();
-                    if (((LinkedHashMap) responseData) != null) {
+                    if (responseData != null) {
                         assertTrue((boolean) ((LinkedHashMap) responseData).get("success"));
                         ArrayList<LinkedHashMap> dataMap = (ArrayList<LinkedHashMap>) ((LinkedHashMap) responseData).get("data");
 
@@ -280,12 +272,8 @@ public class SongControllerTest {
                     if (event != null) {
                         assertEquals("fetch", data.event());
                     }
-                    String id = data.id();
-                    if (id != null) {
-                        assertEquals("0", id);
-                    }
                     Object responseData = data.data();
-                    if (((LinkedHashMap) responseData) != null) {
+                    if (responseData != null) {
                         assertTrue((boolean) ((LinkedHashMap) responseData).get("success"));
                         ArrayList<LinkedHashMap> dataMap = (ArrayList<LinkedHashMap>) ((LinkedHashMap) responseData).get("data");
 
@@ -326,12 +314,8 @@ public class SongControllerTest {
         if (event != null) {
             assertEquals("fetch", data.event());
         }
-        String id = data.id();
-        if (id != null) {
-            assertEquals("0", id);
-        }
         Object responseData = data.data();
-        if (((LinkedHashMap) responseData) != null) {
+        if (responseData != null) {
             assertTrue((boolean) ((LinkedHashMap) responseData).get("success"));
             ArrayList<LinkedHashMap> dataMap = (ArrayList<LinkedHashMap>) ((LinkedHashMap) responseData).get("data");
             assertEquals(0, dataMap.size());
