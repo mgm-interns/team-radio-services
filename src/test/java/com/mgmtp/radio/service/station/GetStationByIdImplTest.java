@@ -46,7 +46,6 @@ public class GetStationByIdImplTest {
         songDTO.setId("song1");
         songDTO.setDownVoteCount(1);
         songDTO.setUpVoteCount(1);
-        songDTO.setCreatorId("creator1");
         songDTO.setDuration(100);
         songDTO.setSkipped(false);
         songDTO.setSource("source");
