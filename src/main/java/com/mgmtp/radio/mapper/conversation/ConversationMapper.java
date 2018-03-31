@@ -13,6 +13,5 @@ public interface ConversationMapper {
     @Mapping(target = "messages", ignore = true)
     ConversationDTO conversationToConversationDTO(Conversation conversation);
 
-    @Mapping(target = "messageIdList", ignore = true)
     Conversation conversationDtoToConversation(ConversationDTO conversationDTO);
 }
