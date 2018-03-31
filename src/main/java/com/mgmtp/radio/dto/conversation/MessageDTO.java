@@ -15,5 +15,7 @@ public class MessageDTO {
     UserDTO from;
     @NotEmpty
     String content;
+    @NotEmpty
+    String conversationId;
     LocalDate createdAt;
 }

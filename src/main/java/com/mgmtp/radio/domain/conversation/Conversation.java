@@ -10,7 +10,6 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @NoArgsConstructor
 @Data
@@ -18,7 +17,6 @@ import java.util.List;
 public class Conversation {
     @Id
     private String id;
-    private List<String> messageIdList;
     private String uid;
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
