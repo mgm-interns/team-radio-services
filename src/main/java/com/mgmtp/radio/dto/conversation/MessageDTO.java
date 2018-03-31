@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @NoArgsConstructor
 @Data
-public class ConversationDTO {
+public class MessageDTO {
     String id;
     UserDTO from;
     UserDTO to;
