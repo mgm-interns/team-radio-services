@@ -2,7 +2,6 @@ package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
-import reactor.core.publisher.Mono;
 import com.mgmtp.radio.dto.station.StationDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -14,5 +13,6 @@ public interface StationService {
     Mono<StationDTO> update(String id, StationDTO stationDTO);
     int getOnlineUsersNumber(StationDTO stationDTO);
     Mono<Station> findStationByIdAndDeletedFalse(String stationId);
+    Mono<Boolean> existsById(String id);
     Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO);
 }

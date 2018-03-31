@@ -1,9 +1,9 @@
 package com.mgmtp.radio.dto.conversation;
 
-import com.mgmtp.radio.domain.conversation.Message;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -11,7 +11,8 @@ import java.util.List;
 @Data
 public class ConversationDTO {
     String id;
-    List<Message> messages;
+    List<MessageDTO> messages;
+    @NotNull
     String uid;
     LocalDate createdAt;
 }
