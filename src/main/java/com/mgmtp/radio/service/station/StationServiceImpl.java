@@ -65,4 +65,9 @@ public class StationServiceImpl implements StationService {
                 })
                 .map(stationMapper::stationToStationDTO);
     }
+
+    @Override
+    public Mono<Boolean> existsById(String id) {
+        return stationRepository.findById(id).map(station -> true).switchIfEmpty(Mono.just(false));
+    }
 }

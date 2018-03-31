@@ -11,6 +11,7 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -30,6 +31,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Mono<MessageDTO> create(MessageDTO messageDTO) {
+        if (messageDTO.getId() == null || messageDTO.getId().isEmpty()) {
+            messageDTO.setId(UUID.randomUUID().toString());
+        }
         messageDTO.setCreatedAt(LocalDate.now());
         Message message = messageMapper.messageDtoToMessage(messageDTO);
         return messageRepository.save(message).map(messageMapper::messageToMessageDTO).switchIfEmpty(Mono.error(new RadioException()));
