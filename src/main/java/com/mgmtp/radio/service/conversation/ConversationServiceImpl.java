@@ -7,7 +7,6 @@ import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.conversation.ConversationMapper;
 import com.mgmtp.radio.respository.conversation.ConversationRepository;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -35,11 +34,6 @@ public class ConversationServiceImpl implements ConversationService {
     }
 
     @Override
-    public Flux<ConversationDTO> findByUid(String uid) {
-        return null;
-    }
-
-    @Override
     public Mono<ConversationDTO> findById(String id) {
         return conversationRepository.findById(id).map(conversationMapper::conversationToConversationDTO).switchIfEmpty(Mono.error(new RadioNotFoundException()));
     }
@@ -47,5 +41,15 @@ public class ConversationServiceImpl implements ConversationService {
     @Override
     public Mono<Boolean> existsById(String id) {
         return conversationRepository.findById(id).map(conversation -> true).switchIfEmpty(Mono.just(false));
+    }
+
+    @Override
+    public Mono<ConversationDTO> findByStationId(String stationId) {
+        return conversationRepository.findByUid(stationId).map(conversationMapper::conversationToConversationDTO).switchIfEmpty(Mono.error(new RadioNotFoundException()));
+    }
+
+    @Override
+    public Mono<Boolean> existsByUid(String uid) {
+        return conversationRepository.findByUid(uid).map(conversation -> true).switchIfEmpty(Mono.just(false));
     }
 }

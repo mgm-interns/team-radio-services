@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping(ConversationController.BASE_URL)
 public class ConversationController extends BaseRadioController {
 
-    public static final String BASE_URL = "/api/v1/stations/me/conversations";
+    public static final String BASE_URL = "/api/v1/stations/{stationId}/conversations";
 
     private final ConversationService conversationService;
     private final CreateConversationValidatior createConversationValidatior;
@@ -43,4 +43,9 @@ public class ConversationController extends BaseRadioController {
         return conversationService.create(conversationDTO).map(RadioSuccessResponse::new);
     }
 
+    @GetMapping()
+    @ResponseStatus(HttpStatus.OK)
+    public Mono<RadioSuccessResponse<ConversationDTO>> getByStationId(@PathVariable(value = "stationId") String stationId) {
+        return conversationService.findByStationId(stationId).map(RadioSuccessResponse::new);
+    }
 }
