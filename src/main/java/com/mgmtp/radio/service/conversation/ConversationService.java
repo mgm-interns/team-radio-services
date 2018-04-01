@@ -10,4 +10,8 @@ public interface ConversationService {
 
     Flux<ConversationDTO> findByUid(String uid);
 
+    Mono<ConversationDTO> findById(String id);
+
+    Mono<Boolean> existsById(String id);
+
 }

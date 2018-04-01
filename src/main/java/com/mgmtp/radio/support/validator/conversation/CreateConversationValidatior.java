@@ -35,7 +35,6 @@ public class CreateConversationValidatior implements Validator {
         if (!isUidExisted(conversationDTO.getUid())) {
             errors.rejectValue("uid", "", messageSource.getMessage("conversation.error.unique.uid", new String[]{}, Locale.getDefault()));
         }
-
     }
 
     private boolean isUidExisted(String uid) {
