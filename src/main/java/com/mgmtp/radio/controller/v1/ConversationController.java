@@ -19,7 +19,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping(ConversationController.BASE_URL)
 public class ConversationController extends BaseRadioController {
 
-    public static final String BASE_URL = "/api/v1/stations/me/conversations";
+    public static final String BASE_URL = "/api/v1/stations/{stationId}/conversations";
 
     private final ConversationService conversationService;
     private final CreateConversationValidatior createConversationValidatior;
