@@ -3,6 +3,7 @@ package com.mgmtp.radio.service.conversation;
 import com.mgmtp.radio.domain.conversation.Conversation;
 import com.mgmtp.radio.dto.conversation.ConversationDTO;
 import com.mgmtp.radio.exception.RadioException;
+import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.conversation.ConversationMapper;
 import com.mgmtp.radio.respository.conversation.ConversationRepository;
 import org.springframework.stereotype.Service;
@@ -38,4 +39,13 @@ public class ConversationServiceImpl implements ConversationService {
         return null;
     }
 
+    @Override
+    public Mono<ConversationDTO> findById(String id) {
+        return conversationRepository.findById(id).map(conversationMapper::conversationToConversationDTO).switchIfEmpty(Mono.error(new RadioNotFoundException()));
+    }
+
+    @Override
+    public Mono<Boolean> existsById(String id) {
+        return conversationRepository.findById(id).map(conversation -> true).switchIfEmpty(Mono.just(false));
+    }
 }
