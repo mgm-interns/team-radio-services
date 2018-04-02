@@ -106,15 +106,10 @@ public class SongServiceImpl implements SongService {
             .map(station -> {
                 List<String> listSongId = station.getPlaylist();
                 return getListSongByListSongId(listSongId);
-            })
-            .map(songDTOFlux -> {
-                PlayList playList = new PlayList();
-                songDTOFlux.collectList().map(songDTOS -> {
-                    playList.setListSong(songDTOS);
-                    return playList;
-                }).map(playList1 -> {
+            }).flatMap(songDTOFlux -> {
+                return songDTOFlux.collectList().map(listSong -> {
+                    PlayList playList = new PlayList();
                     NowPlaying nowPlaying = stationPlayerHelper.getStationNowPlaying(stationId);
-                    List<SongDTO> listSong = playList1.getListSong();
                     if (nowPlaying == null || nowPlaying.isEnded()) {
                         if (nowPlaying != null) {
                             final String endedSongId = nowPlaying.getSongId();
@@ -131,12 +126,11 @@ public class SongServiceImpl implements SongService {
                         nowPlaying = stationPlayerHelper.addNowPlaying(stationId, nowPlayingSong);
                     }
 
-                    playList1.setListSong(listSong);
-                    playList1.setNowPlaying(nowPlaying);
+                    playList.setListSong(listSong);
+                    playList.setNowPlaying(nowPlaying);
 
-                    return playList1;
-                }).subscribe();
-                return playList;
+                    return playList;
+                });
             });
     }
 
