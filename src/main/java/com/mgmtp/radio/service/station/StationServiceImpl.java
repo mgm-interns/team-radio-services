@@ -27,7 +27,11 @@ public class StationServiceImpl implements StationService {
 
 	@Override
 	public void skipCurrentSong(StationDTO stationDTO) {
-		stationDTO.getPlaylist().get(0).setSkipped(true);
+		skipSong(stationDTO, 0);
+	}
+
+	private void skipSong(StationDTO stationDTO, int songIndex) {
+		stationDTO.getPlaylist().get(songIndex).setSkipped(true);
 	}
 
 	private double calcCurrentSongDislikePercent(StationDTO stationDTO, String userId) {
@@ -45,7 +49,8 @@ public class StationServiceImpl implements StationService {
 		}
 	}
 
-	private void checkAndSkipSongIfNeeded(StationDTO stationDTO, String userId) {
+	//TODO Do it after updvotes/downvotes happen
+	public void checkAndSkipSongIfNeeded(StationDTO stationDTO, String userId) {
 		if(calcCurrentSongDislikePercent(stationDTO, userId) > DOWN_VOTE_THRES_PERCENT){
 			skipCurrentSong(stationDTO);
 		}
