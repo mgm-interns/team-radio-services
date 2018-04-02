@@ -34,13 +34,4 @@ public class StationDTO {
 		numberOfUpvote = 0;
 		numberOfDownvote = 0;
 	}
-
-	private int getOnlineUsersNumber() {
-		return stationService.getOnlineUsersNumber(this);
-	}
-
-
-
-//	void skipCurrentSong (){};
-
 }
