@@ -1,8 +1,10 @@
 package com.mgmtp.radio.service.station;
 
+import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.station.ConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.domain.station.Station;
+import com.mgmtp.radio.respository.station.ConfigurationRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -57,11 +59,14 @@ public class StationServiceImpl implements StationService {
 	}
     private final StationRepository stationRepository;
     private final SongService songService;
+    private final ConfigurationRepository configurationRepository;
 
-    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, SongService songService) {
+    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, SongService songService,
+                              ConfigurationRepository configurationRepository) {
         this.stationMapper = stationMapper;
         this.stationRepository = stationRepository;
         this.songService = songService;
+        this.configurationRepository = configurationRepository;
     }
 
     @Override
@@ -69,7 +74,7 @@ public class StationServiceImpl implements StationService {
         return stationRepository.findByIdAndDeletedFalse(stationId);
     }
 
-    public Flux<StationDTO> getAll() {
+	public Flux<StationDTO> getAll() {
         return stationRepository.findAll()
                 .map(stationMapper::stationToStationDTO);
     }
@@ -106,4 +111,12 @@ public class StationServiceImpl implements StationService {
                 })
                 .map(stationMapper::stationToStationDTO);
     }
+
+	@Override
+	public Mono<ConfigurationDTO> updateConfiguration(String stationId, ConfigurationDTO configurationDTO) {
+		return configurationRepository.findById(stationId)
+			.flatMap(configuration -> {
+				//configuration.
+			});
+	}
 }
