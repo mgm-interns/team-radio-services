@@ -1,5 +1,7 @@
 package com.mgmtp.radio.service.station;
 
+import com.mgmtp.radio.domain.station.NowPlaying;
+import com.mgmtp.radio.domain.station.PlayList;
 import com.google.api.services.youtube.model.Video;
 import com.mgmtp.radio.config.YouTubeConfig;
 import com.mgmtp.radio.domain.station.Song;
@@ -24,13 +26,17 @@ import com.mgmtp.radio.support.DateHelper;
 import com.mgmtp.radio.support.TransferHelper;
 import com.mgmtp.radio.support.YouTubeHelper;
 import lombok.extern.log4j.Log4j2;
+import com.mgmtp.radio.support.StationPlayerHelper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import java.util.Date;
 
 @Service("songService")
@@ -44,7 +50,10 @@ public class SongServiceImpl implements SongService {
     private final YouTubeConfig youTubeConfig;
     private final SongMapper songMapper;
     private final UserMapper userMapper;
+    private final StationPlayerHelper stationPlayerHelper;
 
+    public SongServiceImpl(StationRepository stationRepository, SongRepository songRepository, UserRepository userRepository,
+                           SongMapper songMapper, UserMapper userMapper, StationPlayerHelper stationPlayerHelper) {
     public SongServiceImpl(
             SongMapper songMapper,
             UserMapper userMapper,
@@ -65,6 +74,7 @@ public class SongServiceImpl implements SongService {
         this.youTubeConfig = youTubeConfig;
         this.songMapper = songMapper;
         this.userMapper = userMapper;
+        this.stationPlayerHelper = stationPlayerHelper;
     }
 
     @Override
@@ -88,6 +98,46 @@ public class SongServiceImpl implements SongService {
     public Flux<SongDTO> getAllSongById(List<String> idList) {
         return songRepository.findAllById(idList)
                 .map(songMapper::songToSongDTO).defaultIfEmpty(new SongDTO());
+    }
+
+    @Override
+    public Mono<PlayList> getPlayListByStationId(String stationId) {
+        return stationRepository.findByIdAndDeletedFalse(stationId)
+            .map(station -> {
+                List<String> listSongId = station.getPlaylist();
+                return getListSongByListSongId(listSongId);
+            })
+            .map(songDTOFlux -> {
+                PlayList playList = new PlayList();
+                songDTOFlux.collectList().map(songDTOS -> {
+                    playList.setListSong(songDTOS);
+                    return playList;
+                }).map(playList1 -> {
+                    NowPlaying nowPlaying = stationPlayerHelper.getStationNowPlaying(stationId);
+                    List<SongDTO> listSong = playList1.getListSong();
+                    if (nowPlaying == null || nowPlaying.isEnded()) {
+                        if (nowPlaying != null) {
+                            final String endedSongId = nowPlaying.getSongId();
+                            Optional<SongDTO> removeSong = listSong.stream().filter(songDTO -> !songDTO.getSongId().equals(endedSongId)).findFirst();
+                            if (removeSong.isPresent()) {
+                                listSong.remove(removeSong.get());
+                            }
+                        }
+
+                        SongDTO nowPlayingSong = listSong.get(0);
+                        nowPlayingSong.setPlaying(true);
+                        songRepository.save(songMapper.songDtoToSong(nowPlayingSong));
+
+                        nowPlaying = stationPlayerHelper.addNowPlaying(stationId, nowPlayingSong);
+                    }
+
+                    playList1.setListSong(listSong);
+                    playList1.setNowPlaying(nowPlaying);
+
+                    return playList1;
+                }).subscribe();
+                return playList;
+            });
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.mgmtp.radio.service.station;
 
+import com.mgmtp.radio.domain.station.PlayList;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.exception.StationNotFoundException;
 import reactor.core.publisher.Flux;
@@ -13,6 +14,8 @@ public interface SongService {
     Flux<SongDTO> getListSongByStationId(String stationId);
 
     Flux<SongDTO> getAllSongById(List<String> idList);
+
+    Mono<PlayList> getPlayListByStationId(String stationId);
 
     Mono<SongDTO> upVoteSongInStationPlaylist(String stationId, String songId, String userId);
 
