@@ -1,5 +1,6 @@
 package com.mgmtp.radio.service.station;
 
+import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.station.ConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.domain.station.Station;

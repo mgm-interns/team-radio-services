@@ -38,14 +38,6 @@ public class SkipRuleDTO {
 		}
 	}
 
-	public String getTypeName() {
-		return typeName;
-	}
-
-	public String getTypeDescription() {
-    	return typeDescription;
-	}
-
 	public SkipRuleDTO getInstance(RuleType ruleType) throws InvalidRuleTypeException {
     	if(mapAllRules == null) {
     		mapAllRules = new HashMap<>();
