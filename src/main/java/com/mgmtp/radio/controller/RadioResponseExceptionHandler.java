@@ -29,7 +29,7 @@ public class RadioResponseExceptionHandler extends ResponseEntityExceptionHandle
 
     // return 500 INTERNAL_SERVER_ERROR
     @ExceptionHandler({Exception.class})
-    public ResponseEntity<Object> handleInternalServerErrorException(Exception exception, WebRequest webRequest){
+    public ResponseEntity<Object> handleNotFoundException(Exception exception, WebRequest webRequest) {
         log.error("Exception occurred when processing request", exception);
         return new ResponseEntity<>("Resource Not Found", new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }

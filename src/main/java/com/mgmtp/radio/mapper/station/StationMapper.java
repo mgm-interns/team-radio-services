@@ -14,5 +14,5 @@ public interface StationMapper {
 	StationDTO stationToStationDTO(Station station);
 
 	@Mapping(target = "playlist", ignore = true)
-	Station stationDtoToStation(StationDTO stationDTO);
+	Station stationDTOToStation(StationDTO stationDTO);
 }

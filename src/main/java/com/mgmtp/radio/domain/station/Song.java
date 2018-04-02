@@ -10,6 +10,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 @NoArgsConstructor
@@ -25,10 +26,10 @@ public class Song {
 	private String url;
 	private String title;
 	private String thumbnail;
-	private int duration;
+	private long duration;
 	private String creatorId;
-	private List<String> upVoteUserIdList;
-	private List<String> downVoteUserIdList;
+	private List<String> upVoteUserIdList = Collections.emptyList();
+	private List<String> downVoteUserIdList = Collections.emptyList();
 	private String message;
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonSerialize(using = LocalDateSerializer.class)

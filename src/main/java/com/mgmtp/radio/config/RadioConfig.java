@@ -4,6 +4,7 @@ import com.mgmtp.radio.event.BaseEventMessageEndpoint;
 import com.mgmtp.radio.event.MailgunEventEndPoint;
 import com.mgmtp.radio.support.MailgunHelper;
 import org.springframework.context.annotation.Bean;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -18,5 +19,12 @@ public class RadioConfig {
         MailgunEventEndPoint mailgunEventEndPoint = new MailgunEventEndPoint(mailgunHelper);
 
         return mailgunEventEndPoint;
+    }
+
+    @Value("${application.name}")
+    private String APPLICATION_NAME;
+
+    public String getApplicationName() {
+        return APPLICATION_NAME;
     }
 }

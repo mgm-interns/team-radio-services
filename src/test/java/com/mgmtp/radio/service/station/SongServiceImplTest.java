@@ -1,6 +1,7 @@
 package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.RadioApplicationTests;
+import com.mgmtp.radio.config.YouTubeConfig;
 import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.user.User;
@@ -11,6 +12,9 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
+import com.mgmtp.radio.support.DateHelper;
+import com.mgmtp.radio.support.TransferHelper;
+import com.mgmtp.radio.support.YouTubeHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,10 +58,29 @@ public class SongServiceImplTest {
 
     SongService songService;
 
+    YouTubeHelper youTubeHelper;
+
+    TransferHelper transferHelper;
+
+    DateHelper dateHelper;
+
+    @Autowired
+    YouTubeConfig youTubeConfig;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        songService = new SongServiceImpl(stationRepository, songRepository, userRepository, songMapper, userMapper);
+        songService = new SongServiceImpl(
+                songMapper,
+                userMapper,
+                songRepository,
+                stationRepository,
+                userRepository,
+                youTubeHelper,
+                transferHelper,
+                dateHelper,
+                youTubeConfig
+        );
     }
 
     @Test
@@ -121,9 +144,9 @@ public class SongServiceImplTest {
         UserDTO compareUser2 = userMapper.userToUserDTO(user2);
 
         assertEquals(2, convertResult.size());
-        assertThat(convertResult.get(0)).isEqualToIgnoringGivenFields(compareSong1,"creator");
+        assertThat(convertResult.get(0)).isEqualToIgnoringGivenFields(compareSong1,"creatorId");
 
-        assertThat(compareUser1).isEqualToComparingFieldByField(convertResult.get(0).getCreator());
-        assertThat(compareUser2).isEqualToComparingFieldByField(convertResult.get(1).getCreator());
+        assertThat(compareUser1).isEqualToComparingFieldByField(convertResult.get(0).getCreatorId());
+        assertThat(compareUser2).isEqualToComparingFieldByField(convertResult.get(1).getCreatorId());
     }
 }
