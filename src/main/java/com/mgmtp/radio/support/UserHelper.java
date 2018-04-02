@@ -24,6 +24,7 @@ public class UserHelper {
 
     public User convertUserToUserConversation(com.mgmtp.radio.domain.user.User user) {
         User userConversation = new User();
+        userConversation.setId(user.getId());
         userConversation.setUsername(user.getUsername());
         userConversation.setAvatarUrl(user.getAvatarUrl());
         return userConversation;

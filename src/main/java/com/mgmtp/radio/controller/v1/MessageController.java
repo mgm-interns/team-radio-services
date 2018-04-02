@@ -47,6 +47,7 @@ public class MessageController extends BaseRadioController {
         // Todo: set from current user.
         // User user = getCurrentUser();
         User user = new User();
+        user.setId("001");
         user.setUsername("john doe");
         user.setAvatarUrl("http://johndoe.com/avatar");
 
