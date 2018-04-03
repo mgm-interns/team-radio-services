@@ -17,7 +17,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping(MessageController.BASE_URL)
 public class MessageController extends BaseRadioController {
 
-    public static final String BASE_URL = "/api/v1/stations/me/messages";
+    public static final String BASE_URL = "/api/v1/stations/{stationId}/messages";
 
     private final MessageService messageService;
 
