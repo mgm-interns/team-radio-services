@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.mgmtp.radio.sdo.SongStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -21,7 +22,7 @@ public class Song {
 	private String id;
 	private String songId;
 	private String source;
-	private boolean playing;
+	private SongStatus status;
 	private boolean skipped;
 	private String url;
 	private String title;

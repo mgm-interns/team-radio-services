@@ -13,6 +13,6 @@ public class NowPlaying {
     private long startingTime;
     private int duration;
     private String thumbnail;
-    private List<String> messages;
+    private String messages;
     private boolean isEnded;
 }

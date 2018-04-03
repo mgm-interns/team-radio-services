@@ -9,6 +9,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 public class PlayList {
+    public static PlayList EMPTY_PLAYLIST = new PlayList();
+
     List<SongDTO> listSong;
     NowPlaying nowPlaying;
 }

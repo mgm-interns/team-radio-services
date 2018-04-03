@@ -3,7 +3,9 @@ package com.mgmtp.radio.controller.v1;
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
 import com.mgmtp.radio.domain.station.PlayList;
+import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.dto.station.SongDTO;
+import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
@@ -142,17 +144,17 @@ public class SongController extends BaseRadioController  {
 
     @GetMapping("/sse/playList")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<ServerSentEvent<RadioSuccessResponse<PlayList>>> getPlayListByStationId (@RequestParam("stationId") String stationId){
-        return Flux.interval(Duration.ofSeconds(2))
+        public Flux<ServerSentEvent<RadioSuccessResponse<PlayList>>> getPlayListByStationId (@RequestParam("stationId") String stationId){
+            return Flux.interval(Duration.ofSeconds(1)).delayElements(Duration.ofMillis(100))
                 .map(thisSecond -> Tuples.of(thisSecond, songService.getPlayListByStationId(stationId)))
                 .map(tuple2 ->{
                    return ServerSentEvent.<RadioSuccessResponse<PlayList>>builder()
                    .event("fetch")
                    .id(Long.toString(tuple2.getT1()))
                    .data(
-                           new RadioSuccessResponse<>(
-                                   tuple2.getT2().log().block()
-                           )
+                       new RadioSuccessResponse<>(
+                           tuple2.getT2().log().block()
+                       )
                    ).build();
                 });
     }

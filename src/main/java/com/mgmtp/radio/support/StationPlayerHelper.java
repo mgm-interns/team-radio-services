@@ -10,16 +10,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class StationPlayerHelper {
-    private final int TIME_BUFFER = 5000;
+    private final int TIME_BUFFER = 5;
     private ConcurrentHashMap<String, NowPlaying> stationPlayer = new ConcurrentHashMap<>();
 
     public NowPlaying addNowPlaying(String stationId, SongDTO song) {
         NowPlaying nowPlaying = new NowPlaying();
-        nowPlaying.setSongId(song.getSongId());
+        nowPlaying.setSongId(song.getId());
         nowPlaying.setDuration(song.getDuration());
         nowPlaying.setStartingTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond());
         nowPlaying.setThumbnail(song.getThumbnail());
         nowPlaying.setUrl(song.getUrl());
+        nowPlaying.setMessages(song.getMessage());
         nowPlaying.setEnded(false);
 
         stationPlayer.put(stationId, nowPlaying);
