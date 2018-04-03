@@ -5,7 +5,8 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class User {
+public class FromUser {
+    private String id;
     private String username;
-    private String avatar;
+    private String avatarUrl;
 }

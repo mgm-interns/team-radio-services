@@ -12,7 +12,7 @@ import java.time.LocalDate;
 public class MessageDTO {
     String id;
     @NotNull
-    UserDTO from;
+    FromUserDTO from;
     @NotEmpty
     String content;
     @NotEmpty
