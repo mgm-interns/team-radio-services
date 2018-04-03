@@ -19,7 +19,7 @@ public class Message {
     private String id;
     private User from;
     private String content;
-    private String conversationId;
+    private String stationId;
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate createdAt;

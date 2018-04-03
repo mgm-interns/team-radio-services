@@ -12,7 +12,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -29,15 +28,11 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Flux<MessageDTO> findByListId(List<String> listId) {
-        return messageRepository.findByIdIn(listId).map(messageMapper::messageToMessageDTO);
-    }
-
-    @Override
-    public Mono<MessageDTO> create(User user, MessageDTO messageDTO) {
+    public Mono<MessageDTO> create(String stationId, User user, MessageDTO messageDTO) {
         if (messageDTO.getId() == null || messageDTO.getId().isEmpty()) {
             messageDTO.setId(UUID.randomUUID().toString());
         }
+        messageDTO.setStationId(stationId);
         messageDTO.setCreatedAt(LocalDate.now());
         Message message = messageMapper.messageDtoToMessage(messageDTO);
         message.setFrom(userHelper.convertUserToUserConversation(user));
@@ -45,7 +40,12 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Flux<MessageDTO> findByConversationId(String conversationId) {
-        return messageRepository.findByConversationId(conversationId).map(messageMapper::messageToMessageDTO);
+    public Flux<MessageDTO> findByStationId(String conversationId) {
+        return messageRepository.findByStationId(conversationId).map(messageMapper::messageToMessageDTO);
+    }
+
+    @Override
+    public Mono<Boolean> existsById(String id) {
+        return messageRepository.existsById(id);
     }
 }

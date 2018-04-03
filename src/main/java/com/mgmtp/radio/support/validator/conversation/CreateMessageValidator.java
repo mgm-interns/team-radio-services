@@ -1,7 +1,7 @@
 package com.mgmtp.radio.support.validator.conversation;
 
 import com.mgmtp.radio.dto.conversation.MessageDTO;
-import com.mgmtp.radio.service.conversation.ConversationService;
+import com.mgmtp.radio.service.conversation.MessageService;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -12,12 +12,12 @@ import java.util.Locale;
 @Component
 public class CreateMessageValidator implements Validator {
 
-    private final ConversationService conversationService;
     private final MessageSource messageSource;
+    private final MessageService messageService;
 
-    public CreateMessageValidator(ConversationService conversationService, MessageSource messageSource) {
-        this.conversationService = conversationService;
+    public CreateMessageValidator(MessageSource messageSource, MessageService messageService) {
         this.messageSource = messageSource;
+        this.messageService = messageService;
     }
 
     @Override
@@ -28,16 +28,16 @@ public class CreateMessageValidator implements Validator {
     @Override
     public void validate(Object target, Errors errors) {
         MessageDTO messageDTO = (MessageDTO) target;
-        this.validateExists(messageDTO, errors);
+        this.validateUnique(messageDTO, errors);
     }
 
-    private void validateExists(MessageDTO messageDTO, Errors errors) {
-        if (!isConversationExisted(messageDTO.getConversationId())) {
-            errors.rejectValue("conversationId", "", messageSource.getMessage("conversation.error.exist.conversationId", new String[]{"Conversation Id"}, Locale.getDefault()));
+    private void validateUnique(MessageDTO messageDTO, Errors errors) {
+        if (isMessageExisted(messageDTO.getId())) {
+            errors.rejectValue("id", "", messageSource.getMessage("validation.error.unique", new String[]{"Message"}, Locale.getDefault()));
         }
     }
 
-    private boolean isConversationExisted(String conversationId) {
-        return conversationService.existsById(conversationId).block();
+    private boolean isMessageExisted(String id) {
+        return messageService.existsById(id).block();
     }
 }

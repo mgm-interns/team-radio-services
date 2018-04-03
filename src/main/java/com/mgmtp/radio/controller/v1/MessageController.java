@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping(MessageController.BASE_URL)
 public class MessageController extends BaseRadioController {
 
-    public static final String BASE_URL = "/api/v1/conversations/{conversationId}/messages";
+    public static final String BASE_URL = "/api/v1/stations/{stationId}/messages";
 
     private final MessageService messageService;
     private final CreateMessageValidator createMessageValidator;
@@ -39,7 +39,7 @@ public class MessageController extends BaseRadioController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public Mono<RadioSuccessResponse<MessageDTO>> store(@Validated @RequestBody MessageDTO messageDTO, BindingResult bindingResult) {
+    public Mono<RadioSuccessResponse<MessageDTO>> store(@PathVariable(value = "stationId") String stationId, @Validated @RequestBody MessageDTO messageDTO, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
@@ -51,13 +51,13 @@ public class MessageController extends BaseRadioController {
         user.setUsername("john doe");
         user.setAvatarUrl("http://johndoe.com/avatar");
 
-        return messageService.create(user, messageDTO).map(RadioSuccessResponse::new);
+        return messageService.create(stationId, user, messageDTO).map(RadioSuccessResponse::new);
     }
 
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public Flux<RadioSuccessResponse<MessageDTO>> getAll(@PathVariable(value = "conversationId") String conversationId) {
-        return messageService.findByConversationId(conversationId).map(RadioSuccessResponse::new);
+    public Flux<RadioSuccessResponse<MessageDTO>> getAll(@PathVariable(value = "stationId") String stationId) {
+        return messageService.findByStationId(stationId).map(RadioSuccessResponse::new);
     }
 
 }

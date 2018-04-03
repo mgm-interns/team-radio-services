@@ -16,6 +16,6 @@ public class MessageDTO {
     @NotEmpty
     String content;
     @NotEmpty
-    String conversationId;
+    String stationId;
     LocalDate createdAt;
 }

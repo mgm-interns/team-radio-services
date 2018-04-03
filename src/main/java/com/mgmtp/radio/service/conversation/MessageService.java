@@ -5,12 +5,11 @@ import com.mgmtp.radio.dto.conversation.MessageDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-
 public interface MessageService {
-    Flux<MessageDTO> findByListId(List<String> listId);
 
-    Mono<MessageDTO> create(User user, MessageDTO messageDTO);
+    Mono<MessageDTO> create(String stationId, User user, MessageDTO messageDTO);
 
-    Flux<MessageDTO> findByConversationId(String conversationId);
+    Flux<MessageDTO> findByStationId(String conversationId);
+
+    Mono<Boolean> existsById(String id);
 }
