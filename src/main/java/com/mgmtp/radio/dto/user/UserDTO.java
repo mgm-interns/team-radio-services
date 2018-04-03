@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @ToString
@@ -21,5 +23,6 @@ public class UserDTO {
     String bio;
     String avatarUrl;
     String coverUrl;
+    LocalDate updatedAt;
 
 }

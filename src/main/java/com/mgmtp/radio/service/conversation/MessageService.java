@@ -1,5 +1,6 @@
 package com.mgmtp.radio.service.conversation;
 
+import com.mgmtp.radio.domain.conversation.Message;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.conversation.MessageDTO;
 import reactor.core.publisher.Flux;
@@ -12,4 +13,8 @@ public interface MessageService {
     Flux<MessageDTO> findByStationId(String conversationId);
 
     Mono<Boolean> existsById(String id);
+
+    Flux<MessageDTO> findByFromUserId(String userId);
+
+    Mono<MessageDTO> save(Message message);
 }

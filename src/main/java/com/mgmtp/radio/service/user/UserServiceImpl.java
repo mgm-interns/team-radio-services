@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -81,5 +84,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDTO getUserById(String id) throws RadioNotFoundException {
         return userRepository.findById(id).map(userMapper::userToUserDTO).orElseThrow(RadioNotFoundException::new);
+    }
+
+    @Override
+    public List<UserDTO> findUserByUpdatedAt(LocalDate date) {
+        return userRepository.findByUpdatedAtEquals(date).stream().map(userMapper::userToUserDTO).collect(Collectors.toList());
     }
 }

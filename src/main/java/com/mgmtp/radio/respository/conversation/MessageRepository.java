@@ -10,4 +10,5 @@ public interface MessageRepository extends ReactiveMongoRepository<Message, Stri
     @Tailable
     Flux<Message> findByStationId(String conversationId);
 
+    Flux<Message> findByFrom_Id(String userId);
 }

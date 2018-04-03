@@ -43,14 +43,7 @@ public class MessageController extends BaseRadioController {
         if (bindingResult.hasErrors()) {
             return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
-
-        // Todo: set from current user.
-        // User user = getCurrentUser();
-        User user = new User();
-        user.setId("001");
-        user.setUsername("john doe");
-        user.setAvatarUrl("http://johndoe.com/avatar");
-
+        User user = getCurrentUser();
         return messageService.create(stationId, user, messageDTO).map(RadioSuccessResponse::new);
     }
 

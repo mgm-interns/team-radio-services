@@ -29,5 +29,4 @@ public class UserHelper {
         userConversation.setAvatarUrl(user.getAvatarUrl());
         return userConversation;
     }
-
 }
