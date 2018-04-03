@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Service
 public class FavoriteSongServiceImpl implements FavoriteSongService {
@@ -24,6 +25,9 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
 
 	@Override
 	public Mono<FavoriteSongDTO> create(String userId, FavoriteSongDTO favoriteSongDTO) {
+		if (favoriteSongDTO.getId() == null || favoriteSongDTO.getId().isEmpty()) {
+			favoriteSongDTO.setId(UUID.randomUUID().toString());
+		}
 		favoriteSongDTO.setUserId(userId);
 		favoriteSongDTO.setCreatedAt(LocalDate.now());
 		FavoriteSong favoriteSong = favoriteSongMapper.favoriteSongDtoToFavoriteSong(favoriteSongDTO);

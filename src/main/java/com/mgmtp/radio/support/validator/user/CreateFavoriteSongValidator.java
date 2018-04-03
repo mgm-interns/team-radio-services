@@ -2,6 +2,7 @@ package com.mgmtp.radio.support.validator.user;
 
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
 import com.mgmtp.radio.exception.RadioNotFoundException;
+import com.mgmtp.radio.service.station.SongService;
 import com.mgmtp.radio.service.user.FavoriteSongService;
 import com.mgmtp.radio.service.user.UserService;
 import org.springframework.context.MessageSource;
@@ -17,11 +18,13 @@ public class CreateFavoriteSongValidator implements Validator {
 	private final FavoriteSongService favoriteSongService;
 	private final UserService userService;
 	private final MessageSource messageSource;
+	private final SongService songService;
 
-	public CreateFavoriteSongValidator(FavoriteSongService favoriteSongService, UserService userService, MessageSource messageSource) {
+	public CreateFavoriteSongValidator(FavoriteSongService favoriteSongService, UserService userService, MessageSource messageSource, SongService songService) {
 		this.favoriteSongService = favoriteSongService;
 		this.userService = userService;
 		this.messageSource = messageSource;
+		this.songService = songService;
 	}
 
 	@Override
@@ -38,17 +41,17 @@ public class CreateFavoriteSongValidator implements Validator {
 
 	private void validateExists(FavoriteSongDTO favoriteSongDTO, Errors errors) {
 		if (!isUserExisted(favoriteSongDTO.getUserId())) {
-			errors.rejectValue("userId", "", messageSource.getMessage("user.favorite.error.exist.userId", new String[]{}, Locale.getDefault()));
+			errors.rejectValue("userId", "", messageSource.getMessage("validation.error.exist", new String[]{"User Id"}, Locale.getDefault()));
 		}
 
 		if (!isSongExisted(favoriteSongDTO.getSongId())) {
-			errors.rejectValue("songId", "", messageSource.getMessage("user.favorite.error.exist.songId", new String[]{}, Locale.getDefault()));
+			errors.rejectValue("songId", "", messageSource.getMessage("validation.error.exist", new String[]{"Song Id"}, Locale.getDefault()));
 		}
 	}
 
 	private void validateUnique(FavoriteSongDTO favoriteSongDTO, Errors errors) {
 		if (isFavoriteSongExisted(favoriteSongDTO.getUserId(), favoriteSongDTO.getSongId())) {
-			errors.rejectValue("id", "", messageSource.getMessage("user.favorite.error.exist.song", new String[]{}, Locale.getDefault()));
+			errors.rejectValue("id", "", messageSource.getMessage("validation.error.unique", new String[]{"Favorite Song"}, Locale.getDefault()));
 		}
 	}
 
@@ -62,8 +65,7 @@ public class CreateFavoriteSongValidator implements Validator {
 	}
 
 	private boolean isSongExisted(String songId) {
-//		Todo: check song id
-		return true;
+		return songService.existsById(songId).block();
 	}
 
 	private boolean isFavoriteSongExisted(String userId, String songId) {
