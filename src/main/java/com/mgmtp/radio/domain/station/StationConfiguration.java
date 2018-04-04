@@ -7,20 +7,11 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+@NoArgsConstructor
+@Data
+@Document(collection = "stationConfiguration")
 public class StationConfiguration {
-	@Document(collection = "stationConfiguration")
-	@Data
-	@NoArgsConstructor
-	public class Station {
-		@Id
-		private String stationId;
-		@Indexed(unique = true)
-		private SkipRuleDTO skipRuleDTO;
-
-		public SkipRuleDTO getSkipRuleDTO() {
-			return this.skipRuleDTO;
-		}
-
-	}
-
+	@Id
+	private String stationId;
+	private SkipRule skipRule;
 }

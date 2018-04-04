@@ -4,18 +4,18 @@ import java.util.HashMap;
 
 public class SkipRuleDTO {
 
-	private RuleType ruleType;
+	private RuleTypeDTO ruleTypeDTO;
     private String typeName;
     private String typeDescription;
     private HashMap<Integer, SkipRuleDTO> mapAllRules;
 
-    public enum RuleType{
+    public enum RuleTypeDTO {
     	BASIC(0),
 	    ADVANCE(1),
 	    ;
     	private int typeId;
 
-    	RuleType(int typeId) {
+    	RuleTypeDTO(int typeId) {
     		this.typeId = typeId;
 	    }
 
@@ -23,9 +23,9 @@ public class SkipRuleDTO {
     		return typeId;
 	    }
     }
-	private SkipRuleDTO(RuleType ruleType) {
-		this.ruleType = ruleType;
-		switch (ruleType) {
+	private SkipRuleDTO(RuleTypeDTO ruleTypeDTO) {
+		this.ruleTypeDTO = ruleTypeDTO;
+		switch (ruleTypeDTO) {
 			case BASIC:
 				this.typeName = "Basic";
 				this.typeDescription = "SkipRuleDTO: More than 50% downvotes can skip the song";
@@ -38,32 +38,32 @@ public class SkipRuleDTO {
 		}
 	}
 
-	public SkipRuleDTO getInstance(RuleType ruleType) throws InvalidRuleTypeException {
+	public SkipRuleDTO getInstance(RuleTypeDTO ruleTypeDTO) throws InvalidRuleTypeDtoException {
     	if(mapAllRules == null) {
     		mapAllRules = new HashMap<>();
 	    }
-		if(ruleType != null) {
-			SkipRuleDTO skipRule = mapAllRules.get(ruleType.getTypeId());
+		if(ruleTypeDTO != null) {
+			SkipRuleDTO skipRule = mapAllRules.get(ruleTypeDTO.getTypeId());
 			if(skipRule == null)
 			{
-				skipRule = new SkipRuleDTO(ruleType);
-				mapAllRules.put(ruleType.getTypeId(), skipRule);
+				skipRule = new SkipRuleDTO(ruleTypeDTO);
+				mapAllRules.put(ruleTypeDTO.getTypeId(), skipRule);
 			}
 			return skipRule;
 		}
 		else {
-			throw new InvalidRuleTypeException();
+			throw new InvalidRuleTypeDtoException();
 		}
 	}
 
 	public boolean isBasic() {
-    	return ruleType.equals(RuleType.BASIC);
+    	return ruleTypeDTO.equals(RuleTypeDTO.BASIC);
 	}
 
-	public class InvalidRuleTypeException extends Exception {
+	public class InvalidRuleTypeDtoException extends Exception {
 		@Override
 		public String getMessage() {
-			return "The input RuleType is invalid or empty";
+			return "The input RuleTypeDTO is invalid or empty";
 		}
 	}
 }
