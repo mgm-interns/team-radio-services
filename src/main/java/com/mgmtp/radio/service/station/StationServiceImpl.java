@@ -1,22 +1,25 @@
 package com.mgmtp.radio.service.station;
 
-import com.mgmtp.radio.domain.station.StationConfiguration;
-import com.mgmtp.radio.dto.station.ConfigurationDTO;
+import com.mgmtp.radio.domain.station.SkipRule;
+import com.mgmtp.radio.dto.station.SkipRuleDTO;
+import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.domain.station.Station;
+import com.mgmtp.radio.mapper.stationConfiguration.SkipRuleMapper;
+import com.mgmtp.radio.mapper.stationConfiguration.StationConfigurationMapper;
+import com.mgmtp.radio.respository.station.StationConfigurationRepository;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.respository.station.StationRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import reactor.core.publisher.Flux;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service("stationService")
 public class StationServiceImpl implements StationService {
 
 	private final StationMapper stationMapper;
@@ -39,7 +42,7 @@ public class StationServiceImpl implements StationService {
 	}
 
 	private double calcCurrentSongDislikePercent(StationDTO stationDTO, String userId) {
-		if (stationDTO.getConfigurationDTO().getSkipRuleDTO().isBasic()
+		if (!stationDTO.getStationConfigurationDTO().getSkipRuleDTO().isBasic()
 			&& stationDTO.getOwnerId().equals(userId)) {
 			return ONE_HUNDRED_PERCENT;
 		} else {

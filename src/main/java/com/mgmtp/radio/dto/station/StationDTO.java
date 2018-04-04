@@ -2,6 +2,7 @@ package com.mgmtp.radio.dto.station;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mgmtp.radio.sdo.StationPrivacy;
+import com.mgmtp.radio.service.station.StationServiceImpl;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -28,4 +29,14 @@ public class StationDTO {
 	List<SongDTO> playlist;
 
 	LocalDate createdAt;
+	StationConfigurationDTO stationConfigurationDTO;
+	int numberOfUpvote;
+	int numberOfDownvote;
+
+	StationServiceImpl stationService;
+
+	public StationDTO() {
+		numberOfUpvote = 0;
+		numberOfDownvote = 0;
+	}
 }
