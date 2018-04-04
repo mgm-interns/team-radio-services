@@ -4,6 +4,9 @@ import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
+import com.mgmtp.radio.mapper.stationConfiguration.SkipRuleMapper;
+import com.mgmtp.radio.mapper.stationConfiguration.StationConfigurationMapper;
+import com.mgmtp.radio.respository.station.StationConfigurationRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import org.junit.Before;
@@ -30,13 +33,19 @@ public class GetStationByIdImplTest {
 
     StationService stationService;
 
+    SkipRuleMapper skipRuleMapper;
+
+    StationConfigurationMapper stationConfigurationMapper;
+
+    StationConfigurationRepository stationConfigurationRepository;
+
     @Mock
     SongService songService;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        stationService = new StationServiceImpl(stationMapper,  stationRepository, songService);
+        stationService = new StationServiceImpl(stationMapper, skipRuleMapper, stationConfigurationMapper, stationRepository, songService, stationConfigurationRepository);
     }
 
     @Test
