@@ -10,7 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class StationPlayerHelper {
-    private final int TIME_BUFFER = 5;
+    public static final int TIME_BUFFER = 5;
     private ConcurrentHashMap<String, NowPlaying> stationPlayer = new ConcurrentHashMap<>();
 
     public NowPlaying addNowPlaying(String stationId, SongDTO song) {
@@ -38,5 +38,9 @@ public class StationPlayerHelper {
             }
         }
         return currentPlayer;
+    }
+
+    public void clearNowPlayingByStationId(String stationId) {
+        stationPlayer.remove(stationId);
     }
 }

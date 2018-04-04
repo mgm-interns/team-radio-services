@@ -40,6 +40,8 @@ import java.util.Date;
 
 @Service("songService")
 public class SongServiceImpl implements SongService {
+    private static final String BLANK = "";
+
     private final StationRepository stationRepository;
     private final SongRepository songRepository;
     private final UserRepository userRepository;
@@ -108,31 +110,35 @@ public class SongServiceImpl implements SongService {
             .flatMap(songDTOFlux -> songDTOFlux
                 .collectList()
                 .map(listSong -> createPlayListFromListSong(listSong, stationId)))
-            .onErrorResume(Exception.class, ex ->  Mono.just(PlayList.EMPTY_PLAYLIST));
+            .onErrorResume(Exception.class, ex -> Mono.just(PlayList.EMPTY_PLAYLIST));
     }
 
     private PlayList createPlayListFromListSong(List<SongDTO> listSong, String stationId) {
-        listSong = listSong.stream().filter(songDTO -> songDTO.getStatus() != SongStatus.played).collect(Collectors.toList());
         PlayList playList = new PlayList();
-
         NowPlaying nowPlaying = stationPlayerHelper.getStationNowPlaying(stationId);
-        if (nowPlaying != null) {
-            if (nowPlaying.isEnded()) {
-                String endedSongId = nowPlaying.getSongId();
-                nowPlaying = getNextSongFromList(stationId, endedSongId, listSong);
-            } else {
-                Set<String> listSkippedSongId = listSong.stream().filter(SongDTO::isSkipped).map(SongDTO::getId).collect(Collectors.toSet());
-                if (!listSkippedSongId.isEmpty()) {
-                    if (listSkippedSongId.contains(nowPlaying.getSongId())) {
-                        String skippedSongId = nowPlaying.getSongId();
-                        nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong);
+        listSong = listSong.stream().filter(songDTO -> songDTO.getStatus() != SongStatus.played).collect(Collectors.toList());
+        if (!listSong.isEmpty()) {
+            if (nowPlaying != null) {
+                if (nowPlaying.isEnded()) {
+                    String endedSongId = nowPlaying.getSongId();
+                    nowPlaying = getNextSongFromList(stationId, endedSongId, listSong);
+                } else {
+                    Set<String> listSkippedSongId = listSong.stream().filter(SongDTO::isSkipped).map(SongDTO::getId).collect(Collectors.toSet());
+                    if (!listSkippedSongId.isEmpty()) {
+                        if (listSkippedSongId.contains(nowPlaying.getSongId())) {
+                            String skippedSongId = nowPlaying.getSongId();
+                            nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong);
+                        }
+                        addMessageToWillBeSkipSongInList(listSong);
                     }
-                    addMessageToWillBeSkipSongInList(listSong);
                 }
+            } else {
+                SongDTO nowPlayingSong = listSong.get(0);
+                nowPlaying = updateStatusAndSetNowPlayingFromSong(nowPlayingSong, stationId);
             }
         } else {
-            SongDTO nowPlayingSong = listSong.get(0);
-            nowPlaying = updateStatusAndSetNowPlayingFromSong(nowPlayingSong, stationId);
+            stationPlayerHelper.clearNowPlayingByStationId(stationId);
+            nowPlaying = null;
         }
 
         playList.setListSong(listSong);
@@ -142,7 +148,7 @@ public class SongServiceImpl implements SongService {
     }
 
     private void addMessageToWillBeSkipSongInList(List<SongDTO> listSong){
-        listSong.stream().forEach(songDTO -> {
+        listSong.forEach(songDTO -> {
             if (songDTO.isSkipped()) {
                 songDTO.setMessage("This song will be skip when play");
                 updateSongPlayingStatusAndMessage(songDTO.getId(), SongStatus.not_play_yet, songDTO.getMessage());
@@ -171,7 +177,7 @@ public class SongServiceImpl implements SongService {
     }
 
     private NowPlaying updateStatusAndSetNowPlayingFromSong(SongDTO nowPlayingSong, String stationId) {
-        updateSongPlayingStatusAndMessage(nowPlayingSong.getId(), SongStatus.playing, nowPlayingSong.getMessage());
+        updateSongPlayingStatusAndMessage(nowPlayingSong.getId(), SongStatus.playing, BLANK);
         return stationPlayerHelper.addNowPlaying(stationId, nowPlayingSong);
     }
 
