@@ -9,7 +9,7 @@ import org.mapstruct.factory.Mappers;
 public interface SkipRuleMapper {
 	SkipRuleMapper INSTANCE = Mappers.getMapper(SkipRuleMapper.class);
 
-	SkipRuleDTO skipRuleToSkipRuleDto(SkipRule skipRule);
+	SkipRuleDTO skipRuleToSkipRuleDTO(SkipRule skipRule);
 
-	SkipRule skipRuleDtoToSkipRule(SkipRuleDTO stationConfigurationDTO);
+	SkipRule skipRuleDTOToSkipRule(SkipRuleDTO skipRuleDTO);
 }

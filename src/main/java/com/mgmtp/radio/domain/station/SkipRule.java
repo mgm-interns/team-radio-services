@@ -1,9 +1,11 @@
 package com.mgmtp.radio.domain.station;
 
 import com.mgmtp.radio.dto.station.SkipRuleDTO.RuleTypeDTO;
+import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
 
+@NoArgsConstructor
 public class SkipRule {
 	private RuleType ruleType;
 	private String typeName;
@@ -23,16 +25,16 @@ public class SkipRule {
 			return typeId;
 		}
 	}
-	private SkipRule(RuleType ruleType) {
+	public SkipRule(RuleType ruleType) {
 		this.ruleType = ruleType;
 		switch (ruleType) {
 			case BASIC:
 				this.typeName = "Basic";
-				this.typeDescription = "SkipRuleDTO: More than 50% downvotes can skip the song";
+				this.typeDescription = "SkipRule: More than 50% downvotes can skip the song";
 				break;
 			case ADVANCE:
 				this.typeName = "Advance";
-				this.typeDescription = "SkipRuleDTO: Only you can skip the song";
+				this.typeDescription = "SkipRule: Only you can skip the song";
 			default:
 				break;
 		}
