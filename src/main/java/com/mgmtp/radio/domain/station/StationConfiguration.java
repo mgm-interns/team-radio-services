@@ -12,6 +12,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Document(collection = "stationConfiguration")
 public class StationConfiguration {
 	@Id
-	private String stationId;
+	private String Id;
 	private SkipRule skipRule;
 }

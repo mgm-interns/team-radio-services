@@ -1,7 +1,5 @@
 package com.mgmtp.radio.service.station;
 
-import com.mgmtp.radio.domain.station.SkipRule;
-import com.mgmtp.radio.dto.station.SkipRuleDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.domain.station.Station;
@@ -23,6 +21,7 @@ import java.util.Optional;
 public class StationServiceImpl implements StationService {
 
 	private final StationMapper stationMapper;
+	private final SkipRuleMapper skipRuleMapper;
 	private static final double ONE_HUNDRED_PERCENT = 1;
 	private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
 
@@ -69,6 +68,8 @@ public class StationServiceImpl implements StationService {
                               StationRepository stationRepository,
                               SongService songService) {
         this.stationMapper = stationMapper;
+        this.skipRuleMapper = skipRuleMapper;
+        this.stationConfigurationMapper= stationConfigurationMapper;
         this.stationRepository = stationRepository;
         this.songService = songService;
     }
@@ -128,4 +129,12 @@ public class StationServiceImpl implements StationService {
                 })
                 .map(stationMapper::stationToStationDTO);
     }
+
+	@Override
+	public Mono<StationConfigurationDTO> updateConfiguration(String stationId, StationConfigurationDTO stationConfigurationDTO) {
+		return stationConfigurationRepository.findById(stationId).flatMap(stationConfiguration -> {
+			stationConfiguration.setSkipRule(skipRuleMapper.skipRuleDTOToSkipRule(stationConfigurationDTO.getSkipRuleDTO()));
+			return stationConfigurationRepository.save(stationConfiguration);
+		}).map(stationConfigurationMapper::stationConfigurationToStationConfigurationDto);
+	}
 }

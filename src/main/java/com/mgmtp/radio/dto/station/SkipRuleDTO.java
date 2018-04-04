@@ -1,7 +1,10 @@
 package com.mgmtp.radio.dto.station;
 
+import lombok.NoArgsConstructor;
+
 import java.util.HashMap;
 
+@NoArgsConstructor
 public class SkipRuleDTO {
 
 	private RuleTypeDTO ruleTypeDTO;
@@ -23,7 +26,7 @@ public class SkipRuleDTO {
     		return typeId;
 	    }
     }
-	private SkipRuleDTO(RuleTypeDTO ruleTypeDTO) {
+	public SkipRuleDTO(RuleTypeDTO ruleTypeDTO) {
 		this.ruleTypeDTO = ruleTypeDTO;
 		switch (ruleTypeDTO) {
 			case BASIC:
