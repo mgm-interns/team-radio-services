@@ -5,6 +5,7 @@ import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.mapper.station.SongMapper;
 import com.mgmtp.radio.mapper.user.UserMapper;
+import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.service.station.SongService;
 import org.junit.Before;
 import org.junit.Test;
@@ -156,7 +157,7 @@ public class SongControllerTest {
         song2.setUpVoteUserIdList(Collections.emptyList());
         song2.setDownVoteUserIdList(Collections.emptyList());
         song2.setUrl("url2");
-        song2.setPlaying(true);
+        song2.setStatus(SongStatus.playing);
         song2.setSongId("2");
 
         SongDTO songDTO1 = songMapper.songToSongDTO(song1);
