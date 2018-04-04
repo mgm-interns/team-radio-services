@@ -9,9 +9,11 @@ import org.springframework.security.oauth2.client.token.ClientKeyGenerator;
 import org.springframework.security.oauth2.client.token.ClientTokenServices;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 import org.springframework.security.oauth2.common.util.SerializationUtils;
+import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
+@Component
 public class RadioClientTokenServices implements ClientTokenServices {
 
     private final RadioOAuth2ClientTokenRepository radioOAuth2ClientTokenRepository;

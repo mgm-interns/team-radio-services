@@ -3,7 +3,6 @@ package com.mgmtp.radio.config;
 import com.mgmtp.radio.security.RadioApprovalStore;
 import com.mgmtp.radio.security.RadioClientDetailsService;
 import com.mgmtp.radio.security.RadioTokenStore;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -12,6 +11,7 @@ import org.springframework.security.oauth2.config.annotation.configurers.ClientD
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
+import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 
 @Configuration
@@ -25,6 +25,8 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     private RadioApprovalStore radioApprovalStore;
 
     private AuthenticationManager authenticationManager;
+
+
 
     public AuthorizationServerConfiguration(RadioTokenStore radioTokenStore, RadioClientDetailsService radioClientDetailsService, RadioApprovalStore radioApprovalStore, AuthenticationManager authenticationManager) {
         this.radioTokenStore = radioTokenStore;
@@ -54,4 +56,11 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
         tokenServices.setTokenStore(radioTokenStore);
         return tokenServices;
     }
+
+    @Override
+    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
+        security.allowFormAuthenticationForClients(); // here
+    }
+
+
 }

@@ -158,7 +158,8 @@ public class SongController extends BaseRadioController  {
     ) {
         log.info("POST /api/v1/song  - data: " + videoId.toString());
 
-        Mono<SongDTO> newSongDTO = songService.addSongToStationPlaylist(stationId, videoId, message, getCurrentUser().getId());
+        String userId = getCurrentUser().isPresent() ? getCurrentUser().get().getId() : null;
+        Mono<SongDTO> newSongDTO = songService.addSongToStationPlaylist(stationId, videoId, message, userId);
 
         return newSongDTO.flatMap(songDTO -> Mono.just(new RadioSuccessResponse<>(songDTO)));
     }
@@ -175,15 +176,19 @@ public class SongController extends BaseRadioController  {
     })
     @PatchMapping("upVote")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<RadioSuccessResponse<SongDTO>> upvoteSong(
+    public Mono<RadioSuccessResponse<SongDTO>> upvoteSong (
             @RequestParam String stationId,
             @RequestBody String songId
-    ) {
+    ) throws RadioException {
         log.info("POST /api/v1/song/" + stationId + "/upvote  - data: " + songId);
 
-        return songService
-                .upVoteSongInStationPlaylist(stationId, songId, getCurrentUser().getId())
-                .flatMap(updatedSongDTO -> Mono.just(new RadioSuccessResponse<>(updatedSongDTO)));
+        if(getCurrentUser().isPresent()) {
+            return songService
+                    .upVoteSongInStationPlaylist(stationId, songId, getCurrentUser().get().getId())
+                    .flatMap(updatedSongDTO -> Mono.just(new RadioSuccessResponse<>(updatedSongDTO)));
+        } else {
+            throw new RadioNotFoundException("unauthorized");
+        }
     }
 
     @ApiOperation(
@@ -201,11 +206,15 @@ public class SongController extends BaseRadioController  {
     public Mono<RadioSuccessResponse<SongDTO>> downvoteSong(
             @RequestParam String stationId,
             @RequestBody String songId
-    ) {
+    ) throws RadioException {
         log.info("POST /api/v1/song/" + stationId + "/downvote  - data: " + songId);
 
-        return songService
-                .downVoteSongInStationPlaylist(stationId, songId, getCurrentUser().getId())
-                .flatMap(updatedSongDTO -> Mono.just(new RadioSuccessResponse<>(updatedSongDTO)));
+        if(getCurrentUser().isPresent()) {
+            return songService
+                    .downVoteSongInStationPlaylist(stationId, songId, getCurrentUser().get().getId())
+                    .flatMap(updatedSongDTO -> Mono.just(new RadioSuccessResponse<>(updatedSongDTO)));
+        } else {
+            throw new RadioNotFoundException("unauthorized");
+        }
     }
 }

@@ -1,12 +1,12 @@
 package com.mgmtp.radio.domain.mail;
 
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
 
 import java.util.List;
 
-@Data
-@NoArgsConstructor
+@Builder
+@Getter
 public class Email {
 
     private String subject;
@@ -17,5 +17,5 @@ public class Email {
 
     private List<String> bcc;
 
-    private List<String> contentParams;
+    private String content;
 }

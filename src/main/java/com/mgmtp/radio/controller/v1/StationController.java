@@ -75,7 +75,8 @@ public class StationController extends BaseRadioController {
     })
     @PostMapping
     public Mono<ResponseEntity<StationDTO>> createStation(@Valid @RequestBody StationDTO stationDTO) {
-        String userId = getCurrentUser().getId();
+        String userId = getCurrentUser().isPresent() ? getCurrentUser().get().getId() : null;
+
         return stationService.create(userId, stationDTO)
                 .map(station -> ResponseEntity.status(HttpStatus.CREATED).body(station));
     }

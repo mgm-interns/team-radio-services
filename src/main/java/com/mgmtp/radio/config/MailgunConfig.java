@@ -29,9 +29,6 @@ public class MailgunConfig {
     @NotBlank
     private String from;
 
-    @NotBlank
-    private String registerMailSubject;
-
     @Bean
     public WebResource getWebResource() {
         Client client = Client.create();

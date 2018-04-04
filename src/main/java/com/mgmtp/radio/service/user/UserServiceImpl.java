@@ -1,5 +1,6 @@
 package com.mgmtp.radio.service.user;
 
+import com.mgmtp.radio.domain.user.Role;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioNotFoundException;
@@ -7,6 +8,10 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.user.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,7 +37,14 @@ public class UserServiceImpl implements UserService {
     public UserDTO register(UserDTO userDTO) {
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         User user = userMapper.userDtoToUser(userDTO);
+        user.setRoles(getDefaultRole());
         return userMapper.userToUserDTO(userRepository.save(user));
+    }
+
+    private Set<Role> getDefaultRole() {
+        Role role = new Role();
+        role.setAuthority("USER");
+        return new HashSet<>(Arrays.asList(role));
     }
 
     @Override

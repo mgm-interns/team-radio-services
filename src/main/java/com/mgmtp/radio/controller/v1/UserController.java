@@ -51,9 +51,12 @@ public class UserController extends BaseRadioController {
     public RadioSuccessResponse<UserDTO> getUser() throws RadioNotFoundException {
         log.info("GET /api/v1/users/me");
 
-        User currentUser = getCurrentUser();
-        UserDTO userDTO = userService.getUserByUsername(currentUser.getUsername());
-        return new RadioSuccessResponse<>(userDTO);
+        if(getCurrentUser().isPresent()) {
+            UserDTO userDTO = userService.getUserByUsername(getCurrentUser().get().getUsername());
+            return new RadioSuccessResponse<>(userDTO);
+        } else {
+            throw new RadioNotFoundException("unauthorized");
+        }
     }
 
     @ApiOperation(
@@ -88,9 +91,12 @@ public class UserController extends BaseRadioController {
     public RadioSuccessResponse<UserDTO> patchUser(@RequestBody UserDTO userDTO) throws RadioNotFoundException {
         log.info("PATCH /api/v1/users/me - data: " + userDTO.toString());
 
-        User currentUser = getCurrentUser();
-        UserDTO updatedUserDTO = userService.patchUser(currentUser.getUsername(), userDTO);
-        return new RadioSuccessResponse<>(updatedUserDTO);
+        if(getCurrentUser().isPresent()) {
+            UserDTO updatedUserDTO = userService.patchUser(getCurrentUser().get().getUsername(), userDTO);
+            return new RadioSuccessResponse<>(updatedUserDTO);
+        } else {
+            throw new RadioNotFoundException("unauthorized");
+        }
     }
 
     @ApiOperation(
@@ -110,8 +116,13 @@ public class UserController extends BaseRadioController {
         validateFileIsImage(multipartFile);
 
         Map<String, String> uploadResult = cloudinaryHelper.pushFileToCloud(multipartFile);
+
+        if(!getCurrentUser().isPresent()) {
+            throw new RadioNotFoundException("unauthorized");
+        }
+
         if(uploadResult.get(CloudinaryDataKeys.secure_url.name()) != null) {
-            User currentUser = getCurrentUser();
+            User currentUser = getCurrentUser().get();
             final String avatarUrl = uploadResult.get(CloudinaryDataKeys.secure_url.name());
             UserDTO updatedUserDTO = userService.patchUserAvatar(currentUser.getUsername(), avatarUrl);
             return new RadioSuccessResponse<>(updatedUserDTO);
@@ -136,9 +147,13 @@ public class UserController extends BaseRadioController {
 
         validateFileIsImage(multipartFile);
 
+        if(!getCurrentUser().isPresent()) {
+            throw new RadioNotFoundException("unauthorized");
+        }
+
         Map<String, String> uploadResult = cloudinaryHelper.pushFileToCloud(multipartFile);
         if(uploadResult.get(CloudinaryDataKeys.secure_url.name()) != null) {
-            User currentUser = getCurrentUser();
+            User currentUser = getCurrentUser().get();
             final String coverUrl = uploadResult.get(CloudinaryDataKeys.secure_url.name());
             UserDTO updatedUserDTO = userService.patchUserCover(currentUser.getUsername(), coverUrl);
             return new RadioSuccessResponse<>(updatedUserDTO);
