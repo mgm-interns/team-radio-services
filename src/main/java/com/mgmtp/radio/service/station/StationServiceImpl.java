@@ -1,23 +1,26 @@
 package com.mgmtp.radio.service.station;
 
-import com.mgmtp.radio.domain.station.StationConfiguration;
-import com.mgmtp.radio.dto.station.ConfigurationDTO;
+import com.mgmtp.radio.domain.station.SkipRule;
+import com.mgmtp.radio.dto.station.SkipRuleDTO;
+import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.domain.station.Station;
-import com.mgmtp.radio.respository.station.ConfigurationRepository;
+import com.mgmtp.radio.mapper.stationConfiguration.SkipRuleMapper;
+import com.mgmtp.radio.mapper.stationConfiguration.StationConfigurationMapper;
+import com.mgmtp.radio.respository.station.StationConfigurationRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import reactor.core.publisher.Flux;
 import java.time.LocalDate;
 import java.util.List;
 
-@Service
+@Service("stationService")
 public class StationServiceImpl implements StationService {
 
 	private final StationMapper stationMapper;
+	private final SkipRuleMapper skipRuleMapper;
 	private static final double ONE_HUNDRED_PERCENT = 1;
 	private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
 
@@ -37,7 +40,7 @@ public class StationServiceImpl implements StationService {
 	}
 
 	private double calcCurrentSongDislikePercent(StationDTO stationDTO, String userId) {
-		if (stationDTO.getConfigurationDTO().getSkipRuleDTO().isBasic()
+		if (!stationDTO.getStationConfigurationDTO().getSkipRuleDTO().isBasic()
 			&& stationDTO.getOwnerId().equals(userId)) {
 			return ONE_HUNDRED_PERCENT;
 		} else {
@@ -59,14 +62,16 @@ public class StationServiceImpl implements StationService {
 	}
     private final StationRepository stationRepository;
     private final SongService songService;
-    private final ConfigurationRepository configurationRepository;
+    private final StationConfigurationRepository stationConfigurationRepository;
 
-    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, SongService songService,
-                              ConfigurationRepository configurationRepository) {
+    public StationServiceImpl(StationMapper stationMapper, SkipRuleMapper configurationMapper,
+                              StationRepository stationRepository, SongService songService,
+                              StationConfigurationRepository stationConfigurationRepository) {
         this.stationMapper = stationMapper;
+        this.skipRuleMapper = configurationMapper;
         this.stationRepository = stationRepository;
         this.songService = songService;
-        this.configurationRepository = configurationRepository;
+        this.stationConfigurationRepository = stationConfigurationRepository;
     }
 
     @Override
@@ -113,10 +118,12 @@ public class StationServiceImpl implements StationService {
     }
 
 	@Override
-	public Mono<ConfigurationDTO> updateConfiguration(String stationId, ConfigurationDTO configurationDTO) {
-		return configurationRepository.findById(stationId)
-			.flatMap(configuration -> {
-				//configuration.
-			});
+	public Mono<StationConfigurationDTO> updateConfiguration(String stationId, StationConfigurationDTO stationConfigurationDTO) {
+		return stationConfigurationRepository.findById(stationId).flatMap(station -> {
+			final SkipRule skipRule = stationConfigurationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO);
+			station.setSkipRule(
+				);
+			return stationConfigurationRepository.save(station);
+		}).map(stationConfigurationMapper::stationConfigurationToStationConfigurationDto);
 	}
 }
