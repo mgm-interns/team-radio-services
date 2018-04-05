@@ -316,4 +316,9 @@ public class SongServiceImpl implements SongService {
 
         return Mono.just(songDTO);
     }
+
+    @Override
+    public Mono<Boolean> existsById(String id) {
+        return songRepository.existsById(id);
+    }
 }
