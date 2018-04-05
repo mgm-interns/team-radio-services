@@ -30,7 +30,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import sun.net.www.content.text.plain;
 
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -92,7 +91,8 @@ public class SongServiceImplTest {
                 youTubeHelper,
                 transferHelper,
                 dateHelper,
-                youTubeConfig
+                youTubeConfig,
+                stationPlayerHelper
         );
     }
 
@@ -154,10 +154,10 @@ public class SongServiceImplTest {
         UserDTO compareUser2 = userMapper.userToUserDTO(user2);
 
         assertEquals(2, convertResult.size());
-        assertThat(convertResult.get(0)).isEqualToIgnoringGivenFields(compareSong1,"creatorId");
+        assertThat(convertResult.get(0)).isEqualToIgnoringGivenFields(compareSong1,"creator");
 
-        assertThat(compareUser1).isEqualToComparingFieldByField(convertResult.get(0).getCreatorId());
-        assertThat(compareUser2).isEqualToComparingFieldByField(convertResult.get(1).getCreatorId());
+        assertThat(compareUser1).isEqualToComparingFieldByField(convertResult.get(0).getCreator());
+        assertThat(compareUser2).isEqualToComparingFieldByField(convertResult.get(1).getCreator());
     }
 
     @Test

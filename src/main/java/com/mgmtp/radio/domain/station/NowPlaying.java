@@ -11,7 +11,7 @@ public class NowPlaying {
     private String songId;
     private String url;
     private long startingTime;
-    private int duration;
+    private long duration;
     private String thumbnail;
     private String messages;
     private boolean isEnded;

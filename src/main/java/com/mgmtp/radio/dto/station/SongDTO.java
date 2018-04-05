@@ -21,7 +21,7 @@ public class SongDTO {
 	String title;
 	String thumbnail;
 	long duration;
-    UserDTO creatorId;
+    UserDTO creator;
     int upVoteCount;
     int downVoteCount;
 	List<UserDTO> upvoteUserList = Collections.emptyList();

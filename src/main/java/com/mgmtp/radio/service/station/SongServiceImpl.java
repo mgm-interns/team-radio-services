@@ -13,10 +13,6 @@ import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.SongNotFoundException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.exception.StationNotFoundException;
-import com.mgmtp.radio.domain.user.User;
-import com.mgmtp.radio.dto.station.SongDTO;
-import com.mgmtp.radio.exception.RadioBadRequestException;
-import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.station.SongMapper;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
@@ -26,17 +22,13 @@ import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.support.DateHelper;
 import com.mgmtp.radio.support.TransferHelper;
 import com.mgmtp.radio.support.YouTubeHelper;
-import lombok.extern.log4j.Log4j2;
 import com.mgmtp.radio.support.StationPlayerHelper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Date;
 
 @Service("songService")
 public class SongServiceImpl implements SongService {
@@ -53,8 +45,6 @@ public class SongServiceImpl implements SongService {
     private final UserMapper userMapper;
     private final StationPlayerHelper stationPlayerHelper;
 
-    public SongServiceImpl(StationRepository stationRepository, SongRepository songRepository, UserRepository userRepository,
-                           SongMapper songMapper, UserMapper userMapper, StationPlayerHelper stationPlayerHelper) {
     public SongServiceImpl(
             SongMapper songMapper,
             UserMapper userMapper,
@@ -64,8 +54,7 @@ public class SongServiceImpl implements SongService {
             YouTubeHelper youTubeHelper,
             TransferHelper transferHelper,
             DateHelper dateHelper,
-            YouTubeConfig youTubeConfig
-    ) {
+            YouTubeConfig youTubeConfig, StationPlayerHelper stationPlayerHelper) {
         this.songRepository = songRepository;
         this.stationRepository = stationRepository;
         this.userRepository = userRepository;
@@ -74,6 +63,7 @@ public class SongServiceImpl implements SongService {
         this.dateHelper = dateHelper;
         this.songMapper = songMapper;
         this.userMapper = userMapper;
+        this.youTubeConfig = youTubeConfig;
         this.stationPlayerHelper = stationPlayerHelper;
     }
 
@@ -89,7 +79,7 @@ public class SongServiceImpl implements SongService {
         return songRepository.findByIdIn(listSongId).map(song -> {
             SongDTO result = songMapper.songToSongDTO(song);
             Optional<User> creator = userRepository.findById(song.getCreatorId());
-            result.setCreatorId(creator.isPresent() ? userMapper.userToUserDTO(creator.get()) : null);
+            result.setCreator(creator.isPresent() ? userMapper.userToUserDTO(creator.get()) : null);
             return result;
         }).switchIfEmpty(Mono.error(new RadioNotFoundException("Not found song in station")));
     }

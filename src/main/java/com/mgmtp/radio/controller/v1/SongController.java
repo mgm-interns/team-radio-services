@@ -45,58 +45,6 @@ public class SongController extends BaseRadioController  {
     }
 
     @ApiOperation(
-            value = "Get list song",
-            notes = "Returns list all song of station"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Request processed successfully"),
-            @ApiResponse(code = 200, message = "No message then there is error, connection close")
-    })
-    @GetMapping("/sse/listSong")
-    public Flux<ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> getListSong(@RequestParam("stationId") String stationId) {
-        return Flux.interval(Duration.ofSeconds(1))
-                .map(thisSecond -> Tuples.of(thisSecond, songService.getListSongByStationId(stationId)))
-                .map(createDataForGetListSong);
-    }
-
-    private Function<Tuple2<Long, Flux<SongDTO>>, ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> createDataForGetListSong =
-        dataOfTuple -> ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
-            .event("fetch")
-            .id(Long.toString(dataOfTuple.getT1()))
-            .data(new RadioSuccessResponse<>(dataOfTuple.getT2().collectList().block()))
-            .build();
-
-    @ApiOperation(
-            value = "Get list available song",
-            notes = "Returns list available song of station"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Request processed successfully"),
-            @ApiResponse(code = 200, message = "No message then there is error, connection close")
-    })
-    @GetMapping("/sse/listAvailableSong")
-    @ResponseStatus(HttpStatus.OK)
-    public Flux<ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> getAvailableListSong(@RequestParam("stationId") String stationId) {
-        return Flux.interval(Duration.ofSeconds(1))
-                .map(thisSecond -> Tuples.of(thisSecond, songService.getListSongByStationId(stationId)))
-                .map(createDataForGetAvailableListSong);
-    }
-
-    private Function<Tuple2<Long, Flux<SongDTO>>, ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> createDataForGetAvailableListSong =
-        dataOfTuple -> ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
-            .event("fetch")
-            .id(Long.toString(    dataOfTuple.getT1()))
-            .data(new RadioSuccessResponse<>(
-                    dataOfTuple
-                    .getT2()
-                    .collectList()
-                    .block()
-                    .stream()
-                    .filter(songDTO -> songDTO.isPlaying())
-                    .collect(Collectors.toList())))
-            .build();
-
-    @ApiOperation(
             value = "Get list history song",
             notes = "Returns list history song of station"
     )
@@ -121,7 +69,7 @@ public class SongController extends BaseRadioController  {
                     dataOfTuple
                         .getT2()
                         .collectList()
-                        .block().stream().filter(songDTO -> !songDTO.isPlaying())
+                        .block().stream().filter(songDTO -> songDTO.getStatus() != SongStatus.playing)
                         .sorted(dataOfTuple.getT4())
                         .filter(distinctUrl(SongDTO::getUrl))
                         .limit(dataOfTuple.getT3())

@@ -3,6 +3,7 @@ package com.mgmtp.radio.mapper.station;
 import com.mgmtp.radio.RadioApplicationTests;
 import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.dto.station.SongDTO;
+import com.mgmtp.radio.sdo.SongStatus;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +31,7 @@ public class SongMapperTest {
     @Test
     public void userToUserDTO() {
         Song song = new Song();
-        song.setPlaying(IS_PLAYED);
+        song.setStatus(SongStatus.not_play_yet);
         song.setSkipped(IS_SKIPPED);
         song.setUrl(URL);
         song.setTitle(TITLE);
@@ -40,7 +41,7 @@ public class SongMapperTest {
 
         SongDTO songDTO = songMapper.songToSongDTO(song);
 
-        assertEquals(song.isPlaying(), songDTO.isPlaying());
+        assertEquals(song.getStatus(), songDTO.getStatus());
         assertEquals(song.isSkipped(), songDTO.isSkipped());
         assertEquals(song.getUrl(), songDTO.getUrl());
         assertEquals(song.getTitle(), songDTO.getTitle());
@@ -52,7 +53,7 @@ public class SongMapperTest {
     @Test
     public void userDTOToUser() {
         SongDTO songDTO = new SongDTO();
-        songDTO.setPlaying(IS_PLAYED);
+        songDTO.setStatus(SongStatus.not_play_yet);
         songDTO.setSkipped(IS_SKIPPED);
         songDTO.setUrl(URL);
         songDTO.setTitle(TITLE);
@@ -62,7 +63,7 @@ public class SongMapperTest {
 
         Song song = songMapper.songDtoToSong(songDTO);
 
-        assertEquals(songDTO.isPlaying(), song.isPlaying());
+        assertEquals(songDTO.getStatus(), song.getStatus());
         assertEquals(songDTO.isSkipped(), song.isSkipped());
         assertEquals(songDTO.getUrl(), song.getUrl());
         assertEquals(songDTO.getTitle(), song.getTitle());
