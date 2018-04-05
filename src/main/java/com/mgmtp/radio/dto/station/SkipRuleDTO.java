@@ -1,66 +1,65 @@
 package com.mgmtp.radio.dto.station;
 
-import lombok.NoArgsConstructor;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.HashMap;
-
-@NoArgsConstructor
+//@NoArgsConstructor
+@Data
 public class SkipRuleDTO {
 
-	private RuleTypeDTO ruleTypeDTO;
-    private String typeName;
-    private String typeDescription;
-    private HashMap<Integer, SkipRuleDTO> mapAllRules;
+	public static final int BASIC = 0;
+	public static final int ADVANCE = 1;
 
-    public enum RuleTypeDTO {
-    	BASIC(0),
-	    ADVANCE(1),
-	    ;
-    	private int typeId;
+	int typeId;
 
-    	RuleTypeDTO(int typeId) {
-    		this.typeId = typeId;
-	    }
-
-	    public int getTypeId() {
-    		return typeId;
-	    }
+    public SkipRuleDTO() {
+    	this.typeId = BASIC;
     }
-	public SkipRuleDTO(RuleTypeDTO ruleTypeDTO) {
-		this.ruleTypeDTO = ruleTypeDTO;
-		switch (ruleTypeDTO) {
+
+    @Setter(AccessLevel.NONE)
+    String name;
+	@Setter(AccessLevel.NONE)
+    String description;
+
+    public String getName() {
+    	switch (typeId) {
+		    case BASIC:
+		    	name = "Basic rule";
+		    	break;
+		    case ADVANCE:
+		    	name = "Advance rule";
+			    break;
+		    default:
+		    	name = "Invalid typeId";
+			    break;
+	    }
+	    return name;
+    }
+
+	public String getDescription() {
+		switch (typeId) {
 			case BASIC:
-				this.typeName = "Basic";
-				this.typeDescription = "SkipRuleDTO: More than 50% downvotes can skip the song";
+				description = "Rule: More than 50% downvotes can skip the song";
 				break;
 			case ADVANCE:
-				this.typeName = "Advance";
-				this.typeDescription = "SkipRuleDTO: Only you can skip the song";
+				description = "Rule: Only you can skip the song";
+				break;
 			default:
+				description = "Invalid typeId";
 				break;
 		}
+		return description;
 	}
 
-	public SkipRuleDTO getInstance(RuleTypeDTO ruleTypeDTO) throws InvalidRuleTypeDtoException {
-    	if(mapAllRules == null) {
-    		mapAllRules = new HashMap<>();
-	    }
-		if(ruleTypeDTO != null) {
-			SkipRuleDTO skipRule = mapAllRules.get(ruleTypeDTO.getTypeId());
-			if(skipRule == null)
-			{
-				skipRule = new SkipRuleDTO(ruleTypeDTO);
-				mapAllRules.put(ruleTypeDTO.getTypeId(), skipRule);
-			}
-			return skipRule;
+	public SkipRuleDTO(int typeId) throws InvalidRuleTypeDtoException {
+		if(typeId == BASIC || typeId == ADVANCE) {
+			this.typeId = typeId;
 		}
 		else {
 			throw new InvalidRuleTypeDtoException();
 		}
-	}
-
-	public boolean isBasic() {
-    	return ruleTypeDTO.equals(RuleTypeDTO.BASIC);
 	}
 
 	public class InvalidRuleTypeDtoException extends Exception {
