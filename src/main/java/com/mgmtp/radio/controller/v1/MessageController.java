@@ -43,7 +43,7 @@ public class MessageController extends BaseRadioController {
         if (bindingResult.hasErrors()) {
             return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
-        User user = getCurrentUser();
+        User user = getCurrentUser().get();
         return messageService.create(stationId, user, messageDTO).map(RadioSuccessResponse::new);
     }
 
