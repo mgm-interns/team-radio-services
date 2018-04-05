@@ -142,21 +142,27 @@ public class SongController extends BaseRadioController  {
         return 0;
     };
 
+    @ApiOperation(
+            value = "Get playlist and now playing",
+            notes = "Returns playlist and now playing of station"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request processed successfully")
+    })
     @GetMapping("/sse/playList")
     @ResponseStatus(HttpStatus.OK)
         public Flux<ServerSentEvent<RadioSuccessResponse<PlayList>>> getPlayListByStationId (@RequestParam("stationId") String stationId){
             return Flux.interval(Duration.ofSeconds(1)).delayElements(Duration.ofMillis(100))
                 .map(thisSecond -> Tuples.of(thisSecond, songService.getPlayListByStationId(stationId)))
-                .map(tuple2 ->{
-                   return ServerSentEvent.<RadioSuccessResponse<PlayList>>builder()
+                .map(tuple2 -> ServerSentEvent.<RadioSuccessResponse<PlayList>>builder()
                    .event("fetch")
                    .id(Long.toString(tuple2.getT1()))
                    .data(
                        new RadioSuccessResponse<>(
                            tuple2.getT2().log().block()
                        )
-                   ).build();
-                });
+                   ).build()
+                );
     }
 
     @ApiOperation(
