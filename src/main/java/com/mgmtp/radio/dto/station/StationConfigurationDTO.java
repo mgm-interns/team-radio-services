@@ -6,6 +6,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 public class StationConfigurationDTO {
-	private String stationId;
-	private SkipRuleDTO skipRuleDTO;
+	private String id;
+	private SkipRuleDTO skipRule;
 }
