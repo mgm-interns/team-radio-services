@@ -1,6 +1,7 @@
 package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.controller.BaseRadioController;
+import com.mgmtp.radio.controller.response.RadioSuccessResponse;
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
@@ -38,11 +39,11 @@ public class FavoriteSongController extends BaseRadioController {
 
 	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
-	public Flux<FavoriteSongDTO> getAll() throws RadioException {
+	public Flux<RadioSuccessResponse<FavoriteSongDTO>> getAll() throws RadioException {
 
 		if(getCurrentUser().isPresent()) {
 		    String userId = getCurrentUser().get().getId();
-			return favoriteSongService.findByUserId(userId);
+			return favoriteSongService.findByUserId(userId).map(RadioSuccessResponse::new);
 		} else {
 			throw new RadioNotFoundException("unauthorized");
 		}
@@ -51,7 +52,7 @@ public class FavoriteSongController extends BaseRadioController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.OK)
-	public Mono<FavoriteSongDTO> store(@Validated @RequestBody FavoriteSongDTO favoriteSongDTO,
+	public Mono<RadioSuccessResponse<FavoriteSongDTO>> store(@Validated @RequestBody FavoriteSongDTO favoriteSongDTO,
                                                              BindingResult bindingResult)
             throws RadioException {
 		if (bindingResult.hasErrors()) {
@@ -60,7 +61,7 @@ public class FavoriteSongController extends BaseRadioController {
 
         if(getCurrentUser().isPresent()) {
             String userId = getCurrentUser().get().getId();
-            return favoriteSongService.create(userId, favoriteSongDTO);
+            return favoriteSongService.create(userId, favoriteSongDTO).map(RadioSuccessResponse::new);
         } else {
             throw new RadioNotFoundException("unauthorized");
         }
@@ -68,10 +69,10 @@ public class FavoriteSongController extends BaseRadioController {
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.OK)
-	public Mono<FavoriteSongDTO> delete(@PathVariable(value = "id") String id) throws RadioException {
+	public Mono<RadioSuccessResponse<Void>> delete(@PathVariable(value = "id") String id) throws RadioException {
         if(getCurrentUser().isPresent()) {
             String userId = getCurrentUser().get().getId();
-            return favoriteSongService.delete(id, userId);
+            return favoriteSongService.delete(id, userId).map(song -> new RadioSuccessResponse<>());
         } else {
             throw new RadioNotFoundException("unauthorized");
         }
