@@ -12,8 +12,6 @@ public interface MessageService {
 
     Flux<MessageDTO> findByStationId(String conversationId);
 
-    Mono<Boolean> existsById(String id);
-
     Flux<MessageDTO> findByFromUserId(String userId);
 
     Mono<MessageDTO> save(Message message);

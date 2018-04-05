@@ -8,13 +8,12 @@ import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.mapper.conversation.MessageMapper;
 import com.mgmtp.radio.respository.conversation.MessageRepository;
 import com.mgmtp.radio.support.UserHelper;
-import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -22,20 +21,22 @@ public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
     private final MessageMapper messageMapper;
     private final UserHelper userHelper;
-    private final Environment env;
+    @Value("${user.limit.username}")
+    private String usernameLimit;
+    @Value("${user.limit.avatar}")
+    private String avatarLimit;
 
-    public MessageServiceImpl(MessageRepository messageRepository, MessageMapper messageMapper, UserHelper userHelper, Environment env) {
+    public MessageServiceImpl(MessageRepository messageRepository, MessageMapper messageMapper, UserHelper userHelper) {
         this.messageRepository = messageRepository;
         this.messageMapper = messageMapper;
         this.userHelper = userHelper;
-        this.env = env;
     }
 
     @Override
     public Mono<MessageDTO> create(String stationId, User user, MessageDTO messageDTO) {
         FromUser fromUser = userHelper.convertUserToFromUser(user);
-        String userNameFormat = "%-"+env.getProperty("user.limit.username")+"s";
-        String avatarUrlFormat = "%-"+env.getProperty("user.limit.avatar")+"s";
+        String userNameFormat = "%-"+usernameLimit+"s";
+        String avatarUrlFormat = "%-"+avatarLimit+"s";
         fromUser.setUsername(String.format(userNameFormat, fromUser.getUsername()));
         fromUser.setAvatarUrl(String.format(avatarUrlFormat, fromUser.getAvatarUrl()));
         messageDTO.setStationId(stationId);
@@ -49,11 +50,6 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Flux<MessageDTO> findByStationId(String conversationId) {
         return messageRepository.findByStationId(conversationId).map(messageMapper::messageToMessageDTO);
-    }
-
-    @Override
-    public Mono<Boolean> existsById(String id) {
-        return messageRepository.existsById(id);
     }
 
     @Override

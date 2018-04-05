@@ -1,5 +1,6 @@
 package com.mgmtp.radio.support;
 
+import com.mgmtp.radio.domain.conversation.FromUser;
 import com.mgmtp.radio.domain.user.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,11 +23,11 @@ public class UserHelper {
         return user;
     }
 
-    public User convertUserToUserConversation(com.mgmtp.radio.domain.user.User user) {
-        User userConversation = new User();
-        userConversation.setId(user.getId());
-        userConversation.setUsername(user.getUsername());
-        userConversation.setAvatarUrl(user.getAvatarUrl());
-        return userConversation;
+    public FromUser convertUserToFromUser(User user) {
+        FromUser fromUser = new FromUser();
+        fromUser.setId(user.getId());
+        fromUser.setUsername(user.getUsername());
+        fromUser.setAvatarUrl(user.getAvatarUrl());
+        return fromUser;
     }
 }
