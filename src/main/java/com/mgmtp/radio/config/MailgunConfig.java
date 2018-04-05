@@ -5,6 +5,7 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
@@ -17,16 +18,15 @@ import javax.validation.constraints.NotBlank;
 @NoArgsConstructor
 @Component
 @Validated
-@PropertySource(value = "classpath:local.properties")
-@ConfigurationProperties(prefix = "mailgun")
 public class MailgunConfig {
-    @NotBlank
+
+    @Value("${mailgun.api}")
     private String api;
 
-    @NotBlank
+    @Value("${mailgun.domain}")
     private String domain;
 
-    @NotBlank
+    @Value("${mailgun.from}")
     private String from;
 
     @Bean
