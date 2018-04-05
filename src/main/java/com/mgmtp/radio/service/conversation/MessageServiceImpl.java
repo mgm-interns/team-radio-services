@@ -33,10 +33,6 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Mono<MessageDTO> create(String stationId, User user, MessageDTO messageDTO) {
-        if (messageDTO.getId() == null || messageDTO.getId().isEmpty()) {
-            messageDTO.setId(UUID.randomUUID().toString());
-        }
-
         FromUser fromUser = userHelper.convertUserToFromUser(user);
         String userNameFormat = "%-"+env.getProperty("user.limit.username")+"s";
         String avatarUrlFormat = "%-"+env.getProperty("user.limit.avatar")+"s";
