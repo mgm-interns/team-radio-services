@@ -1,10 +1,8 @@
 package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.domain.station.Station;
-import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
-import com.mgmtp.radio.mapper.stationConfiguration.SkipRuleMapper;
 import com.mgmtp.radio.mapper.stationConfiguration.StationConfigurationMapper;
 import com.mgmtp.radio.respository.station.StationConfigurationRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
@@ -30,8 +28,6 @@ public class CreateStationImplTest {
 
     SongService songService;
 
-    SkipRuleMapper skipRuleMapper;
-
     StationConfigurationMapper stationConfigurationMapper;
 
     StationConfigurationRepository stationConfigurationRepository;
@@ -39,7 +35,7 @@ public class CreateStationImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        stationService = new StationServiceImpl(stationMapper, skipRuleMapper, stationConfigurationMapper, stationRepository, songService, stationConfigurationRepository);
+        stationService = new StationServiceImpl(stationMapper, stationConfigurationMapper, stationRepository, songService, stationConfigurationRepository);
     }
 
     @Test

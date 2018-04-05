@@ -2,6 +2,7 @@ package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
+import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
@@ -18,6 +19,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.HashMap;
+import java.util.Map;
 
 @Log4j2
 @RestController
@@ -91,11 +94,11 @@ public class StationController extends BaseRadioController {
         return stationService.update(id, stationDTO);
     }
 
-    @PutMapping("{id}")
-    public Mono<ResponseEntity<StationConfigurationDTO>> updateConfigurationStation(@PathVariable(value = "id") final String id,
+    @PutMapping("/update-config/")
+    public Mono<ResponseEntity<StationConfigurationDTO>> updateConfigurationStation(
                                                                                     @Valid @RequestBody final StationConfigurationDTO stationConfigurationDTO) {
-        return stationService.updateConfiguration(id, stationConfigurationDTO)
-            .map(updatedStation -> new ResponseEntity<>(updatedStation, HttpStatus.OK))
+        return stationService.updateConfiguration(stationConfigurationDTO)
+            .map(updatedStationConfiguration -> ResponseEntity.ok().body(stationConfigurationDTO))
             .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 }
