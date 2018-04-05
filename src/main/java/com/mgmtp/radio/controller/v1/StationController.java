@@ -12,7 +12,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -32,7 +31,6 @@ public class StationController extends BaseRadioController {
         this.stationService = stationService;
     }
 
-
     @ApiOperation(
             value = "GET all station",
             notes = "Returns all station"
@@ -43,9 +41,8 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Flux<ResponseEntity<StationDTO>> getAllStation() {
-        return this.stationService.getAll()
-                .map(station -> ResponseEntity.status(HttpStatus.OK).body(station));
+    public Flux<StationDTO> getAllStation() {
+        return this.stationService.getAll();
     }
 
     @ApiOperation(
@@ -58,10 +55,8 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping("{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<ResponseEntity<StationDTO>> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
-        return this.stationService.findById(stationId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
+        return this.stationService.findById(stationId);
     }
 
     @ApiOperation(
@@ -74,11 +69,10 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
     @PostMapping
-    public Mono<ResponseEntity<StationDTO>> createStation(@Valid @RequestBody StationDTO stationDTO) {
+    public Mono<StationDTO> createStation(@Valid @RequestBody StationDTO stationDTO) {
         String userId = getCurrentUser().isPresent() ? getCurrentUser().get().getId() : null;
 
-        return stationService.create(userId, stationDTO)
-                .map(station -> ResponseEntity.status(HttpStatus.CREATED).body(station));
+        return stationService.create(userId, stationDTO);
     }
 
     @ApiOperation(
@@ -91,11 +85,9 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
     @PutMapping("{id}")
-    public Mono<ResponseEntity<StationDTO>> updateStation(@PathVariable(value = "id") final String id,
+    public Mono<StationDTO> updateStation(@PathVariable(value = "id") final String id,
                                                    @Valid @RequestBody final StationDTO stationDTO) {
-        return stationService.update(id, stationDTO)
-                .map(updatedStation -> new ResponseEntity<>(updatedStation, HttpStatus.OK))
-                .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return stationService.update(id, stationDTO);
     }
 
 }

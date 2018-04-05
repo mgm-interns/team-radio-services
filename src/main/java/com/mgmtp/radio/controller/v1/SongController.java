@@ -1,9 +1,7 @@
 package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.controller.BaseRadioController;
-import com.mgmtp.radio.controller.response.RadioSuccessResponse;
 import com.mgmtp.radio.domain.station.PlayList;
-import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.exception.RadioBadRequestException;
@@ -19,7 +17,6 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
@@ -54,27 +51,26 @@ public class SongController extends BaseRadioController  {
     })
     @GetMapping("/sse/listHistorySong")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> getListSongHistory(@RequestParam(value = "stationId") String stationId, @RequestParam(value = "limit") Integer limit) {
+    public Flux<ServerSentEvent<List<SongDTO>>> getListSongHistory(@RequestParam(value = "stationId") String stationId, @RequestParam(value = "limit") Integer limit) {
         return Flux.interval(Duration.ofSeconds(1))
                 .map(thisSecond -> Tuples.of(thisSecond, songService.getListSongByStationId(stationId), limit, songDTODateDescComparator))
                 .map(createDataForGetListHistorySong);
     }
 
-    private Function<Tuple4<Long, Flux<SongDTO>, Integer, Comparator<SongDTO>>, ServerSentEvent<RadioSuccessResponse<List<SongDTO>>>> createDataForGetListHistorySong =
-        dataOfTuple -> ServerSentEvent.<RadioSuccessResponse<List<SongDTO>>>builder()
-            .event("fetch")
-            .id(Long.toString(dataOfTuple.getT1()))
-            .data(
-                new RadioSuccessResponse<>(
-                    dataOfTuple
-                        .getT2()
-                        .collectList()
-                        .block().stream().filter(songDTO -> songDTO.getStatus() != SongStatus.playing)
-                        .sorted(dataOfTuple.getT4())
-                        .filter(distinctUrl(SongDTO::getUrl))
-                        .limit(dataOfTuple.getT3())
-                        .collect(Collectors.toList())))
-            .build();
+    private Function<Tuple4<Long, Flux<SongDTO>, Integer, Comparator<SongDTO>>, ServerSentEvent<List<SongDTO>>> createDataForGetListHistorySong =
+            dataOfTuple -> ServerSentEvent.<List<SongDTO>>builder()
+                    .event("fetch")
+                    .id(Long.toString(dataOfTuple.getT1()))
+                    .data(
+                            dataOfTuple
+                                    .getT2()
+                                    .collectList()
+                                    .block().stream().filter(songDTO -> songDTO.getStatus() != SongStatus.playing)
+                                    .sorted(dataOfTuple.getT4())
+                                    .filter(distinctUrl(SongDTO::getUrl))
+                                    .limit(dataOfTuple.getT3())
+                                    .collect(Collectors.toList()))
+                    .build();
 
     private Predicate<SongDTO> distinctUrl(Function<SongDTO, String> getUrl) {
         Set<String> uniqueUrl = ConcurrentHashMap.newKeySet();
@@ -99,17 +95,14 @@ public class SongController extends BaseRadioController  {
     })
     @GetMapping("/sse/playList")
     @ResponseStatus(HttpStatus.OK)
-        public Flux<ServerSentEvent<RadioSuccessResponse<PlayList>>> getPlayListByStationId (@RequestParam("stationId") String stationId){
-            return Flux.interval(Duration.ofSeconds(1)).delayElements(Duration.ofMillis(100))
+    public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@RequestParam("stationId") String stationId) {
+        return Flux.interval(Duration.ofSeconds(1)).delayElements(Duration.ofMillis(100))
                 .map(thisSecond -> Tuples.of(thisSecond, songService.getPlayListByStationId(stationId)))
-                .map(tuple2 -> ServerSentEvent.<RadioSuccessResponse<PlayList>>builder()
-                   .event("fetch")
-                   .id(Long.toString(tuple2.getT1()))
-                   .data(
-                       new RadioSuccessResponse<>(
-                           tuple2.getT2().log().block()
-                       )
-                   ).build()
+                .map(tuple2 -> ServerSentEvent.<PlayList>builder()
+                        .event("fetch")
+                        .id(Long.toString(tuple2.getT1()))
+                        .data(tuple2.getT2().log().block())
+                        .build()
                 );
     }
 
@@ -118,14 +111,14 @@ public class SongController extends BaseRadioController  {
             notes = "Return a new song"
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 200, message = "Request processed successfully", response = SongDTO.class),
             @ApiResponse(code = 400, message = "Error in request parameters", response = RadioBadRequestException.class),
             @ApiResponse(code = 404, message = "Station or Song not found", response = RadioNotFoundException.class),
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public Mono<RadioSuccessResponse<SongDTO>> addSong(
+    public Mono<SongDTO> addSong(
             @RequestParam String stationId,
             @RequestParam String videoId,
             @RequestParam(value = "message", required = false) String message
@@ -133,9 +126,7 @@ public class SongController extends BaseRadioController  {
         log.info("POST /api/v1/song  - data: " + videoId.toString());
 
         String userId = getCurrentUser().isPresent() ? getCurrentUser().get().getId() : null;
-        Mono<SongDTO> newSongDTO = songService.addSongToStationPlaylist(stationId, videoId, message, userId);
-
-        return newSongDTO.flatMap(songDTO -> Mono.just(new RadioSuccessResponse<>(songDTO)));
+        return songService.addSongToStationPlaylist(stationId, videoId, message, userId);
     }
 
     @ApiOperation(
@@ -143,23 +134,21 @@ public class SongController extends BaseRadioController  {
             notes = "Return updated song in station playlist"
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 200, message = "Request processed successfully", response = SongDTO.class),
             @ApiResponse(code = 400, message = "Error in request parameters", response = RadioBadRequestException.class),
             @ApiResponse(code = 404, message = "Station or Song not found", response = RadioNotFoundException.class),
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
     @PatchMapping("upVote")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<RadioSuccessResponse<SongDTO>> upvoteSong (
+    public Mono<SongDTO> upvoteSong (
             @RequestParam String stationId,
             @RequestBody String songId
     ) throws RadioException {
         log.info("POST /api/v1/song/" + stationId + "/upvote  - data: " + songId);
 
         if(getCurrentUser().isPresent()) {
-            return songService
-                    .upVoteSongInStationPlaylist(stationId, songId, getCurrentUser().get().getId())
-                    .flatMap(updatedSongDTO -> Mono.just(new RadioSuccessResponse<>(updatedSongDTO)));
+            return songService.upVoteSongInStationPlaylist(stationId, songId, getCurrentUser().get().getId());
         } else {
             throw new RadioNotFoundException("unauthorized");
         }
@@ -170,14 +159,14 @@ public class SongController extends BaseRadioController  {
             notes = "Return updated song in station playlist"
     )
     @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 200, message = "Request processed successfully", response = SongDTO.class),
             @ApiResponse(code = 400, message = "Error in request parameters", response = RadioBadRequestException.class),
             @ApiResponse(code = 404, message = "Station or Song not found", response = RadioNotFoundException.class),
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
     @PatchMapping("downVote")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<RadioSuccessResponse<SongDTO>> downvoteSong(
+    public Mono<SongDTO> downvoteSong(
             @RequestParam String stationId,
             @RequestBody String songId
     ) throws RadioException {
@@ -185,8 +174,7 @@ public class SongController extends BaseRadioController  {
 
         if(getCurrentUser().isPresent()) {
             return songService
-                    .downVoteSongInStationPlaylist(stationId, songId, getCurrentUser().get().getId())
-                    .flatMap(updatedSongDTO -> Mono.just(new RadioSuccessResponse<>(updatedSongDTO)));
+                    .downVoteSongInStationPlaylist(stationId, songId, getCurrentUser().get().getId());
         } else {
             throw new RadioNotFoundException("unauthorized");
         }
