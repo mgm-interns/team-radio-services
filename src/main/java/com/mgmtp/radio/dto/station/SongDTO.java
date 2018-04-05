@@ -1,6 +1,7 @@
 package com.mgmtp.radio.dto.station;
 
 import com.mgmtp.radio.dto.user.UserDTO;
+import com.mgmtp.radio.sdo.SongStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -14,13 +15,13 @@ public class SongDTO {
 	String id;
 	String songId;
 	String source;
-	boolean playing;
+	SongStatus status;
 	boolean skipped;
 	String url;
 	String title;
 	String thumbnail;
 	long duration;
-    UserDTO creatorId;
+    UserDTO creator;
     int upVoteCount;
     int downVoteCount;
 	List<UserDTO> upvoteUserList = Collections.emptyList();

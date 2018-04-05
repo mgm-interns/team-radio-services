@@ -12,7 +12,9 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
+import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.support.DateHelper;
+import com.mgmtp.radio.support.StationPlayerHelper;
 import com.mgmtp.radio.support.TransferHelper;
 import com.mgmtp.radio.support.YouTubeHelper;
 import lombok.extern.log4j.Log4j2;
@@ -23,7 +25,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.core.publisher.Mono;
@@ -68,6 +69,9 @@ public class AddSongServiceImplTest {
     User user;
     Station station;
 
+    @Autowired
+    private StationPlayerHelper stationPlayerHelper;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -85,8 +89,8 @@ public class AddSongServiceImplTest {
                 youTubeHelper,
                 transferHelper,
                 dateHelper,
-                youTubeConfig
-        );
+                youTubeConfig,
+                stationPlayerHelper);
 
         // Init new user
         user = new User();
@@ -118,20 +122,20 @@ public class AddSongServiceImplTest {
         SongDTO songDTO = new SongDTO();
 
         songDTO.setSongId("mNh6MCoMPis");
-        songDTO.setPlaying(false);
+        songDTO.setStatus(SongStatus.not_play_yet);
         songDTO.setSkipped(false);
         songDTO.setUrl("https://www.youtube.com/watch?v=mNh6MCoMPis");
         songDTO.setTitle("Chelsea - What Do You Want From Me (The Voice Kids 2013: The Blind Auditions)");
         songDTO.setDuration(50000);
-        songDTO.setCreatorId(userMapper.userToUserDTO(user));
+        songDTO.setCreator(userMapper.userToUserDTO(user));
 
         Song savedSong = new Song();
-        savedSong.setPlaying(songDTO.isPlaying());
+        savedSong.setStatus(songDTO.getStatus());
         savedSong.setSkipped(songDTO.isSkipped());
         savedSong.setUrl(songDTO.getUrl());
         savedSong.setTitle(songDTO.getTitle());
         savedSong.setDuration(songDTO.getDuration());
-        savedSong.setCreatorId(songDTO.getCreatorId().getId());
+        savedSong.setCreatorId(songDTO.getCreator().getId());
 
         Video video = new Video();
         VideoSnippet videoSnippet = new VideoSnippet();

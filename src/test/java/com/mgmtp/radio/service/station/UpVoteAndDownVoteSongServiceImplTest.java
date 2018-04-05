@@ -12,7 +12,9 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
+import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.support.DateHelper;
+import com.mgmtp.radio.support.StationPlayerHelper;
 import com.mgmtp.radio.support.TransferHelper;
 import com.mgmtp.radio.support.YouTubeHelper;
 import org.assertj.core.api.Assertions;
@@ -70,6 +72,9 @@ public class UpVoteAndDownVoteSongServiceImplTest {
 
     private Song song;
 
+    @Autowired
+    private StationPlayerHelper stationPlayerHelper;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -89,8 +94,8 @@ public class UpVoteAndDownVoteSongServiceImplTest {
                 youTubeHelper,
                 transferHelper,
                 dateHelper,
-                youTubeConfig
-        );
+                youTubeConfig,
+                stationPlayerHelper);
 
         //given
         user = new User();
@@ -118,7 +123,7 @@ public class UpVoteAndDownVoteSongServiceImplTest {
         song = new Song();
         song.setId("shape-of-me");
         song.setTitle("Shape of me");
-        song.setPlaying(false);
+        song.setStatus(SongStatus.not_play_yet);
         song.setSkipped(false);
         song.setDuration(1230);
         song.setDownVoteUserIdList(new ArrayList<>());
