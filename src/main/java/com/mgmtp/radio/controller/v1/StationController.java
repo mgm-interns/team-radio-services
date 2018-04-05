@@ -53,7 +53,7 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
         return this.stationService.findById(stationId);
@@ -76,7 +76,7 @@ public class StationController extends BaseRadioController {
     }
 
     @ApiOperation(
-            value = "Update the curren station",
+            value = "Update the current station",
             notes = "return updated station"
     )
     @ApiResponses(value = {
@@ -84,7 +84,7 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 400, message = "Error in station is not found", response = RadioNotFoundException.class),
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
-    @PutMapping("{id}")
+    @PutMapping("/{id}")
     public Mono<StationDTO> updateStation(@PathVariable(value = "id") final String id,
                                                    @Valid @RequestBody final StationDTO stationDTO) {
         return stationService.update(id, stationDTO);
