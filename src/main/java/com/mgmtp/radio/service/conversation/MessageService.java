@@ -10,7 +10,7 @@ public interface MessageService {
 
     Mono<MessageDTO> create(String stationId, User user, MessageDTO messageDTO);
 
-    Flux<MessageDTO> findByStationId(String conversationId);
+    Flux<MessageDTO> findByStationId(String stationId);
 
     Mono<Boolean> existsById(String id);
 

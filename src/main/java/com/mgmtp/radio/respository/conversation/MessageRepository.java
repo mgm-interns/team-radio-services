@@ -8,7 +8,7 @@ import reactor.core.publisher.Flux;
 public interface MessageRepository extends ReactiveMongoRepository<Message, String> {
 
     @Tailable
-    Flux<Message> findByStationId(String conversationId);
+    Flux<Message> findByStationId(String stationId);
 
     Flux<Message> findByFrom_Id(String userId);
 }

@@ -5,6 +5,7 @@ import com.mgmtp.radio.controller.response.RadioSuccessResponse;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.conversation.MessageDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
+import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.service.conversation.MessageService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
@@ -30,12 +31,17 @@ public class MessageController extends BaseRadioController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.OK)
-    public Mono<RadioSuccessResponse<MessageDTO>> store(@PathVariable(value = "stationId") String stationId, @Validated @RequestBody MessageDTO messageDTO, BindingResult bindingResult) {
+    public Mono<RadioSuccessResponse<MessageDTO>> store(@PathVariable(value = "stationId") String stationId, @Validated @RequestBody MessageDTO messageDTO, BindingResult bindingResult) throws RadioNotFoundException {
         if (bindingResult.hasErrors()) {
             return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
-        User user = getCurrentUser().get();
-        return messageService.create(stationId, user, messageDTO).map(RadioSuccessResponse::new);
+
+        if (getCurrentUser().isPresent()) {
+            User user = getCurrentUser().get();
+            return messageService.create(stationId, user, messageDTO).map(RadioSuccessResponse::new);
+        } else {
+            throw new RadioNotFoundException("unauthorized");
+        }
     }
 
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

@@ -48,8 +48,8 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Flux<MessageDTO> findByStationId(String conversationId) {
-        return messageRepository.findByStationId(conversationId).map(messageMapper::messageToMessageDTO);
+    public Flux<MessageDTO> findByStationId(String stationId) {
+        return messageRepository.findByStationId(stationId).map(messageMapper::messageToMessageDTO);
     }
 
     @Override
