@@ -1,70 +1,35 @@
 package com.mgmtp.radio.domain.station;
 
-import com.mgmtp.radio.dto.station.SkipRuleDTO.RuleTypeDTO;
+import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
 
 import java.util.HashMap;
 
-@NoArgsConstructor
+@Data
 public class SkipRule {
-	private RuleType ruleType;
-	private String typeName;
-	private String typeDescription;
-	private HashMap<Integer, SkipRule> mapAllRules;
-	private enum RuleType {
-		BASIC(0),
-		ADVANCE(1),
-		;
-		private int typeId;
+	public static final int BASIC = 0;
+	public static final int ADVANCE = 1;
 
-		RuleType(int typeId) {
+	int typeId;
+
+	public SkipRule() {
+		this.typeId = BASIC;
+	}
+
+	public SkipRule(int typeId) throws InvalidRuleTypeDtoException {
+		if(typeId == BASIC || typeId == ADVANCE) {
 			this.typeId = typeId;
 		}
-
-		public int getTypeId() {
-			return typeId;
-		}
-	}
-	public SkipRule(RuleType ruleType) {
-		this.ruleType = ruleType;
-		switch (ruleType) {
-			case BASIC:
-				this.typeName = "Basic";
-				this.typeDescription = "SkipRule: More than 50% downvotes can skip the song";
-				break;
-			case ADVANCE:
-				this.typeName = "Advance";
-				this.typeDescription = "SkipRule: Only you can skip the song";
-			default:
-				break;
-		}
-	}
-	public SkipRule getInstance(RuleType ruleType) throws InvalidRuleTypeException {
-		if(mapAllRules == null) {
-			mapAllRules = new HashMap<>();
-		}
-		if(ruleType != null) {
-			SkipRule skipRule = mapAllRules.get(ruleType.getTypeId());
-			if(skipRule == null)
-			{
-				skipRule = new SkipRule(ruleType);
-				mapAllRules.put(ruleType.getTypeId(), skipRule);
-			}
-			return skipRule;
-		}
 		else {
-			throw new InvalidRuleTypeException();
+			throw new InvalidRuleTypeDtoException();
 		}
 	}
 
-	public boolean isBasic() {
-		return ruleType.equals(RuleTypeDTO.BASIC);
-	}
-
-	public class InvalidRuleTypeException extends Exception {
+	public class InvalidRuleTypeDtoException extends Exception {
 		@Override
 		public String getMessage() {
-			return "The input RuleType is invalid or empty";
+			return "The input RuleTypeDTO is invalid or empty";
 		}
 	}
 }
