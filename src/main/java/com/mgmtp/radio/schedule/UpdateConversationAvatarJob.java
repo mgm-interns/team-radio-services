@@ -41,7 +41,7 @@ public class UpdateConversationAvatarJob {
             fromUserDTO.setAvatarUrl(String.format(avatarUrlFormat, userDTO.getAvatarUrl()));
             messageService.findByFromUserId(userDTO.getId()).flatMap(messageDTO -> {
                 messageDTO.setFrom(fromUserDTO);
-                return messageService.save(messageMapper.messageDtoToMessage(messageDTO));
+                return messageService.save(messageDTO);
             }).subscribe();
         });
     }
