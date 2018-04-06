@@ -63,7 +63,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Mono<MessageDTO> save(Message message) {
-        return messageRepository.save(message).map(messageMapper::messageToMessageDTO).switchIfEmpty(Mono.error(new RadioException()));
+    public Mono<MessageDTO> save(MessageDTO messageDTO) {
+        return messageRepository.save(messageMapper.messageDtoToMessage(messageDTO)).map(messageMapper::messageToMessageDTO).switchIfEmpty(Mono.error(new RadioException()));
     }
 }
