@@ -8,7 +8,6 @@ import reactor.core.publisher.Flux;
 
 public interface StationService {
 	int getOnlineUsersNumber(StationDTO stationDTO);
-	void skipCurrentSong(StationDTO stationDTO);
 	Flux<StationDTO> getAll();
 	Mono<StationDTO> findById(String id);
 	Mono<StationDTO> create(String userId, StationDTO stationDTO);
