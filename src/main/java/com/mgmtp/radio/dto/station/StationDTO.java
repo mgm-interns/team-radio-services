@@ -30,13 +30,4 @@ public class StationDTO {
 
 	LocalDate createdAt;
 	StationConfigurationDTO stationConfigurationDTO;
-	int numberOfUpvote;
-	int numberOfDownvote;
-
-	StationServiceImpl stationService;
-
-	public StationDTO() {
-		numberOfUpvote = 0;
-		numberOfDownvote = 0;
-	}
 }

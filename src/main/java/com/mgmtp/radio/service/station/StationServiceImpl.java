@@ -1,23 +1,31 @@
 package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.domain.station.SkipRule;
+import com.mgmtp.radio.domain.station.Song;
+import com.mgmtp.radio.domain.station.Station;
+import com.mgmtp.radio.domain.station.StationConfiguration;
+import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
-import com.mgmtp.radio.domain.station.Station;
+import com.mgmtp.radio.dto.user.UserDTO;
+import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.mapper.stationConfiguration.StationConfigurationMapper;
 import com.mgmtp.radio.respository.station.StationConfigurationRepository;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.respository.station.StationRepository;
+import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
-import com.mgmtp.radio.mapper.station.StationMapper;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service("stationService")
+@Aspect
 public class StationServiceImpl implements StationService {
 
 	private final StationMapper stationMapper;
@@ -31,35 +39,49 @@ public class StationServiceImpl implements StationService {
 		return 0;
 	}
 
-	@Override
-	public void skipCurrentSong(StationDTO stationDTO) {
-		skipSong(stationDTO, 0);
-	}
-
 	private void skipSong(StationDTO stationDTO, int songIndex) {
 		stationDTO.getPlaylist().get(songIndex).setSkipped(true);
 	}
 
-	private double calcCurrentSongDislikePercent(StationDTO stationDTO, String userId) {
-		if (stationDTO.getStationConfigurationDTO().getSkipRule().getTypeId() != SkipRule.BASIC
-			&& stationDTO.getOwnerId().equals(userId)) {
-			return ONE_HUNDRED_PERCENT;
-		} else {
-			final int numberOnline = getOnlineUsersNumber(stationDTO);
-			double currentSongDislikePercent = 0;
-			if(numberOnline > 0) {
-				currentSongDislikePercent = (stationDTO.getNumberOfUpvote() - stationDTO.getNumberOfUpvote())
-					/ (float) numberOnline;
-			}
-			return currentSongDislikePercent;
+	private double calcCurrentSongDislikePercent(SongDTO songDTO, StationDTO station) {
+		final int numberOnline = getOnlineUsersNumber(station);
+		double currentSongDislikePercent = 0;
+		if (numberOnline > 0) {
+			currentSongDislikePercent = songDTO.getDownVoteCount() / (float) numberOnline;
 		}
+		return currentSongDislikePercent;
 	}
 
-	//TODO Do it after updvotes/downvotes happen
-	public void checkAndSkipSongIfNeeded(StationDTO stationDTO, String userId) {
-		if(calcCurrentSongDislikePercent(stationDTO, userId) > DOWN_VOTE_THRES_PERCENT){
-			skipCurrentSong(stationDTO);
+	private boolean isOwnerDownvote(Station station, SongDTO songDTO) {
+		for (UserDTO user: songDTO.getDownvoteUserList()) {
+			if (station.getOwnerId().equals(user.getId())) {
+				return true;
+			}
 		}
+		return false;
+	}
+
+	@AfterReturning(value = "execution(* com.mgmtp.radio.service.station.SongService.downVoteSongInStationPlaylist(..))", returning = "monoSongDTO")
+	public Mono<SongDTO> checkAndSkipSongIfNeeded(Mono<SongDTO> monoSongDTO) {
+		Mono<SongDTO> ms = monoSongDTO.map(songDTO -> {
+			final Station station = stationRepository.findById(songDTO.getStationId()).block();
+			final StationConfiguration stationConfiguration = stationConfigurationRepository.findById(songDTO.getStationId()).block();
+			boolean isSkipped = false;
+
+			if (stationConfiguration.getRule().getTypeId() == SkipRule.ADVANCE) {
+				if (isOwnerDownvote(station, songDTO)) {
+					isSkipped = true;
+				}
+			} else {
+				final double downvotePercent = calcCurrentSongDislikePercent(songDTO, new StationDTO());
+				if (downvotePercent > DOWN_VOTE_THRES_PERCENT) {
+					isSkipped = true;
+				}
+			}
+			songDTO.setSkipped(isSkipped);
+			return songDTO;
+		});
+		return ms;
 	}
     private final StationRepository stationRepository;
     private final SongService songService;
