@@ -46,7 +46,7 @@ public class StationControllerTest {
 	}
 
 	@Test
-	public void createStation() {
+	public void createStation() throws InvalidRuleTypeDtoException {
 		StationDTO stationDTO = new StationDTO();
 		stationDTO.setId("RRRE");
 		Mono<StationDTO> stationDTOMono = stationController.createStation(stationDTO);

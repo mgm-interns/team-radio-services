@@ -1,6 +1,7 @@
 package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.domain.station.Station;
+import com.mgmtp.radio.dto.station.SkipRuleDTO.InvalidRuleTypeDtoException;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
@@ -46,7 +47,7 @@ public class GetStationByIdImplTest {
     }
 
     @Test
-    public void GetStationByIdSuccess() {
+    public void GetStationByIdSuccess() throws InvalidRuleTypeDtoException {
         //given
         SongDTO songDTO = new SongDTO();
         songDTO.setId("song1");
