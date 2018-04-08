@@ -28,4 +28,5 @@ public class SongDTO {
 	List<UserDTO> downvoteUserList = Collections.emptyList();
 	String message;
 	LocalDate createdAt;
+	String stationId;
 }

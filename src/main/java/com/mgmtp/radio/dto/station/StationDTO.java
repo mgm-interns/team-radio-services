@@ -3,11 +3,13 @@ package com.mgmtp.radio.dto.station;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.service.station.StationServiceImpl;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class StationDTO {
 	String id;
 	String name;
@@ -18,13 +20,4 @@ public class StationDTO {
 	List<SongDTO> playlist;
 	LocalDate createdAt;
 	StationConfigurationDTO stationConfigurationDTO;
-	int numberOfUpvote;
-	int numberOfDownvote;
-
-	StationServiceImpl stationService;
-
-	public StationDTO() {
-		numberOfUpvote = 0;
-		numberOfDownvote = 0;
-	}
 }
