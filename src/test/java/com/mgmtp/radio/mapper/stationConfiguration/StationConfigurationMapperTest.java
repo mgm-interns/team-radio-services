@@ -10,8 +10,6 @@ public class StationConfigurationMapperTest {
 
 	StationConfigurationMapper stationConfigurationMapper = StationConfigurationMapper.INSTANCE;
 
-
-
 	@Test
 	public void skipRuleToSkipRuleDTO() {
 		//given
