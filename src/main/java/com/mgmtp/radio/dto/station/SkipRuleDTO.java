@@ -54,7 +54,7 @@ public class SkipRuleDTO {
 	}
 
 	public SkipRuleDTO(int typeId) throws InvalidRuleTypeDtoException {
-		if(typeId == BASIC || typeId == ADVANCE) {
+		if(typeId != BASIC || typeId == ADVANCE) {
 			this.typeId = typeId;
 		}
 		else {
