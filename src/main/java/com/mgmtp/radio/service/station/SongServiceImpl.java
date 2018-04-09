@@ -189,15 +189,19 @@ public class SongServiceImpl implements SongService {
         Song song = new Song();
         Video video = youTubeHelper.getYouTubeVideoById(videoId);
 
-        song.setSongId(video.getId());
-        song.setTitle(video.getSnippet().getTitle());
-        song.setCreatedAt(dateHelper.convertDateToLocalDate(new Date()));
-        song.setMessage(message);
-        song.setThumbnail(video.getSnippet().getThumbnails().getDefault().getUrl());
-        song.setUrl(youTubeConfig.getUrl() + videoId + "&t=0");
-        song.setCreatorId(creatorId);
-        song.setSource(video.getKind().split("#")[0]);
-        song.setDuration(transferHelper.transferVideoDuration(video.getContentDetails().getDuration()));
+        if(video.getId() == null){
+            return Mono.error(new SongNotFoundException());
+        } else {
+            song.setSongId(video.getId());
+            song.setTitle(video.getSnippet().getTitle());
+            song.setCreatedAt(dateHelper.convertDateToLocalDate(new Date()));
+            song.setMessage(message);
+            song.setThumbnail(video.getSnippet().getThumbnails().getDefault().getUrl());
+            song.setUrl(youTubeConfig.getUrl() + videoId + "&t=0");
+            song.setCreatorId(creatorId);
+            song.setSource(video.getKind().split("#")[0]);
+            song.setDuration(transferHelper.transferVideoDuration(video.getContentDetails().getDuration()));
+        }
 
         return songRepository.save(song).flatMap(newSong ->
                 stationRepository.findById(stationId)
