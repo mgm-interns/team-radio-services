@@ -1,11 +1,8 @@
 package com.mgmtp.radio.dto.station;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.mgmtp.radio.dto.skipRule.SkipRuleDTO;
 import com.mgmtp.radio.sdo.StationPrivacy;
-import com.mgmtp.radio.service.station.StationServiceImpl;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,4 +27,9 @@ public class StationDTO {
 
 	LocalDate createdAt;
 	StationConfigurationDTO stationConfigurationDTO;
+
+	public StationDTO() {
+		stationConfigurationDTO = new StationConfigurationDTO();
+		stationConfigurationDTO.setSkipRule(new SkipRuleDTO(SkipRuleDTO.BASIC));
+	}
 }

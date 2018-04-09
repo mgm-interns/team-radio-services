@@ -1,10 +1,8 @@
 package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.domain.station.SkipRule;
-import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.station.StationConfiguration;
-import com.mgmtp.radio.dto.station.SkipRuleDTO.InvalidRuleTypeDtoException;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
@@ -75,11 +73,7 @@ public class StationServiceImpl implements StationService {
 				}
 			} else {
 				double downvotePercent = 0;
-				try {
-					downvotePercent = calcCurrentSongDislikePercent(songDTO, new StationDTO());
-				} catch (InvalidRuleTypeDtoException e) {
-					e.printStackTrace();
-				}
+				downvotePercent = calcCurrentSongDislikePercent(songDTO, new StationDTO());
 				if (downvotePercent > DOWN_VOTE_THRES_PERCENT) {
 					isSkipped = true;
 				}
