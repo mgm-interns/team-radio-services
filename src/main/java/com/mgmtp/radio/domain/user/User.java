@@ -30,7 +30,7 @@ public class User implements UserDetails, Serializable {
 
     private boolean accountNonLocked = true;
 
-    private boolean enabled = true;
+    private boolean enabled = false;
 
     private boolean credentialsNonExpired = true;
 

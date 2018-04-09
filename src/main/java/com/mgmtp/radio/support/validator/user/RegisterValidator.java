@@ -3,6 +3,7 @@ package com.mgmtp.radio.support.validator.user;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.respository.user.UserRepository;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
@@ -44,7 +45,7 @@ public class RegisterValidator implements Validator {
 
         Pattern pattern = Pattern.compile(EMAIL_PATTERN);
         Matcher matcher = pattern.matcher(userDTO.getEmail());
-        if(userDTO.getEmail() ==null || !matcher.matches()) {
+        if(StringUtils.isAllEmpty(userDTO.getEmail()) || !matcher.matches()) {
             errors.rejectValue("email", "", messageSourceAccessor.getMessage("validation.error.email"));
         }
     }
