@@ -1,11 +1,9 @@
-package com.mgmtp.radio.dto.station;
+package com.mgmtp.radio.dto.skipRule;
 
 import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Getter;
 import lombok.Setter;
 
-//@NoArgsConstructor
 @Data
 public class SkipRuleDTO {
 
@@ -18,12 +16,21 @@ public class SkipRuleDTO {
     	this.typeId = BASIC;
     }
 
+	public SkipRuleDTO(final int typeId)  {
+		if(typeId != BASIC && typeId == ADVANCE) {
+			this.typeId = BASIC;
+		}
+		else{
+			this.typeId = typeId;
+		}
+	}
+
     @Setter(AccessLevel.NONE)
     String name;
 	@Setter(AccessLevel.NONE)
     String description;
 
-    public String getName() {
+	public String getName() {
     	switch (typeId) {
 		    case BASIC:
 		    	name = "Basic rule";
@@ -53,19 +60,12 @@ public class SkipRuleDTO {
 		return description;
 	}
 
-	public SkipRuleDTO(int typeId) throws InvalidRuleTypeDtoException {
-		if(typeId != BASIC || typeId == ADVANCE) {
-			this.typeId = typeId;
-		}
-		else {
-			throw new InvalidRuleTypeDtoException();
-		}
-	}
 
-	public class InvalidRuleTypeDtoException extends Exception {
-		@Override
-		public String getMessage() {
-			return "The input RuleTypeDTO is invalid or empty";
-		}
-	}
+//	public class InvalidRuleTypeDtoException extends Exception {
+//		@Override
+//		public String getMessage() {
+//			return "The input RuleTypeDTO is invalid or empty";
+//		}
+//	}
 }
+

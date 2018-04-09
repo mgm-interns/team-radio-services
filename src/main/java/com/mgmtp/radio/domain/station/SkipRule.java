@@ -17,16 +17,16 @@ public class SkipRule {
 		this.typeId = BASIC;
 	}
 
-	public SkipRule(int typeId) throws InvalidRuleTypeDtoException {
+	public SkipRule(int typeId) throws InvalidRuleTypeException {
 		if(typeId == BASIC || typeId == ADVANCE) {
 			this.typeId = typeId;
 		}
 		else {
-			throw new InvalidRuleTypeDtoException();
+			throw new InvalidRuleTypeException();
 		}
 	}
 
-	public class InvalidRuleTypeDtoException extends Exception {
+	public class InvalidRuleTypeException extends Exception {
 		@Override
 		public String getMessage() {
 			return "The input RuleTypeDTO is invalid or empty";

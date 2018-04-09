@@ -16,18 +16,18 @@ import java.util.Map;
 @Component
 public class UserAspect {
 
-    MessageChannel registerChannel;
-
-    public UserAspect(MessageChannel registerChannel) {
-        this.registerChannel = registerChannel;
-    }
-
-    @AfterReturning(value = "execution(* com.mgmtp.radio.service.user.UserServiceImpl.register(..))", returning = "userInfo")
-    public void sendMailRegisterSuccess(UserDTO userInfo){
-        Map<String, Object> mailParam = new HashMap<>();
-        mailParam.put(EventDataKeys.user_id.name(), userInfo.getId());
-        mailParam.put(EventDataKeys.event_id.name(), SubscriptionEvents.register.name());
-
-        registerChannel.send(new GenericMessage<>(mailParam));
-    }
+ //   MessageChannel registerChannel;
+//
+//    public UserAspect(MessageChannel registerChannel) {
+//        this.registerChannel = registerChannel;
+//    }
+//
+//    @AfterReturning(value = "execution(* com.mgmtp.radio.service.user.UserServiceImpl.register(..))", returning = "userInfo")
+//    public void sendMailRegisterSuccess(UserDTO userInfo){
+//        Map<String, Object> mailParam = new HashMap<>();
+//        mailParam.put(EventDataKeys.user_id.name(), userInfo.getId());
+//        mailParam.put(EventDataKeys.event_id.name(), SubscriptionEvents.register.name());
+//
+//        registerChannel.send(new GenericMessage<>(mailParam));
+//    }
 }
