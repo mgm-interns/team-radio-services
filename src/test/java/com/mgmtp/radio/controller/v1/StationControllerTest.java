@@ -2,8 +2,7 @@ package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.RadioApplicationTests;
 import com.mgmtp.radio.domain.station.SkipRule;
-import com.mgmtp.radio.dto.station.SkipRuleDTO;
-import com.mgmtp.radio.dto.station.SkipRuleDTO.InvalidRuleTypeDtoException;
+import com.mgmtp.radio.dto.skipRule.SkipRuleDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.service.station.StationService;
@@ -17,7 +16,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = RadioApplicationTests.class)
@@ -46,7 +45,7 @@ public class StationControllerTest {
 	}
 
 	@Test
-	public void createStation() throws InvalidRuleTypeDtoException {
+	public void createStation() {
 		StationDTO stationDTO = new StationDTO();
 		stationDTO.setId("RRRE");
 		Mono<StationDTO> stationDTOMono = stationController.createStation(stationDTO);
@@ -60,14 +59,10 @@ public class StationControllerTest {
 	@Test
 	public void updateStationSkipRuleToBasic() {
 		StationConfigurationDTO stationConfigurationDTO = new StationConfigurationDTO();
-		try {
-			stationConfigurationDTO.setId("1112");
-			stationConfigurationDTO.setSkipRule(new SkipRuleDTO(SkipRule.BASIC));
-			Mono<StationConfigurationDTO> mnStation = stationService.updateConfiguration(stationConfigurationDTO);
-			StationConfigurationDTO dto = mnStation.block();
-			assertEquals(dto.getId(), stationConfigurationDTO.getId());
-		} catch (InvalidRuleTypeDtoException e) {
-			e.printStackTrace();
-		}
+		stationConfigurationDTO.setId("1112");
+		stationConfigurationDTO.setSkipRule(new SkipRuleDTO(SkipRule.BASIC));
+		Mono<StationConfigurationDTO> mnStation = stationService.updateConfiguration(stationConfigurationDTO);
+		StationConfigurationDTO dto = mnStation.block();
+		assertEquals(dto.getId(), stationConfigurationDTO.getId());
 	}
 }

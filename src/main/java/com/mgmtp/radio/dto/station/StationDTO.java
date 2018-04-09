@@ -1,10 +1,8 @@
 package com.mgmtp.radio.dto.station;
 
-import com.mgmtp.radio.dto.station.SkipRuleDTO.InvalidRuleTypeDtoException;
+import com.mgmtp.radio.dto.skipRule.SkipRuleDTO;
 import com.mgmtp.radio.sdo.StationPrivacy;
-import com.mgmtp.radio.service.station.StationServiceImpl;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,7 +19,7 @@ public class StationDTO {
 	LocalDate createdAt;
 	StationConfigurationDTO stationConfigurationDTO;
 
-	public StationDTO () throws InvalidRuleTypeDtoException {
+	public StationDTO() {
 		stationConfigurationDTO = new StationConfigurationDTO();
 		stationConfigurationDTO.setSkipRule(new SkipRuleDTO(SkipRuleDTO.BASIC));
 	}
