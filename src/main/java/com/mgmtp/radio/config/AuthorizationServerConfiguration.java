@@ -1,17 +1,18 @@
 package com.mgmtp.radio.config;
 
-import com.mgmtp.radio.security.RadioApprovalStore;
-import com.mgmtp.radio.security.RadioClientDetailsService;
-import com.mgmtp.radio.security.RadioTokenStore;
+import com.mgmtp.radio.security.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
-import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 
 @Configuration
@@ -20,31 +21,47 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
 
     private RadioTokenStore radioTokenStore;
 
-    private RadioClientDetailsService radioClientDetailsService;
+    @Autowired
+    @Qualifier("authenticationManagerBean")
+    AuthenticationManager authenticationManager;
 
-    private RadioApprovalStore radioApprovalStore;
+    private RadioUserDetailsService radioUserDetailsService;
 
-    private AuthenticationManager authenticationManager;
+    private PasswordEncoder passwordEncoder;
 
+    @Value("${radio.client.id}")
+    String clientId;
 
+    @Value("${radio.client.secret}")
+    String clientSecret;
 
-    public AuthorizationServerConfiguration(RadioTokenStore radioTokenStore, RadioClientDetailsService radioClientDetailsService, RadioApprovalStore radioApprovalStore, AuthenticationManager authenticationManager) {
+    Integer timeOut = 30 * 24 * 3600;
+
+    private static final String RESOURCE_ID = "radio-resource";
+
+    public AuthorizationServerConfiguration(RadioTokenStore radioTokenStore,
+                                            RadioUserDetailsService radioUserDetailsService,
+                                            PasswordEncoder passwordEncoder) {
         this.radioTokenStore = radioTokenStore;
-        this.radioClientDetailsService = radioClientDetailsService;
-        this.radioApprovalStore = radioApprovalStore;
-        this.authenticationManager = authenticationManager;
+        this.radioUserDetailsService = radioUserDetailsService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients.withClientDetails(radioClientDetailsService);
+        clients.inMemory()
+                .withClient(clientId)
+                .authorizedGrantTypes("password")
+                .authorities("USER")
+                .scopes("read", "write")
+                .resourceIds(RESOURCE_ID)
+                .secret(clientSecret).accessTokenValiditySeconds(timeOut);
     }
 
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
         endpoints
                 .tokenStore(radioTokenStore)
-                .approvalStore(radioApprovalStore)
                 .authenticationManager(authenticationManager);
     }
 
@@ -56,11 +73,4 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
         tokenServices.setTokenStore(radioTokenStore);
         return tokenServices;
     }
-
-    @Override
-    public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
-        security.allowFormAuthenticationForClients(); // here
-    }
-
-
 }

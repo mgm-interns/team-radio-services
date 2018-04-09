@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.validation.constraints.Email;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Set;
@@ -33,6 +34,7 @@ public class User implements UserDetails, Serializable {
 
     private boolean credentialsNonExpired = true;
 
+    @Email
     private String email;
 
     private String name;

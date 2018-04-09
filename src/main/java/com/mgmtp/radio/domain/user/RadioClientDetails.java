@@ -10,7 +10,7 @@ import org.springframework.security.oauth2.provider.ClientDetails;
 
 import java.util.*;
 
-@Document
+@Document(collection = "radio_client_details")
 @Data
 @NoArgsConstructor
 public class RadioClientDetails implements ClientDetails {

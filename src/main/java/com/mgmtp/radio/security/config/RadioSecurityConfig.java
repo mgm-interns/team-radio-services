@@ -1,5 +1,6 @@
 package com.mgmtp.radio.security.config;
 
+import com.mgmtp.radio.security.RadioPasswordEncoder;
 import com.mgmtp.radio.security.service.SecurityContextService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +25,7 @@ public class RadioSecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new RadioPasswordEncoder();
     }
 
     @Bean

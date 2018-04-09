@@ -8,7 +8,7 @@ import org.springframework.security.oauth2.provider.approval.Approval.ApprovalSt
 
 import java.time.LocalDate;
 
-@Document
+@Document(collection = "radio_approval")
 @Data
 public class RadioApproval {
 

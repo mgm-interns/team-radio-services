@@ -36,8 +36,13 @@ public class MailgunHelper {
         formData.add("subject", email.getSubject());
         formData.add("to", email.getTo());
 
-        email.getCc().stream().forEach(ccAddress -> formData.add("cc", ccAddress));
-        email.getBcc().stream().forEach(bccAddress -> formData.add("bcc", bccAddress));
+        if(email.getBcc() != null) {
+            email.getCc().stream().forEach(ccAddress -> formData.add("cc", ccAddress));
+        }
+
+        if(email.getBcc() != null) {
+            email.getBcc().stream().forEach(bccAddress -> formData.add("bcc", bccAddress));
+        }
         formData.add("html", email.getContent());
 
         return webResource.type(MediaType.APPLICATION_FORM_URLENCODED).post(ClientResponse.class, formData);

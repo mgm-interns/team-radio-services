@@ -1,24 +1,23 @@
 package com.mgmtp.radio.config;
 
-import com.mgmtp.radio.security.RadioUserDetailsManager;
+import com.mgmtp.radio.security.RadioUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 
 @Configuration
-@Order(SecurityProperties.DEFAULT_FILTER_ORDER)
+@EnableWebSecurity
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Autowired(required = false)
@@ -28,8 +27,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
     SwaggerConfig swaggerConfig;
 
     @Autowired
-    @Lazy
-    RadioUserDetailsManager radioUserDetailsManager;
+    RadioUserDetailsService radioUserDetailsService;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @Override
     public void configure(HttpSecurity http) throws Exception {
@@ -38,8 +39,11 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
         }
 
         http.authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers("/oauth/**").permitAll()
+                .antMatchers(HttpMethod.OPTIONS, "/**").authenticated()
+                .antMatchers("/oauth/**").authenticated()
+                .antMatchers("/api/**").permitAll()
+                .and()
+                .httpBasic()
                 .and()
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -68,11 +72,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Bean
     public UserDetailsService getUserDetailsManager() {
-        return radioUserDetailsManager;
+        return radioUserDetailsService;
     }
 
-    @Bean(name="authenticationManager")
-    @Lazy
+    @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();

@@ -11,13 +11,18 @@ import com.mgmtp.radio.sdo.CloudinaryDataKeys;
 import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.support.CloudinaryHelper;
 import com.mgmtp.radio.support.ContentTypeValidator;
+import com.mgmtp.radio.support.validator.user.RegisterValidator;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.Map;
 
@@ -31,11 +36,22 @@ public class UserController extends BaseRadioController {
     private final UserService userService;
     private final CloudinaryHelper cloudinaryHelper;
     private final ContentTypeValidator contentTypeValidator;
+    private final RegisterValidator registerValidator;
 
-    public UserController(UserService userService, CloudinaryHelper cloudinaryHelper, ContentTypeValidator contentTypeValidator) {
+
+    public UserController(UserService userService,
+                          RegisterValidator registerValidator,
+                          CloudinaryHelper cloudinaryHelper,
+                          ContentTypeValidator contentTypeValidator) {
         this.userService = userService;
         this.cloudinaryHelper = cloudinaryHelper;
         this.contentTypeValidator = contentTypeValidator;
+        this.registerValidator = registerValidator;
+    }
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        binder.addValidators(this.registerValidator);
     }
 
     @ApiOperation(
@@ -48,12 +64,11 @@ public class UserController extends BaseRadioController {
     })
     @GetMapping("/me")
     @ResponseStatus(HttpStatus.OK)
-    public RadioSuccessResponse<UserDTO> getUser() throws RadioNotFoundException {
+    public UserDTO getUser() throws RadioNotFoundException {
         log.info("GET /api/v1/users/me");
 
         if(getCurrentUser().isPresent()) {
-            UserDTO userDTO = userService.getUserByUsername(getCurrentUser().get().getUsername());
-            return new RadioSuccessResponse<>(userDTO);
+            return userService.getUserById(getCurrentUser().get().getId());
         } else {
             throw new RadioNotFoundException("unauthorized");
         }
@@ -70,11 +85,16 @@ public class UserController extends BaseRadioController {
     })
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.OK)
-    public RadioSuccessResponse<UserDTO> register(@RequestBody UserDTO userDTO) {
+    public UserDTO register(@Validated @RequestBody UserDTO userDTO,
+                                                  BindingResult bindingResult)
+            throws RadioException {
         log.info("POST /api/v1/users/register  - data: " + userDTO.toString());
 
-        UserDTO newUserDTO = userService.register(userDTO);
-        return new RadioSuccessResponse<>(newUserDTO);
+        if (bindingResult.hasErrors()) {
+            throw new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage());
+        }
+
+        return userService.register(userDTO);
     }
 
     @ApiOperation(
@@ -88,12 +108,11 @@ public class UserController extends BaseRadioController {
     })
     @PatchMapping("/me")
     @ResponseStatus(HttpStatus.OK)
-    public RadioSuccessResponse<UserDTO> patchUser(@RequestBody UserDTO userDTO) throws RadioNotFoundException {
+    public UserDTO patchUser(@RequestBody UserDTO userDTO) throws RadioNotFoundException {
         log.info("PATCH /api/v1/users/me - data: " + userDTO.toString());
 
         if(getCurrentUser().isPresent()) {
-            UserDTO updatedUserDTO = userService.patchUser(getCurrentUser().get().getUsername(), userDTO);
-            return new RadioSuccessResponse<>(updatedUserDTO);
+            return userService.patchUser(getCurrentUser().get().getUsername(), userDTO);
         } else {
             throw new RadioNotFoundException("unauthorized");
         }
@@ -110,7 +129,7 @@ public class UserController extends BaseRadioController {
     })
     @PatchMapping("/me/avatar")
     @ResponseStatus(HttpStatus.OK)
-    public RadioSuccessResponse<UserDTO> patchUserAvatar(@RequestParam("file") MultipartFile multipartFile) throws RadioException, IOException {
+    public UserDTO patchUserAvatar(@RequestParam("file") MultipartFile multipartFile) throws RadioException, IOException {
         log.info("PATCH /api/v1/users/me/avatar");
 
         validateFileIsImage(multipartFile);
@@ -124,8 +143,7 @@ public class UserController extends BaseRadioController {
         if(uploadResult.get(CloudinaryDataKeys.secure_url.name()) != null) {
             User currentUser = getCurrentUser().get();
             final String avatarUrl = uploadResult.get(CloudinaryDataKeys.secure_url.name());
-            UserDTO updatedUserDTO = userService.patchUserAvatar(currentUser.getUsername(), avatarUrl);
-            return new RadioSuccessResponse<>(updatedUserDTO);
+            return userService.patchUserAvatar(currentUser.getUsername(), avatarUrl);
         } else {
             throw new RadioException("Can not upload");
         }
@@ -142,7 +160,7 @@ public class UserController extends BaseRadioController {
     })
     @PatchMapping("/me/cover")
     @ResponseStatus(HttpStatus.OK)
-    public RadioSuccessResponse<UserDTO> patchCoverPhoto(@RequestParam("file") MultipartFile multipartFile) throws RadioException, IOException {
+    public UserDTO patchCoverPhoto(@RequestParam("file") MultipartFile multipartFile) throws RadioException, IOException {
         log.info("PATCH /api/v1/users/me/cover");
 
         validateFileIsImage(multipartFile);
@@ -155,8 +173,7 @@ public class UserController extends BaseRadioController {
         if(uploadResult.get(CloudinaryDataKeys.secure_url.name()) != null) {
             User currentUser = getCurrentUser().get();
             final String coverUrl = uploadResult.get(CloudinaryDataKeys.secure_url.name());
-            UserDTO updatedUserDTO = userService.patchUserCover(currentUser.getUsername(), coverUrl);
-            return new RadioSuccessResponse<>(updatedUserDTO);
+            return userService.patchUserCover(currentUser.getUsername(), coverUrl);
         } else {
             throw new RadioException("Can not upload");
         }
