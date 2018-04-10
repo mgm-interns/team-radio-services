@@ -44,6 +44,7 @@ public class SongServiceImpl implements SongService {
     private final SongMapper songMapper;
     private final UserMapper userMapper;
     private final StationPlayerHelper stationPlayerHelper;
+    StationServiceImpl stationService;
 
     public SongServiceImpl(
             SongMapper songMapper,
@@ -210,8 +211,8 @@ public class SongServiceImpl implements SongService {
                             station.getPlaylist().add(newSong.getId());
 
                             return stationRepository
-                                    .save(station)
-                                    .then(Mono.just(songMapper.songToSongDTO(newSong)));
+                                .save(station)
+                                .then(Mono.just(songMapper.songToSongDTO(newSong)));
                         })
         );
     }
@@ -248,6 +249,7 @@ public class SongServiceImpl implements SongService {
             String songId,
             String userId
     ) {
+
         return findSong(stationId, songId).flatMap(song -> {
             if (song.getCreatorId().equals(userId)) {
                 return Mono.error(new RadioBadRequestException("You can not downvote your own song."));

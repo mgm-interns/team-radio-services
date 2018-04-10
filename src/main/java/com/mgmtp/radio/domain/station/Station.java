@@ -30,4 +30,5 @@ public class Station {
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate createdAt;
+	private StationConfiguration stationConfiguration;
 }
