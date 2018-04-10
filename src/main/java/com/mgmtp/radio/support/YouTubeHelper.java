@@ -32,13 +32,15 @@ public class YouTubeHelper {
             parameters.put("part", "id,snippet,contentDetails");
             parameters.put("id", videoId);
 
-            YouTube.Videos.List videosListByIdRequest = youTube.videos().list(parameters.get("part").toString());
+            YouTube.Videos.List videosListByIdRequest = youTube.videos().list(parameters.get("part"));
             videosListByIdRequest.setKey(youTubeConfig.getApiKey());
-            if (parameters.containsKey("id") && parameters.get("id").isEmpty()) {
-                videosListByIdRequest.setId(parameters.get("id"));
-            }
+            videosListByIdRequest.setId(parameters.get("id"));
 
             response = videosListByIdRequest.execute();
+
+            if(response.getItems().isEmpty()) {
+                return new Video();
+            }
 
             return response.getItems().get(0);
 
