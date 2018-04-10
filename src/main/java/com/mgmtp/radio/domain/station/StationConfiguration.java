@@ -5,8 +5,11 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@NoArgsConstructor
 @Data
-@Document(collection = "stationConfiguration")
 public class StationConfiguration {
-	private SkipRule rule;}
+	private SkipRule rule;
+
+	public StationConfiguration() {
+		this.rule = new SkipRule();
+	}
+}
