@@ -69,7 +69,7 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public Flux<SongDTO> getListSongByStationId(String stationId) {
-        return stationRepository.findByIdAndDeletedFalse(stationId).flatMapMany(station -> {
+        return stationRepository.findById(stationId).flatMapMany(station -> {
             List<String> listSongId = station.getPlaylist();
             return getListSongByListSongId(listSongId);
         }).switchIfEmpty(Mono.error(new RadioBadRequestException("Invalid station ID!")));
@@ -92,7 +92,7 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public Mono<PlayList> getPlayListByStationId(String stationId) {
-        return stationRepository.findByIdAndDeletedFalse(stationId)
+        return stationRepository.findById(stationId)
             .map(station -> {
                 List<String> listSongId = station.getPlaylist();
                 return getListSongByListSongId(listSongId);

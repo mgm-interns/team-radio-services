@@ -21,7 +21,6 @@ import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 
 @Configuration
 @EnableWebSecurity
-@Order(Ordered.HIGHEST_PRECEDENCE)
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter{
 
     @Autowired(required = false)

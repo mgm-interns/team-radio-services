@@ -20,13 +20,18 @@ import java.util.List;
 public class Station {
 	@Id
 	private String id;
+
 	@Indexed(unique = true)
 	private String name;
-	private StationPrivacy privacy;
+
+	private String friendlyId;
+
+	private StationPrivacy privacy = StationPrivacy.station_public;
+
 	private String ownerId;
-	private int startingTime;
-	private boolean deleted;
+
 	private List<String> playlist;
+
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate createdAt;

@@ -112,7 +112,7 @@ public class UserController extends BaseRadioController {
         log.info("PATCH /api/v1/users/me - data: " + userDTO.toString());
 
         if(getCurrentUser().isPresent()) {
-            return userService.patchUser(getCurrentUser().get().getUsername(), userDTO);
+            return userService.patchUser(getCurrentUser().get().getId(), userDTO);
         } else {
             throw new RadioNotFoundException("unauthorized");
         }
@@ -143,7 +143,7 @@ public class UserController extends BaseRadioController {
         if(uploadResult.get(CloudinaryDataKeys.secure_url.name()) != null) {
             User currentUser = getCurrentUser().get();
             final String avatarUrl = uploadResult.get(CloudinaryDataKeys.secure_url.name());
-            return userService.patchUserAvatar(currentUser.getUsername(), avatarUrl);
+            return userService.patchUserAvatar(currentUser.getId(), avatarUrl);
         } else {
             throw new RadioException("Can not upload");
         }
@@ -173,7 +173,7 @@ public class UserController extends BaseRadioController {
         if(uploadResult.get(CloudinaryDataKeys.secure_url.name()) != null) {
             User currentUser = getCurrentUser().get();
             final String coverUrl = uploadResult.get(CloudinaryDataKeys.secure_url.name());
-            return userService.patchUserCover(currentUser.getUsername(), coverUrl);
+            return userService.patchUserCover(currentUser.getId(), coverUrl);
         } else {
             throw new RadioException("Can not upload");
         }

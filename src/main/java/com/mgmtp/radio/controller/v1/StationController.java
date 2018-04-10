@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -69,7 +70,11 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
     @PostMapping
-    public Mono<StationDTO> createStation(@Valid @RequestBody StationDTO stationDTO) {
+    public Mono<StationDTO> createStation(@Valid @RequestBody StationDTO stationDTO) throws RadioException {
+        if(StringUtils.isEmpty(stationDTO.getId())) {
+            throw new RadioBadRequestException("station id is invalid");
+        }
+
         String userId = getCurrentUser().isPresent() ? getCurrentUser().get().getId() : null;
 
         return stationService.create(userId, stationDTO);
@@ -86,7 +91,7 @@ public class StationController extends BaseRadioController {
     })
     @PutMapping("/{id}")
     public Mono<StationDTO> updateStation(@PathVariable(value = "id") final String id,
-                                                   @Valid @RequestBody final StationDTO stationDTO) {
+                                          @Valid @RequestBody final StationDTO stationDTO) {
         return stationService.update(id, stationDTO);
     }
 

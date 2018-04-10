@@ -1,5 +1,6 @@
 package com.mgmtp.radio.dto.user;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mgmtp.radio.dto.station.SongDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 
 @NoArgsConstructor
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class FavoriteSongDTO {
 	String id;
 	String userId;

@@ -102,11 +102,10 @@ public class SongServiceImplTest {
         Station station = new Station();
         station.setName("test station");
         station.setOwnerId(STATION_ID);
-        station.setDeleted(false);
         station.setPlaylist(playListCreatorId);
 
         //when station repository call
-        when(stationRepository.findByIdAndDeletedFalse(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationRepository.findById(STATION_ID)).thenReturn(Mono.just(station));
 
         //given these song
         Song song1  = new Song();
@@ -166,11 +165,10 @@ public class SongServiceImplTest {
         Station station = new Station();
         station.setName("test station");
         station.setOwnerId(STATION_ID);
-        station.setDeleted(false);
         station.setPlaylist(playListCreatorId);
 
         //when station repository call
-        when(stationRepository.findByIdAndDeletedFalse(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationRepository.findById(STATION_ID)).thenReturn(Mono.just(station));
 
         //given these song
         Song song1 = new Song();
@@ -264,11 +262,10 @@ public class SongServiceImplTest {
         Station station = new Station();
         station.setName("test station");
         station.setOwnerId(STATION_ID);
-        station.setDeleted(false);
         station.setPlaylist(playListCreatorId);
 
         //when station repository call
-        when(stationRepository.findByIdAndDeletedFalse(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationRepository.findById(STATION_ID)).thenReturn(Mono.just(station));
 
         //given these song
         Song song1 = new Song();
@@ -376,11 +373,10 @@ public class SongServiceImplTest {
         Station station = new Station();
         station.setName("test station");
         station.setOwnerId(STATION_ID);
-        station.setDeleted(false);
         station.setPlaylist(playListCreatorId);
 
         //when station repository call
-        when(stationRepository.findByIdAndDeletedFalse(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationRepository.findById(STATION_ID)).thenReturn(Mono.just(station));
 
         //given these song
         Song song3 = new Song();
@@ -477,11 +473,10 @@ public class SongServiceImplTest {
         Station station = new Station();
         station.setName("test station");
         station.setOwnerId(STATION_ID);
-        station.setDeleted(false);
         station.setPlaylist(playListCreatorId);
 
         //when station repository call
-        when(stationRepository.findByIdAndDeletedFalse(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationRepository.findById(STATION_ID)).thenReturn(Mono.just(station));
 
         //given these song
         Song song4 = new Song();
