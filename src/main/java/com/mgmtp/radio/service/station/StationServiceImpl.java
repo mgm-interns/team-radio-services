@@ -56,9 +56,9 @@ public class StationServiceImpl implements StationService {
 
 	@AfterReturning(value = "execution(* com.mgmtp.radio.service.station.SongService.downVoteSongInStationPlaylist(..))", returning = "monoSongDTO")
 	public Mono<SongDTO> checkAndSkipSongIfNeeded(Mono<SongDTO> monoSongDTO) {
-		Mono<SongDTO> ms = monoSongDTO.map(songDTO -> {
+		Mono<SongDTO> songDTOMono = monoSongDTO.map(songDTO -> {
 			final Station station = stationRepository.findById(songDTO.getStationId()).block();
-			final StationConfiguration stationConfiguration =station.getStationConfiguration();
+			final StationConfiguration stationConfiguration = station.getStationConfiguration();
 			boolean isSkipped = false;
 
 			if (stationConfiguration.getRule().getTypeId() == SkipRule.ADVANCE) {
@@ -75,7 +75,7 @@ public class StationServiceImpl implements StationService {
 			songDTO.setSkipped(isSkipped);
 			return songDTO;
 		});
-		return ms;
+		return songDTOMono;
 	}
     private final StationRepository stationRepository;
     private final SongService songService;
@@ -157,6 +157,8 @@ public class StationServiceImpl implements StationService {
 				station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO));
 				station.getStationConfiguration().setRule(stationMapper.skipRuleDtoToSkipRule(stationConfigurationDTO.getSkipRule()));
 					stationRepository.save(station).subscribe();
+				System.out.println(station);
+				System.out.println(stationConfiguration.getRule());
 					return stationConfiguration;
 			})
 			.map(stationMapper::stationConfigurationToStationConfigurationDto);

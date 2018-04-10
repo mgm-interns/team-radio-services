@@ -16,11 +16,10 @@ public class SkipRuleDTO {
     	this.typeId = BASIC;
     }
 
-	public SkipRuleDTO(final int typeId)  {
-		if(typeId != BASIC && typeId == ADVANCE) {
+	public SkipRuleDTO(final int typeId) {
+		if (typeId != BASIC && typeId != ADVANCE) {
 			this.typeId = BASIC;
-		}
-		else{
+		} else {
 			this.typeId = typeId;
 		}
 	}
@@ -59,13 +58,5 @@ public class SkipRuleDTO {
 		}
 		return description;
 	}
-
-
-//	public class InvalidRuleTypeDtoException extends Exception {
-//		@Override
-//		public String getMessage() {
-//			return "The input RuleTypeDTO is invalid or empty";
-//		}
-//	}
 }
 
