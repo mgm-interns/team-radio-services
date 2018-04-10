@@ -96,10 +96,10 @@ public class StationController extends BaseRadioController {
         return stationService.update(id, stationDTO);
     }
 
-    @PutMapping("/update-config/")
-    public Mono<ResponseEntity<StationConfigurationDTO>> updateConfigurationStation(
+    @PutMapping("/update-config/{id}")
+    public Mono<ResponseEntity<StationConfigurationDTO>> updateConfigurationStation(@PathVariable(value = "id") final String id,
                                                                                     @Valid @RequestBody final StationConfigurationDTO stationConfigurationDTO) {
-        return stationService.updateConfiguration(stationConfigurationDTO)
+        return stationService.updateConfiguration(id, stationConfigurationDTO)
             .map(updatedStationConfiguration -> ResponseEntity.ok().body(stationConfigurationDTO))
             .defaultIfEmpty(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }

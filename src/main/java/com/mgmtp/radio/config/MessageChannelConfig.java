@@ -11,19 +11,19 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @Configuration
 public class MessageChannelConfig {
 
-//    private static final String TASK_EXECUTOR = "task-executor";
-//    public static final String REGISTER_CHANNEL = "registerChannel";
-//
-//    @Bean(name = TASK_EXECUTOR)
-//    public TaskExecutor getTaskExecutor() {
-//        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
-//        taskExecutor.setThreadNamePrefix("Pub-Sub-");
-//        taskExecutor.setCorePoolSize(5);
-//        return taskExecutor;
-//    }
-//
-//    @Bean
-//    MessageChannel registerChannel(@Qualifier(TASK_EXECUTOR) TaskExecutor taskExecutor) {
-//        return new PublishSubscribeChannel(taskExecutor);
-//    }
+    private static final String TASK_EXECUTOR = "task-executor";
+    public static final String REGISTER_CHANNEL = "registerChannel";
+
+    @Bean(name = TASK_EXECUTOR)
+    public TaskExecutor getTaskExecutor() {
+        ThreadPoolTaskExecutor taskExecutor = new ThreadPoolTaskExecutor();
+        taskExecutor.setThreadNamePrefix("Pub-Sub-");
+        taskExecutor.setCorePoolSize(5);
+        return taskExecutor;
+    }
+
+    @Bean
+    MessageChannel registerChannel(@Qualifier(TASK_EXECUTOR) TaskExecutor taskExecutor) {
+        return new PublishSubscribeChannel(taskExecutor);
+    }
 }
