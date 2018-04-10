@@ -3,10 +3,10 @@ package com.mgmtp.radio.controller.v1;
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.domain.station.PlayList;
 import com.mgmtp.radio.dto.station.SongDTO;
-import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
+import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.service.station.SongService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -32,8 +32,10 @@ import java.util.stream.Collectors;
 @Log4j2
 @RestController
 @RequestMapping(SongController.BASE_URL)
-public class SongController extends BaseRadioController  {
+public class SongController extends BaseRadioController {
     public static final String BASE_URL = "/api/v1/station";
+
+    private static ConcurrentHashMap<String, PlayList> compareList = new ConcurrentHashMap<>();
 
     private final SongService songService;
 
@@ -96,14 +98,26 @@ public class SongController extends BaseRadioController  {
     @GetMapping("/{stationId}/playList")
     @ResponseStatus(HttpStatus.OK)
     public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId) {
-        return Flux.interval(Duration.ofSeconds(1)).delayElements(Duration.ofMillis(100))
-                .map(thisSecond -> Tuples.of(thisSecond, songService.getPlayListByStationId(stationId)))
-                .map(tuple2 -> ServerSentEvent.<PlayList>builder()
-                        .event("fetch")
-                        .id(Long.toString(tuple2.getT1()))
-                        .data(tuple2.getT2().log().block())
-                        .build()
-                );
+        return songService.getPlayListByStationId(stationId)
+                .flatMapMany(playList -> Flux.just(
+                        ServerSentEvent.<PlayList>builder()
+                                .event("fetch")
+                                .data(playList)
+                                .build()))
+                .delayElements(Duration.ofSeconds(1))
+                .delayElements(Duration.ofMillis(100))
+                .skipWhile(playListServerSentEvent -> {
+                    PlayList compare = compareList.get(stationId);
+                    if (compare == null || !compare.toString().equals(playListServerSentEvent.data().toString())) {
+                        compareList.put(stationId, playListServerSentEvent.data());
+                        return false;
+                    } else {
+                        return true;
+                    }
+                })
+                .repeat()
+                .publish()
+                .refCount();
     }
 
     @ApiOperation(
@@ -141,13 +155,13 @@ public class SongController extends BaseRadioController  {
     })
     @PatchMapping("/{stationId}/{songId}/upVote")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<SongDTO> upVoteSong (
+    public Mono<SongDTO> upVoteSong(
             @PathVariable String stationId,
             @PathVariable String songId
     ) throws RadioException {
         log.info("POST /api/v1/song/" + stationId + "/upvote  - data: " + songId);
 
-        if(getCurrentUser().isPresent()) {
+        if (getCurrentUser().isPresent()) {
             return songService.upVoteSongInStationPlaylist(stationId, songId, getCurrentUser().get().getId());
         } else {
             throw new RadioNotFoundException("unauthorized");
@@ -172,7 +186,7 @@ public class SongController extends BaseRadioController  {
     ) throws RadioException {
         log.info("POST /api/v1/song/" + stationId + "/downVote  - data: " + songId);
 
-        if(getCurrentUser().isPresent()) {
+        if (getCurrentUser().isPresent()) {
             return songService
                     .downVoteSongInStationPlaylist(stationId, songId, getCurrentUser().get().getId());
         } else {
