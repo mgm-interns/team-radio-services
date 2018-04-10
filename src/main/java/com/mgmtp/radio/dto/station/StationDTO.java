@@ -1,14 +1,16 @@
 package com.mgmtp.radio.dto.station;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mgmtp.radio.dto.skipRule.SkipRuleDTO;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StationDTO {
 
