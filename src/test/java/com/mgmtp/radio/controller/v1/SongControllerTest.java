@@ -104,7 +104,7 @@ public class SongControllerTest {
 
         //test
         webTestClient.get()
-                .uri(URI.create("/api/v1/songs/sse/listHistorySong?stationId=" + STATION_ID + "&limit=2"))
+                .uri(URI.create("/api/v1/station/" + STATION_ID + "/history?limit=2"))
                 .header("Content-Type", MediaType.TEXT_EVENT_STREAM_VALUE)
                 .exchange()
                 .expectStatus()
@@ -116,14 +116,9 @@ public class SongControllerTest {
                     if (event != null) {
                         assertEquals("fetch", data.event());
                     }
-                    String id = data.id();
-                    if (id != null) {
-                        assertEquals("0", id);
-                    }
                     Object responseData = data.data();
-                    if (((LinkedHashMap) responseData) != null) {
-                        assertTrue((boolean) ((LinkedHashMap) responseData).get("success"));
-                        ArrayList<LinkedHashMap> dataMap = (ArrayList<LinkedHashMap>) ((LinkedHashMap) responseData).get("data");
+                    if (responseData != null) {
+                        ArrayList<LinkedHashMap> dataMap = (ArrayList<LinkedHashMap>) responseData;
 
                         assertEquals(2, dataMap.size());
 
@@ -147,7 +142,7 @@ public class SongControllerTest {
 
         //test
         webTestClient.get()
-                .uri(URI.create("/api/v1/songs/sse/listHistorySong?stationId=" + STATION_ID + "&limit=2"))
+                .uri(URI.create("/api/v1/station/" + STATION_ID + "/history?limit=2"))
                 .header("Content-Type", MediaType.TEXT_EVENT_STREAM_VALUE)
                 .exchange()
                 .expectStatus()
@@ -164,9 +159,8 @@ public class SongControllerTest {
         }
 
         Object responseData = data.data();
-        if (((LinkedHashMap) responseData) != null) {
-            assertTrue((boolean) ((LinkedHashMap) responseData).get("success"));
-            ArrayList<LinkedHashMap> dataMap = (ArrayList<LinkedHashMap>) ((LinkedHashMap) responseData).get("data");
+        if (responseData != null) {
+            ArrayList<LinkedHashMap> dataMap = (ArrayList<LinkedHashMap>) responseData;
             assertEquals(0, dataMap.size());
         }
     };
