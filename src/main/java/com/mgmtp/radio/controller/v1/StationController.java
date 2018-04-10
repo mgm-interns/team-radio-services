@@ -1,23 +1,31 @@
 package com.mgmtp.radio.controller.v1;
 
+import com.cloudinary.utils.StringUtils;
+import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
+import com.mgmtp.radio.domain.station.ActiveStation;
 import com.mgmtp.radio.dto.station.StationDTO;
+import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
+import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.service.station.StationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.time.Duration;
 
 @Log4j2
 @RestController
@@ -27,9 +35,13 @@ public class StationController extends BaseRadioController {
     public static final String BASE_URL = "/api/v1/stations";
 
     private final StationService stationService;
+    private final UserMapper userMapper;
+    private final Constant constant;
 
-    public StationController(StationService stationService) {
+    public StationController(StationService stationService, UserMapper userMapper, Constant constant) {
         this.stationService = stationService;
+        this.userMapper = userMapper;
+        this.constant = constant;
     }
 
     @ApiOperation(
@@ -56,8 +68,21 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
-        return this.stationService.findById(stationId);
+    public Flux<ServerSentEvent<ActiveStation>> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException, IOException {
+        if (getCurrentUser().isPresent()) {
+            UserDTO userDTO = userMapper.userToUserDTO(getCurrentUser().get());
+            return Flux.interval(Duration.ofSeconds(3))
+                .map(theSecond -> Tuples.of(theSecond, this.stationService.findByStationId(userDTO, stationId)))
+                .map(tuple2 -> ServerSentEvent.<ActiveStation>builder()
+                    .event(constant.getEvent_join_station())
+                    .id(Long.toString(tuple2.getT1()))
+                    .data(tuple2.getT2().log().block())
+                    .build()
+                );
+        } else {
+            throw new RadioNotFoundException("unauthorized");
+        }
+
     }
 
     @ApiOperation(

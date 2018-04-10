@@ -1,9 +1,15 @@
 package com.mgmtp.radio.controller;
 
 import com.mgmtp.radio.controller.response.RadioErrorResponse;
+import com.mgmtp.radio.domain.station.ActiveStation;
+import com.mgmtp.radio.domain.user.User;
+import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.exception.RadioServiceException;
+import com.mgmtp.radio.mapper.user.UserMapper;
+import com.mgmtp.radio.support.ActiveStationStore;
+import com.mgmtp.radio.support.UserHelper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.MessageSource;
 import org.springframework.http.HttpHeaders;
@@ -15,16 +21,25 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.Locale;
+import java.util.Optional;
 
 @Log4j2
 @ControllerAdvice
 public class RadioResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
     private final MessageSource messageSource;
+    private final ActiveStationStore activeStationStore;
+    private final UserHelper userHelper;
+    private final UserMapper userMapper;
 
-    public RadioResponseExceptionHandler(MessageSource messageSource) {
+    public RadioResponseExceptionHandler(MessageSource messageSource, ActiveStationStore activeStationStore, UserHelper userHelper, UserMapper userMapper) {
         this.messageSource = messageSource;
+        this.activeStationStore = activeStationStore;
+        this.userHelper = userHelper;
+        this.userMapper = userMapper;
     }
 
     // return 500 INTERNAL_SERVER_ERROR
@@ -70,5 +85,22 @@ public class RadioResponseExceptionHandler extends ResponseEntityExceptionHandle
             message = exception.getMessage();
         }
         return new ResponseEntity<>(new RadioErrorResponse(message), new HttpHeaders(), HttpStatus.NOT_FOUND);
+    }
+
+    // return 202 ACCEPTED
+    @ExceptionHandler(IOException.class)
+    protected ResponseEntity<Object> handleIOException(IOException exception, WebRequest webRequest, HttpServletRequest request) {
+
+        String requestURI = request.getRequestURI();
+        String stationId = requestURI.substring(requestURI.lastIndexOf("/") + 1);
+        ActiveStation activeStation = activeStationStore.getActiveStations().get(stationId);
+        if (activeStation != null) {
+            Optional<User> user = userHelper.getCurrentUser();
+            if (user.isPresent()) {
+                UserDTO userDTO = userMapper.userToUserDTO(user.get());
+                activeStation.getUsers().remove(userDTO);
+            }
+        }
+        return new ResponseEntity<>(new RadioErrorResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.ACCEPTED);
     }
 }

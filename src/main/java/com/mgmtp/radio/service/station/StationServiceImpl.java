@@ -1,9 +1,11 @@
 package com.mgmtp.radio.service.station;
 
+import com.mgmtp.radio.domain.station.ActiveStation;
 import com.mgmtp.radio.domain.station.Station;
-import com.mgmtp.radio.exception.RadioBadRequestException;
+import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.respository.station.StationRepository;
+import com.mgmtp.radio.support.ActiveStationStore;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import com.mgmtp.radio.dto.station.StationDTO;
@@ -19,13 +21,15 @@ public class StationServiceImpl implements StationService {
     private final StationMapper stationMapper;
     private final StationRepository stationRepository;
     private final SongService songService;
+    private final ActiveStationStore activeStationStore;
 
     public StationServiceImpl(StationMapper stationMapper,
                               StationRepository stationRepository,
-                              SongService songService) {
+                              SongService songService, ActiveStationStore activeStationStore) {
         this.stationMapper = stationMapper;
         this.stationRepository = stationRepository;
         this.songService = songService;
+        this.activeStationStore = activeStationStore;
     }
 
     @Override
@@ -82,5 +86,25 @@ public class StationServiceImpl implements StationService {
                     return stationRepository.save(station);
                 })
                 .map(stationMapper::stationToStationDTO);
+    }
+
+    @Override
+    public Mono<ActiveStation> findByStationId(UserDTO userDTO, String id) {
+
+        return findById(id).map(stationDTO -> {
+            ActiveStation activeStation = activeStationStore.getActiveStations().get(id);
+            if (activeStation == null) {
+                activeStationStore.getActiveStations().put(id, new ActiveStation());
+                activeStation = activeStationStore.getActiveStations().get(id);
+            }
+
+            if (!activeStation.getUsers().contains(userDTO)) {
+                activeStation.getUsers().add(userDTO);
+            }
+            activeStation.setStationDTO(stationDTO);
+            activeStationStore.getActiveStations().put(stationDTO.getId(), activeStation);
+
+            return activeStation;
+        }).switchIfEmpty(Mono.error(new RadioNotFoundException()));
     }
 }
