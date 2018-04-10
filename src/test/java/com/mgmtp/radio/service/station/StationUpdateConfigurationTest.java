@@ -55,12 +55,15 @@ public class StationUpdateConfigurationTest {
 
 		when(stationRepository.findById(id)).thenReturn(Mono.just(station));
 		when(stationRepository.save(station)).thenReturn(Mono.just(station));
-		//when(stationMapper.stationToStationDTO(station)).thenReturn(new Station);
 
 		//Fake input StationConfigurationDto
 		SkipRuleDTO skipRuleDTO = new SkipRuleDTO(SkipRuleDTO.ADVANCE);
 		StationConfigurationDTO inputStationConfigurationDTO = new StationConfigurationDTO();
 		inputStationConfigurationDTO.setSkipRule(skipRuleDTO);
+
+		//Expected stationConfigurationDto
+		StationConfigurationDTO expectedDto = new StationConfigurationDTO();
+		expectedDto.setSkipRule(new SkipRuleDTO(SkipRuleDTO.ADVANCE));
 
 		//Original skipRule
 		SkipRule skipRule = new SkipRule(SkipRule.BASIC);
@@ -68,7 +71,9 @@ public class StationUpdateConfigurationTest {
 		stationConfiguration.setSkipRule(skipRule);
 		station.setStationConfiguration(stationConfiguration);
 
-		Mono<Station> monoStationConfig = stationRepository.findById(id).map(originalStation -> {
+
+
+		Mono<StationConfigurationDTO> monoStationConfig = stationRepository.findById(id).map(originalStation -> {
 			StationConfiguration originalStationConfig = new StationConfiguration();
 			when(stationMapper.stationConfigurationDtoToStationConfiguration(inputStationConfigurationDTO)).thenReturn(
 				originalStationConfig
@@ -83,12 +88,16 @@ public class StationUpdateConfigurationTest {
 			//Save
 			when(stationRepository.save(originalStation)).thenReturn(Mono.just(originalStation));
 			stationRepository.save(originalStation);
-			return originalStation;
-		});
 
-		final Station station1 = monoStationConfig.block();
+			when(stationMapper.stationConfigurationToStationConfigurationDto(originalStation.getStationConfiguration())).thenReturn(
+				expectedDto
+			);
 
+			return originalStation.getStationConfiguration();
+		}).map(stationMapper::stationConfigurationToStationConfigurationDto);
 
-		assertEquals(inputStationConfigurationDTO.getSkipRule().getTypeId(), station1.getStationConfiguration().getSkipRule().getTypeId());
+		final StationConfigurationDTO outputStationConfiguration = monoStationConfig.block();
+
+		assertEquals(inputStationConfigurationDTO.getSkipRule().getTypeId(), outputStationConfiguration.getSkipRule().getTypeId());
 	}
 }
