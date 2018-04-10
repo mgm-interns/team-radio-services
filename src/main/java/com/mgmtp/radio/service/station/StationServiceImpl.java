@@ -61,7 +61,7 @@ public class StationServiceImpl implements StationService {
 			final StationConfiguration stationConfiguration = station.getStationConfiguration();
 			boolean isSkipped = false;
 
-			if (stationConfiguration.getRule().getTypeId() == SkipRule.ADVANCE) {
+			if (stationConfiguration.getSkipRule().getTypeId() == SkipRule.ADVANCE) {
 				if (isOwnerDownvote(station, songDTO)) {
 					isSkipped = true;
 				}
@@ -122,7 +122,7 @@ public class StationServiceImpl implements StationService {
         Station station = stationMapper.stationDTOToStation(stationDTO);
 
         station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationDTO.getStationConfigurationDTO()));
-	    station.getStationConfiguration().setRule(stationMapper.skipRuleDtoToSkipRule(stationDTO.getStationConfigurationDTO().getSkipRule()));
+	    station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationDTO.getStationConfigurationDTO().getSkipRule()));
         return stationRepository.save(station).map(stationMapper::stationToStationDTO);
     }
 
@@ -155,10 +155,10 @@ public class StationServiceImpl implements StationService {
 					stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO);
 					station.setStationConfiguration(stationConfiguration);
 				station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO));
-				station.getStationConfiguration().setRule(stationMapper.skipRuleDtoToSkipRule(stationConfigurationDTO.getSkipRule()));
+				station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationConfigurationDTO.getSkipRule()));
 					stationRepository.save(station).subscribe();
 				System.out.println(station);
-				System.out.println(stationConfiguration.getRule());
+				System.out.println(stationConfiguration.getSkipRule());
 					return stationConfiguration;
 			})
 			.map(stationMapper::stationConfigurationToStationConfigurationDto);
