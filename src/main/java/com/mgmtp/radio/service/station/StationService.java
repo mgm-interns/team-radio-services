@@ -13,5 +13,5 @@ public interface StationService {
 	Mono<StationDTO> create(String userId, StationDTO stationDTO);
 	Mono<StationDTO> update(String id, StationDTO stationDTO);
     Mono<Station> findStationByIdAndDeletedFalse(String stationId);
-    Mono<StationConfigurationDTO> updateConfiguration(StationConfigurationDTO stationConfigurationDTO);
+	Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO);
 }
