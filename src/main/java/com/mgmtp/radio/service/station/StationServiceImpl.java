@@ -8,8 +8,8 @@ import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
-import com.mgmtp.radio.mapper.stationConfiguration.StationConfigurationMapper;
-import com.mgmtp.radio.respository.station.StationConfigurationRepository;
+//import com.mgmtp.radio.mapper.stationConfiguration.StationConfigurationMapper;
+//import com.mgmtp.radio.respository.station.StationConfigurationRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -25,18 +25,12 @@ import java.util.List;
 public class StationServiceImpl implements StationService {
 
 	private final StationMapper stationMapper;
-	private final StationConfigurationMapper stationConfigurationMapper;
-	private static final double ONE_HUNDRED_PERCENT = 1;
 	private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
 
 	@Override
 	public int getOnlineUsersNumber(StationDTO stationDTO) {
 		//TODO Get number of online users id here
 		return 0;
-	}
-
-	private void skipSong(StationDTO stationDTO, int songIndex) {
-		stationDTO.getPlaylist().get(songIndex).setSkipped(true);
 	}
 
 	private double calcCurrentSongDislikePercent(SongDTO songDTO, StationDTO station) {
@@ -61,7 +55,7 @@ public class StationServiceImpl implements StationService {
 	public Mono<SongDTO> checkAndSkipSongIfNeeded(Mono<SongDTO> monoSongDTO) {
 		Mono<SongDTO> ms = monoSongDTO.map(songDTO -> {
 			final Station station = stationRepository.findById(songDTO.getStationId()).block();
-			final StationConfiguration stationConfiguration = stationConfigurationRepository.findById(songDTO.getStationId()).block();
+			final StationConfiguration stationConfiguration =station.getStationConfiguration();
 			boolean isSkipped = false;
 
 			if (stationConfiguration.getRule().getTypeId() == SkipRule.ADVANCE) {
@@ -82,17 +76,12 @@ public class StationServiceImpl implements StationService {
 	}
     private final StationRepository stationRepository;
     private final SongService songService;
-    private final StationConfigurationRepository stationConfigurationRepository;
 
     public StationServiceImpl(StationMapper stationMapper,
-                              StationConfigurationMapper stationConfigurationMapper,
-                              StationRepository stationRepository, SongService songService,
-                              StationConfigurationRepository stationConfigurationRepository) {
+                              StationRepository stationRepository, SongService songService){
         this.stationMapper = stationMapper;
-        this.stationConfigurationMapper= stationConfigurationMapper;
         this.stationRepository = stationRepository;
         this.songService = songService;
-        this.stationConfigurationRepository = stationConfigurationRepository;
     }
 
     @Override
@@ -125,7 +114,10 @@ public class StationServiceImpl implements StationService {
         stationDTO.setOwnerId(userId);
         stationDTO.setCreatedAt(LocalDate.now());
         Station station = stationMapper.stationDTOToStation(stationDTO);
-        return stationRepository.save(station).map( stationMapper::stationToStationDTO);
+
+        station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationDTO.getStationConfigurationDTO()));
+	    station.getStationConfiguration().setRule(stationMapper.skipRuleDtoToSkipRule(stationDTO.getStationConfigurationDTO().getSkipRule()));
+        return stationRepository.save(station).map(stationMapper::stationToStationDTO);
     }
 
     @Override
@@ -139,11 +131,17 @@ public class StationServiceImpl implements StationService {
     }
 
 	@Override
-	public Mono<StationConfigurationDTO> updateConfiguration(StationConfigurationDTO stationConfigurationDTO) {
-		return stationConfigurationRepository.findById(stationConfigurationDTO.getId()).flatMap(stationConfiguration -> {
-			SkipRule skipRule = stationConfigurationMapper.skipRuleDtoToSkipRule(stationConfigurationDTO.getSkipRule());
-			stationConfiguration.setRule(skipRule);
-			return stationConfigurationRepository.save(stationConfiguration);
-		}).map(stationConfigurationMapper::stationConfigurationToStationConfigurationDto);
+	public Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO) {
+		return stationRepository.findById(id)
+			.map(station -> {
+				final StationConfiguration stationConfiguration =
+					stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO);
+					station.setStationConfiguration(stationConfiguration);
+				station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO));
+				station.getStationConfiguration().setRule(stationMapper.skipRuleDtoToSkipRule(stationConfigurationDTO.getSkipRule()));
+					stationRepository.save(station).subscribe();
+					return stationConfiguration;
+			})
+			.map(stationMapper::stationConfigurationToStationConfigurationDto);
 	}
 }

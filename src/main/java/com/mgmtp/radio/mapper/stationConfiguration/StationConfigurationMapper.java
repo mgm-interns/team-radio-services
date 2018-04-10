@@ -9,13 +9,13 @@ import org.mapstruct.factory.Mappers;
 
 @Mapper
 public interface StationConfigurationMapper {
-	StationConfigurationMapper INSTANCE = Mappers.getMapper(StationConfigurationMapper.class);
-
-	SkipRuleDTO skipRuleToSkipRuleDTO(SkipRule skipRule);
-
-	SkipRule skipRuleDtoToSkipRule(SkipRuleDTO skipRuleDTO);
-
-	StationConfigurationDTO stationConfigurationToStationConfigurationDto(StationConfiguration stationConfiguration);
-
-	StationConfiguration stationConfigurationDtoToStationConfiguration(StationConfigurationDTO stationConfigurationDTO);
+//	StationConfigurationMapper INSTANCE = Mappers.getMapper(StationConfigurationMapper.class);
+//
+//	SkipRuleDTO skipRuleToSkipRuleDTO(SkipRule skipRule);
+//
+//	SkipRule skipRuleDtoToSkipRule(SkipRuleDTO skipRuleDTO);
+//
+//	StationConfigurationDTO stationConfigurationToStationConfigurationDto(StationConfiguration stationConfiguration);
+//
+//	StationConfiguration stationConfigurationDtoToStationConfiguration(StationConfigurationDTO stationConfigurationDTO);
 }
