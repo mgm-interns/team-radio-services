@@ -7,10 +7,8 @@ import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.skipRule.SkipRuleDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
-import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.respository.station.StationRepository;
-import com.mgmtp.radio.service.station.StationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -67,7 +65,7 @@ public class StationUpdateConfigurationTest {
 		//Original skipRule
 		SkipRule skipRule = new SkipRule(SkipRule.BASIC);
 		StationConfiguration stationConfiguration = new StationConfiguration();
-		stationConfiguration.setRule(skipRule);
+		stationConfiguration.setSkipRule(skipRule);
 		station.setStationConfiguration(stationConfiguration);
 
 		Mono<Station> monoStationConfig = stationRepository.findById(id).map(originalStation -> {
@@ -80,7 +78,7 @@ public class StationUpdateConfigurationTest {
 			SkipRule mockSkipRule = new SkipRule(SkipRule.ADVANCE);
 			when(stationMapper.skipRuleDtoToSkipRule(inputStationConfigurationDTO.getSkipRule())).thenReturn(mockSkipRule);
 
-			originalStation.getStationConfiguration().setRule(stationMapper.skipRuleDtoToSkipRule(inputStationConfigurationDTO.getSkipRule()));
+			originalStation.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(inputStationConfigurationDTO.getSkipRule()));
 
 			//Save
 			when(stationRepository.save(originalStation)).thenReturn(Mono.just(originalStation));
@@ -91,6 +89,6 @@ public class StationUpdateConfigurationTest {
 		final Station station1 = monoStationConfig.block();
 
 
-		assertEquals(inputStationConfigurationDTO.getSkipRule().getTypeId(), station1.getStationConfiguration().getRule().getTypeId());
+		assertEquals(inputStationConfigurationDTO.getSkipRule().getTypeId(), station1.getStationConfiguration().getSkipRule().getTypeId());
 	}
 }
