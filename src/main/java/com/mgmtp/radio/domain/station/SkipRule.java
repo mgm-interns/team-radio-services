@@ -2,11 +2,13 @@ package com.mgmtp.radio.domain.station;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 
 import java.util.HashMap;
 
 @Data
+@ToString
 public class SkipRule {
 	public static final int BASIC = 0;
 	public static final int ADVANCE = 1;
@@ -17,19 +19,10 @@ public class SkipRule {
 		this.typeId = BASIC;
 	}
 
-	public SkipRule(int typeId) throws InvalidRuleTypeException {
-		if(typeId == BASIC || typeId == ADVANCE) {
-			this.typeId = typeId;
+	public SkipRule(int typeId) {
+		if(typeId != BASIC && typeId != ADVANCE) {
+			typeId = BASIC;
 		}
-		else {
-			throw new InvalidRuleTypeException();
-		}
-	}
-
-	public class InvalidRuleTypeException extends Exception {
-		@Override
-		public String getMessage() {
-			return "The input RuleTypeDTO is invalid or empty";
-		}
+		this.typeId = typeId;
 	}
 }

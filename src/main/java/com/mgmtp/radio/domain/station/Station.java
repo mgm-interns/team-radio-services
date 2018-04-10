@@ -16,7 +16,6 @@ import java.util.List;
 
 @Document(collection = "station")
 @Data
-@NoArgsConstructor
 public class Station {
 	@Id
 	private String id;
@@ -36,4 +35,8 @@ public class Station {
 	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate createdAt;
 	private StationConfiguration stationConfiguration;
+
+	public Station() {
+		this.stationConfiguration = new StationConfiguration();
+	}
 }
