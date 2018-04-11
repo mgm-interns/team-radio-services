@@ -6,7 +6,6 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -16,7 +15,6 @@ import java.util.List;
 
 @Document(collection = "station")
 @Data
-@NoArgsConstructor
 public class Station {
 	@Id
 	private String id;
@@ -35,4 +33,9 @@ public class Station {
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonSerialize(using = LocalDateSerializer.class)
 	private LocalDate createdAt;
+	private StationConfiguration stationConfiguration;
+
+	public Station() {
+		this.stationConfiguration = new StationConfiguration();
+	}
 }
