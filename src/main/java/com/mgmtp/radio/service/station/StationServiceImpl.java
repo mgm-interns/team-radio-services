@@ -26,6 +26,9 @@ import java.util.Optional;
 @Aspect
 public class StationServiceImpl implements StationService {
 
+	private final StationRepository stationRepository;
+	private final SongService songService;
+	private final ActiveStationStore activeStationStore;
 	private final StationMapper stationMapper;
 	private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
 
@@ -76,9 +79,6 @@ public class StationServiceImpl implements StationService {
 		});
 		return songDTOMono;
 	}
-    private final StationRepository stationRepository;
-    private final SongService songService;
-    private final ActiveStationStore activeStationStore;
 
     public StationServiceImpl(StationMapper stationMapper,
                               StationRepository stationRepository,

@@ -23,6 +23,7 @@ import com.mgmtp.radio.support.DateHelper;
 import com.mgmtp.radio.support.TransferHelper;
 import com.mgmtp.radio.support.YouTubeHelper;
 import com.mgmtp.radio.support.StationPlayerHelper;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -324,5 +325,21 @@ public class SongServiceImpl implements SongService {
     @Override
     public Mono<Boolean> existsById(String id) {
         return songRepository.existsById(id);
+    }
+
+
+    @AfterReturning(value = "execution(* com.mgmtp.radio.service.station.StationServiceImpl.checkAndSkipSongIfNeeded(..)"
+        , returning = "songDTO")
+    private void saveSongDtoAfterSkip(Mono<SongDTO> monoSongDTO) {
+        monoSongDTO.map(songDTO -> {
+            if(songDTO.isSkipped()) {
+                Mono<Song> songInDB = songRepository.findById(songDTO.getSongId()).map(song -> {
+                   song.setSkipped(true);
+                   return song;
+                });
+                songInDB.subscribe();
+            }
+            return songDTO;
+        });
     }
 }
