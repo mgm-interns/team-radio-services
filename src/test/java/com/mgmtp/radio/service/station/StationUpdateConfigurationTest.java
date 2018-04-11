@@ -103,6 +103,6 @@ public class StationUpdateConfigurationTest {
 
 		final StationConfigurationDTO outputStationConfiguration = monoStationConfig.block();
 
-		assertEquals(inputStationConfigurationDTO.getSkipRule().getTypeId(), outputStationConfiguration.getSkipRule().getTypeId());
+		assertEquals(inputStationConfigurationDTO.getSkipRule().getSkipRuleType(), outputStationConfiguration.getSkipRule().getSkipRuleType());
 	}
 }

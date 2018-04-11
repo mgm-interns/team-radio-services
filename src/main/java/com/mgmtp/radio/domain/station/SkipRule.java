@@ -1,5 +1,6 @@
 package com.mgmtp.radio.domain.station;
 
+import com.mgmtp.radio.sdo.SkipRuleType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -10,19 +11,20 @@ import java.util.HashMap;
 @Data
 @ToString
 public class SkipRule {
-	public static final int BASIC = 0;
-	public static final int ADVANCE = 1;
+	public static final SkipRuleType BASIC = SkipRuleType.BASIC;
+	public static final SkipRuleType ADVANCE = SkipRuleType.ADVANCE;
 
-	int typeId;
+//	int typeId;
+	SkipRuleType skipRuleType = SkipRuleType.BASIC;
 
 	public SkipRule() {
-		this.typeId = BASIC;
+		this.skipRuleType = BASIC;
 	}
 
-	public SkipRule(int typeId) {
-		if(typeId != BASIC && typeId != ADVANCE) {
-			typeId = BASIC;
+	public SkipRule(SkipRuleType skipRuleType) {
+		if(skipRuleType != BASIC && skipRuleType != ADVANCE) {
+			skipRuleType = BASIC;
 		}
-		this.typeId = typeId;
+		this.skipRuleType = skipRuleType;
 	}
 }

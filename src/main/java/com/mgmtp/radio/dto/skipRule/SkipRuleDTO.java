@@ -1,5 +1,6 @@
 package com.mgmtp.radio.dto.skipRule;
 
+import com.mgmtp.radio.sdo.SkipRuleType;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
@@ -7,45 +8,28 @@ import lombok.Setter;
 @Data
 public class SkipRuleDTO {
 
-	public static final int BASIC = 0;
-	public static final int ADVANCE = 1;
+	public static final SkipRuleType BASIC = SkipRuleType.BASIC;
+	public static final SkipRuleType ADVANCE = SkipRuleType.ADVANCE;
 
-	int typeId;
+	SkipRuleType skipRuleType;
 
     public SkipRuleDTO() {
-    	this.typeId = BASIC;
+    	this.skipRuleType = BASIC;
     }
 
-	public SkipRuleDTO(final int typeId) {
-		if (typeId != BASIC && typeId != ADVANCE) {
-			this.typeId = BASIC;
+	public SkipRuleDTO(final SkipRuleType skipRuleType) {
+		if (skipRuleType != BASIC && skipRuleType != ADVANCE) {
+			this.skipRuleType = BASIC;
 		} else {
-			this.typeId = typeId;
+			this.skipRuleType = skipRuleType;
 		}
 	}
 
-    @Setter(AccessLevel.NONE)
-    String name;
 	@Setter(AccessLevel.NONE)
     String description;
 
-	public String getName() {
-    	switch (typeId) {
-		    case BASIC:
-		    	name = "Basic rule";
-		    	break;
-		    case ADVANCE:
-		    	name = "Advance rule";
-			    break;
-		    default:
-		    	name = "Invalid typeId";
-			    break;
-	    }
-	    return name;
-    }
-
 	public String getDescription() {
-		switch (typeId) {
+		switch (skipRuleType) {
 			case BASIC:
 				description = "Rule: More than 50% downvotes can skip the song";
 				break;

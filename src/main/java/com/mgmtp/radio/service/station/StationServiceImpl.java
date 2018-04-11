@@ -58,7 +58,7 @@ public class StationServiceImpl implements StationService {
 			final StationConfiguration stationConfiguration = station.getStationConfiguration();
 			boolean isSkipped = false;
 
-			if (stationConfiguration.getSkipRule().getTypeId() == SkipRule.ADVANCE) {
+			if (stationConfiguration.getSkipRule().getSkipRuleType() == SkipRule.ADVANCE) {
 				if (isOwnerDownvote(station, songDTO)) {
 					isSkipped = true;
 				}
