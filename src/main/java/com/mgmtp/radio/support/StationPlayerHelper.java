@@ -32,7 +32,7 @@ public class StationPlayerHelper {
         NowPlaying currentPlayer = stationPlayer.get(stationId);
         if (currentPlayer != null) {
             long currentTimestamp = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
-            long songEndTime = currentPlayer.getStartingTime() + currentPlayer.getDuration() + TIME_BUFFER;
+            long songEndTime = currentPlayer.getStartingTime() + currentPlayer.getDuration() / 1000 + TIME_BUFFER;
             if (currentTimestamp > songEndTime) {
                 currentPlayer.setEnded(true);
             }

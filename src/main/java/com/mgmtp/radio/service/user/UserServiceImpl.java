@@ -51,6 +51,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO patchUser(String userId, UserDTO userDTO) throws RadioNotFoundException {
         return userRepository.findById(userId).map(user -> {
             user.setName(userDTO.getName());
+            user.setUsername(userDTO.getUsername());
             user.setFirstName(userDTO.getFirstName());
             user.setLastName(userDTO.getLastName());
             user.setCountry(userDTO.getCountry());
