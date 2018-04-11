@@ -5,6 +5,7 @@ import com.mgmtp.radio.dto.user.FavoriteSongDTO;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.user.FavoriteSongMapper;
 import com.mgmtp.radio.respository.user.FavoriteSongRepository;
+import com.mgmtp.radio.service.station.SongService;
 import com.mgmtp.radio.service.user.FavoriteSongService;
 import com.mgmtp.radio.service.user.FavoriteSongServiceImpl;
 import org.junit.Before;
@@ -20,6 +21,9 @@ public class DeleteFavoriteSongImplTest {
     @Mock
     FavoriteSongRepository favoriteSongRepository;
 
+    @Mock
+    SongService songService;
+
     FavoriteSongMapper favoriteSongMapper = FavoriteSongMapper.INSTANCE;
 
     FavoriteSongService favoriteSongService;
@@ -27,7 +31,7 @@ public class DeleteFavoriteSongImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        favoriteSongService = new FavoriteSongServiceImpl(favoriteSongRepository, favoriteSongMapper);
+        favoriteSongService = new FavoriteSongServiceImpl(favoriteSongRepository, favoriteSongMapper, songService);
     }
 
     @Test

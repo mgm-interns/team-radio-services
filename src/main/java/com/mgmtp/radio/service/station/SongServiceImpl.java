@@ -365,4 +365,9 @@ public class SongServiceImpl implements SongService {
     public Mono<Boolean> existsById(String id) {
         return songRepository.existsById(id);
     }
+
+    @Override
+    public Mono<SongDTO> getById(String id) {
+        return songRepository.findById(id).map(songMapper::songToSongDTO).switchIfEmpty(Mono.error(new RadioNotFoundException()));
+    }
 }
