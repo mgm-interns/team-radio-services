@@ -134,6 +134,14 @@ public class SongControllerTest {
     }
 
     @Test
+    public void testDownvoteSong() {
+        String stationId = "1111";
+        String songId = "song01";
+        String userId = "user01";
+        songService.downVoteSongInStationPlaylist(stationId, songId, userId);
+    }
+
+    @Test
     public void testGetListSongHistory_notExistStationId() {
         final String STATION_ID = "5ab0c35c04a97f2c08954fa6";
 
