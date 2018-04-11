@@ -2,6 +2,7 @@ package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
+import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
@@ -95,4 +96,9 @@ public class StationController extends BaseRadioController {
         return stationService.update(id, stationDTO);
     }
 
+    @PutMapping("/update-config/{id}")
+    public Mono<StationConfigurationDTO> updateConfigurationStation(@PathVariable(value = "id") final String id,
+                                                                                    @Valid @RequestBody final StationConfigurationDTO stationConfigurationDTO) {
+        return stationService.updateConfiguration(id, stationConfigurationDTO);
+    }
 }
