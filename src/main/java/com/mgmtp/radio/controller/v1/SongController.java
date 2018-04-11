@@ -17,13 +17,13 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuple2;
 import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
 import java.time.Duration;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -34,8 +34,7 @@ import java.util.stream.Collectors;
 @RequestMapping(SongController.BASE_URL)
 public class SongController extends BaseRadioController {
     public static final String BASE_URL = "/api/v1/station";
-
-    private static ConcurrentHashMap<String, PlayList> compareList = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Flux<ServerSentEvent<PlayList>>> stationStream = new ConcurrentHashMap<>();
 
     private final SongService songService;
 
@@ -98,26 +97,30 @@ public class SongController extends BaseRadioController {
     @GetMapping("/{stationId}/playList")
     @ResponseStatus(HttpStatus.OK)
     public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId) {
-        return songService.getPlayListByStationId(stationId)
-                .flatMapMany(playList -> Flux.just(
-                        ServerSentEvent.<PlayList>builder()
-                                .event("fetch")
-                                .data(playList)
-                                .build()))
-                .delayElements(Duration.ofSeconds(1))
-                .delayElements(Duration.ofMillis(100))
-                .skipWhile(playListServerSentEvent -> {
-                    PlayList compare = compareList.get(stationId);
-                    if (compare == null || !compare.toString().equals(playListServerSentEvent.data().toString())) {
-                        compareList.put(stationId, playListServerSentEvent.data());
-                        return false;
-                    } else {
-                        return true;
-                    }
-                })
-                .repeat()
-                .publish()
-                .refCount();
+        Map<String, Integer> compareHash = new HashMap<>();
+        Flux<ServerSentEvent<PlayList>> stationPlayListStream = stationStream.get(stationId);
+        if (stationPlayListStream == null) {
+            stationPlayListStream =
+                    Flux.interval(Duration.ofMillis(1100)).map(tick -> Tuples.of(tick, songService.getPlayListByStationId(stationId)))
+                            .map(data -> data.getT2().map(playList -> {
+                                        int currentHash = playList.hashCode();
+                                        Integer previousHash = compareHash.get(stationId);
+                                        if (previousHash == null || previousHash != currentHash) {
+                                            compareHash.put(stationId, currentHash);
+                                            return ServerSentEvent.<PlayList>builder().id(Long.toString(data.getT1())).event("fetch").data(playList).build();
+                                        } else {
+                                            return ServerSentEvent.<PlayList>builder().build();
+                                        }
+                                    })
+                            )
+                            .map(serverSentEventMono -> serverSentEventMono.subscribeOn(Schedulers.elastic()).block())
+                            .publish()
+                            .refCount()
+                            .doOnSubscribe(subscription -> compareHash.remove(stationId));
+
+            stationStream.put(stationId, stationPlayListStream);
+        }
+        return stationPlayListStream;
     }
 
     @ApiOperation(
