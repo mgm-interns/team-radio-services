@@ -92,11 +92,8 @@ public class StationServiceImpl implements StationService {
     public Mono<ActiveStation> findByStationId(UserDTO userDTO, String id) {
 
         return findById(id).map(stationDTO -> {
+            activeStationStore.getActiveStations().putIfAbsent(id, new ActiveStation());
             ActiveStation activeStation = activeStationStore.getActiveStations().get(id);
-            if (activeStation == null) {
-                activeStationStore.getActiveStations().put(id, new ActiveStation());
-                activeStation = activeStationStore.getActiveStations().get(id);
-            }
 
             if (!activeStation.getUsers().contains(userDTO)) {
                 activeStation.getUsers().add(userDTO);
