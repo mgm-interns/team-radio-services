@@ -10,6 +10,7 @@ import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.respository.station.StationRepository;
+import com.mgmtp.radio.sdo.SkipRuleType;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
@@ -58,7 +59,7 @@ public class StationServiceImpl implements StationService {
 			final StationConfiguration stationConfiguration = station.getStationConfiguration();
 			boolean isSkipped = false;
 
-			if (stationConfiguration.getSkipRule().getSkipRuleType() == SkipRule.ADVANCE) {
+			if (stationConfiguration.getSkipRule().getSkipRuleType() == SkipRuleType.ADVANCE) {
 				if (isOwnerDownvote(station, songDTO)) {
 					isSkipped = true;
 				}

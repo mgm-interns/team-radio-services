@@ -9,6 +9,7 @@ import com.mgmtp.radio.dto.skipRule.SkipRuleDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.respository.station.StationRepository;
+import com.mgmtp.radio.sdo.SkipRuleType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,21 +63,19 @@ public class StationUpdateConfigurationTest {
 		when(stationRepository.save(station)).thenReturn(Mono.just(station));
 
 		//Fake input StationConfigurationDto
-		SkipRuleDTO skipRuleDTO = new SkipRuleDTO(SkipRuleDTO.ADVANCE);
+		SkipRuleDTO skipRuleDTO = new SkipRuleDTO(SkipRuleType.ADVANCE);
 		StationConfigurationDTO inputStationConfigurationDTO = new StationConfigurationDTO();
 		inputStationConfigurationDTO.setSkipRule(skipRuleDTO);
 
 		//Expected stationConfigurationDto
 		StationConfigurationDTO expectedDto = new StationConfigurationDTO();
-		expectedDto.setSkipRule(new SkipRuleDTO(SkipRuleDTO.ADVANCE));
+		expectedDto.setSkipRule(new SkipRuleDTO(SkipRuleType.ADVANCE));
 
 		//Original skipRule
-		SkipRule skipRule = new SkipRule(SkipRule.BASIC);
+		SkipRule skipRule = new SkipRule(SkipRuleType.BASIC);
 		StationConfiguration stationConfiguration = new StationConfiguration();
 		stationConfiguration.setSkipRule(skipRule);
 		station.setStationConfiguration(stationConfiguration);
-
-
 
 		Mono<StationConfigurationDTO> monoStationConfig = stationRepository.findById(id).map(originalStation -> {
 			StationConfiguration originalStationConfig = new StationConfiguration();
@@ -85,7 +84,7 @@ public class StationUpdateConfigurationTest {
 			);
 			originalStation.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(inputStationConfigurationDTO));
 
-			SkipRule mockSkipRule = new SkipRule(SkipRule.ADVANCE);
+			SkipRule mockSkipRule = new SkipRule(SkipRuleType.ADVANCE);
 			when(stationMapper.skipRuleDtoToSkipRule(inputStationConfigurationDTO.getSkipRule())).thenReturn(mockSkipRule);
 
 			originalStation.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(inputStationConfigurationDTO.getSkipRule()));

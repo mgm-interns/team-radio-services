@@ -11,19 +11,16 @@ import java.util.HashMap;
 @Data
 @ToString
 public class SkipRule {
-	public static final SkipRuleType BASIC = SkipRuleType.BASIC;
-	public static final SkipRuleType ADVANCE = SkipRuleType.ADVANCE;
 
-//	int typeId;
-	SkipRuleType skipRuleType = SkipRuleType.BASIC;
+	SkipRuleType skipRuleType;
 
 	public SkipRule() {
-		this.skipRuleType = BASIC;
+		this.skipRuleType = SkipRuleType.BASIC;
 	}
 
 	public SkipRule(SkipRuleType skipRuleType) {
-		if(skipRuleType != BASIC && skipRuleType != ADVANCE) {
-			skipRuleType = BASIC;
+		if(skipRuleType != SkipRuleType.BASIC && skipRuleType != SkipRuleType.ADVANCE) {
+			skipRuleType = SkipRuleType.BASIC;
 		}
 		this.skipRuleType = skipRuleType;
 	}

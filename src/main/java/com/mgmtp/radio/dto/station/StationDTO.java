@@ -2,6 +2,7 @@ package com.mgmtp.radio.dto.station;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mgmtp.radio.dto.skipRule.SkipRuleDTO;
+import com.mgmtp.radio.sdo.SkipRuleType;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,6 @@ public class StationDTO {
 
 	public StationDTO() {
 		stationConfigurationDTO = new StationConfigurationDTO();
-		stationConfigurationDTO.setSkipRule(new SkipRuleDTO(SkipRuleDTO.BASIC));
+		stationConfigurationDTO.setSkipRule(new SkipRuleDTO(SkipRuleType.BASIC));
 	}
 }

@@ -8,18 +8,18 @@ import lombok.Setter;
 @Data
 public class SkipRuleDTO {
 
-	public static final SkipRuleType BASIC = SkipRuleType.BASIC;
-	public static final SkipRuleType ADVANCE = SkipRuleType.ADVANCE;
+//	public static final SkipRuleType BASIC = SkipRuleType.BASIC;
+//	public static final SkipRuleType ADVANCE = SkipRuleType.ADVANCE;
 
 	SkipRuleType skipRuleType;
 
     public SkipRuleDTO() {
-    	this.skipRuleType = BASIC;
+    	this.skipRuleType = SkipRuleType.BASIC;
     }
 
 	public SkipRuleDTO(final SkipRuleType skipRuleType) {
-		if (skipRuleType != BASIC && skipRuleType != ADVANCE) {
-			this.skipRuleType = BASIC;
+		if (skipRuleType != SkipRuleType.BASIC && skipRuleType != SkipRuleType.ADVANCE) {
+			this.skipRuleType = SkipRuleType.BASIC;
 		} else {
 			this.skipRuleType = skipRuleType;
 		}

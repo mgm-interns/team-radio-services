@@ -4,6 +4,7 @@ import com.mgmtp.radio.domain.station.SkipRule;
 import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.skipRule.SkipRuleDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
+import com.mgmtp.radio.sdo.SkipRuleType;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -15,10 +16,10 @@ public class StationConfigurationMapperTest {
     public void skipRuleToSkipRuleDTO() {
         //given
         SkipRule skipRuleBasic = new SkipRule();
-        skipRuleBasic.setSkipRuleType(SkipRule.BASIC);
+        skipRuleBasic.setSkipRuleType(SkipRuleType.BASIC);
 
         SkipRule skipRuleAdvance = new SkipRule();
-        skipRuleAdvance.setSkipRuleType(SkipRule.ADVANCE);
+        skipRuleAdvance.setSkipRuleType(SkipRuleType.ADVANCE);
 
         //when
         SkipRuleDTO skipRuleDtoBasic = stationMapper.skipRuleToSkipRuleDTO(skipRuleBasic);
@@ -33,10 +34,10 @@ public class StationConfigurationMapperTest {
     public void skipRuleDtoToSkipRule() {
         //given
         SkipRuleDTO skipRuleDTOBasic = new SkipRuleDTO();
-        skipRuleDTOBasic.setSkipRuleType(SkipRuleDTO.BASIC);
+        skipRuleDTOBasic.setSkipRuleType(SkipRuleType.BASIC);
 
         SkipRuleDTO skipRuleDTOAdvance = new SkipRuleDTO();
-        skipRuleDTOAdvance.setSkipRuleType(SkipRuleDTO.ADVANCE);
+        skipRuleDTOAdvance.setSkipRuleType(SkipRuleType.ADVANCE);
 
         //when
         SkipRule skipRuleBasic = stationMapper.skipRuleDtoToSkipRule(skipRuleDTOBasic);
@@ -52,7 +53,7 @@ public class StationConfigurationMapperTest {
         //given
         StationConfiguration stationConfigurationBasic = new StationConfiguration();
         SkipRule skipRuleBasic = new SkipRule();
-        skipRuleBasic.setSkipRuleType(SkipRule.BASIC);
+        skipRuleBasic.setSkipRuleType(SkipRuleType.BASIC);
         stationConfigurationBasic.setSkipRule(skipRuleBasic);
 
         //when
@@ -65,7 +66,7 @@ public class StationConfigurationMapperTest {
         //given
         StationConfiguration stationConfigurationAdvance = new StationConfiguration();
         SkipRule skipRuleAdvance = new SkipRule();
-        skipRuleAdvance.setSkipRuleType(SkipRule.ADVANCE);
+        skipRuleAdvance.setSkipRuleType(SkipRuleType.ADVANCE);
         stationConfigurationAdvance.setSkipRule(skipRuleAdvance);
 
         //when
@@ -81,7 +82,7 @@ public class StationConfigurationMapperTest {
         //given
         StationConfigurationDTO stationConfigurationDTOBasic = new StationConfigurationDTO();
         SkipRuleDTO skipRuleDTOBasic = new SkipRuleDTO();
-        skipRuleDTOBasic.setSkipRuleType(SkipRuleDTO.BASIC);
+        skipRuleDTOBasic.setSkipRuleType(SkipRuleType.BASIC);
         stationConfigurationDTOBasic.setSkipRule(skipRuleDTOBasic);
 
         //when
@@ -93,7 +94,7 @@ public class StationConfigurationMapperTest {
         //given
         StationConfigurationDTO stationConfigurationDTOAdvance = new StationConfigurationDTO();
         SkipRuleDTO skipRuleDTOAdvance = new SkipRuleDTO();
-        skipRuleDTOAdvance.setSkipRuleType(SkipRuleDTO.ADVANCE);
+        skipRuleDTOAdvance.setSkipRuleType(SkipRuleType.ADVANCE);
         stationConfigurationDTOAdvance.setSkipRule(skipRuleDTOAdvance);
 
         //when
