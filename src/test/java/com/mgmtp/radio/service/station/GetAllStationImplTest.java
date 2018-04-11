@@ -5,6 +5,7 @@ import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.sdo.StationPrivacy;
+import com.mgmtp.radio.support.ActiveStationStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -28,10 +29,13 @@ public class GetAllStationImplTest {
 
     SongService songService;
 
+    private ActiveStationStore activeStationStore;
+
     @Before
     public void setUp() throws Exception {
+        activeStationStore = new ActiveStationStore();
         MockitoAnnotations.initMocks(this);
-        stationService = new StationServiceImpl(stationMapper,  stationRepository, songService);
+        stationService = new StationServiceImpl(stationMapper,  stationRepository, songService, activeStationStore);
     }
 
     @Test
