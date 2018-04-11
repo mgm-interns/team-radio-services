@@ -94,13 +94,15 @@ public class RadioResponseExceptionHandler extends ResponseEntityExceptionHandle
         String requestURI = request.getRequestURI();
         String stationId = requestURI.substring(requestURI.lastIndexOf("/") + 1);
         ActiveStation activeStation = activeStationStore.getActiveStations().get(stationId);
-        if (activeStation != null) {
+
+        Optional.ofNullable(activeStation).map(station -> {
             Optional<User> user = userHelper.getCurrentUser();
             if (user.isPresent()) {
                 UserDTO userDTO = userMapper.userToUserDTO(user.get());
                 activeStation.getUsers().remove(userDTO);
             }
-        }
+            return station;
+        });
         return new ResponseEntity<>(new RadioErrorResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.ACCEPTED);
     }
 }
