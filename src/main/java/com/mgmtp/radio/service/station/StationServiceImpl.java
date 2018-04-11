@@ -24,6 +24,8 @@ import java.util.Optional;
 @Service
 public class StationServiceImpl implements StationService {
 
+	private final StationRepository stationRepository;
+	private final SongService songService;
 	private final StationMapper stationMapper;
 	private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
 
