@@ -82,7 +82,7 @@ public class SongServiceImpl implements SongService {
             SongDTO result = songMapper.songToSongDTO(song);
             Optional<User> creator = userRepository.findById(song.getCreatorId());
             if (creator.isPresent()){
-                result.setCreator(creator.isPresent() ? userMapper.userToUserDTO(creator.get()) : null);
+                result.setCreator(userMapper.userToUserDTO(creator.get()));
                 sink.next(result);
             }
         });

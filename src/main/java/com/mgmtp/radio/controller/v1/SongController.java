@@ -35,6 +35,7 @@ import java.util.stream.Collectors;
 public class SongController extends BaseRadioController {
     public static final String BASE_URL = "/api/v1/station";
     private static final ConcurrentHashMap<String, Flux<ServerSentEvent<PlayList>>> stationStream = new ConcurrentHashMap<>();
+    private static final Map<String, Integer> compareHash = new HashMap<>();
 
     private final SongService songService;
 
@@ -97,7 +98,6 @@ public class SongController extends BaseRadioController {
     @GetMapping("/{stationId}/playList")
     @ResponseStatus(HttpStatus.OK)
     public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId) {
-        Map<String, Integer> compareHash = new HashMap<>();
         Flux<ServerSentEvent<PlayList>> stationPlayListStream = stationStream.get(stationId);
         if (stationPlayListStream == null) {
             stationPlayListStream =
@@ -113,7 +113,7 @@ public class SongController extends BaseRadioController {
                                         }
                                     })
                             )
-                            .map(serverSentEventMono -> serverSentEventMono.subscribeOn(Schedulers.elastic()).block())
+                            .flatMap(Flux::from)
                             .publish()
                             .refCount()
                             .doOnSubscribe(subscription -> compareHash.remove(stationId));
