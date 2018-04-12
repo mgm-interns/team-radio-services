@@ -246,9 +246,9 @@ public class SongServiceImplTest {
 
         assertEquals(4, playList.getListSong().size());
 
-        NowPlaying nowPlaying = stationPlayerHelper.getStationNowPlaying(STATION_ID);
+        Optional<NowPlaying> nowPlaying = stationPlayerHelper.getStationNowPlaying(STATION_ID);
 
-        assertThat(nowPlaying).isEqualToComparingFieldByField(playList.getNowPlaying());
+        assertThat(nowPlaying.get()).isEqualToComparingFieldByField(playList.getNowPlaying());
 
         assertThat(songMapper.songToSongDTO(song1)).isEqualToIgnoringGivenFields(playList.getListSong().get(0), "creator");
         assertThat(songMapper.songToSongDTO(song2)).isEqualToIgnoringGivenFields(playList.getListSong().get(1), "creator");
@@ -351,16 +351,16 @@ public class SongServiceImplTest {
         Mono<PlayList> result = songService.getPlayListByStationId(STATION_ID);
 
         PlayList playList = result.log().block();
-        NowPlaying playing = stationPlayerHelper.getStationNowPlaying(STATION_ID);
+        Optional<NowPlaying> playing = stationPlayerHelper.getStationNowPlaying(STATION_ID);
 
         assertNotNull(playing);
-        assertFalse(playing.isEnded());
-        assertEquals(song2.getId(), playing.getSongId());
-        assertEquals(0, playing.getDuration());
-        assertEquals(song2.getUrl(), playing.getUrl());
+        assertFalse(playing.get().isEnded());
+        assertEquals(song2.getId(), playing.get().getSongId());
+        assertEquals(0, playing.get().getDuration());
+        assertEquals(song2.getUrl(), playing.get().getUrl());
 
         assertEquals(3, playList.getListSong().size());
-        assertThat(playing).isEqualToComparingFieldByField(playList.getNowPlaying());
+        assertThat(playing).get().isEqualToComparingFieldByField(playList.getNowPlaying());
 
         assertThat(songMapper.songToSongDTO(song2)).isEqualToIgnoringGivenFields(playList.getListSong().get(0), "creator");
         assertThat(songMapper.songToSongDTO(song3)).isEqualToIgnoringGivenFields(playList.getListSong().get(1), "creator");
@@ -451,16 +451,16 @@ public class SongServiceImplTest {
         Mono<PlayList> result = songService.getPlayListByStationId(STATION_ID);
 
         PlayList playList = result.log().block();
-        NowPlaying playing = stationPlayerHelper.getStationNowPlaying(STATION_ID);
+        Optional<NowPlaying> playing = stationPlayerHelper.getStationNowPlaying(STATION_ID);
 
         assertNotNull(playing);
-        assertFalse(playing.isEnded());
-        assertEquals(song4.getId(), playing.getSongId());
-        assertEquals(0, playing.getDuration());
-        assertEquals(song4.getUrl(), playing.getUrl());
+        assertFalse(playing.get().isEnded());
+        assertEquals(song4.getId(), playing.get().getSongId());
+        assertEquals(0, playing.get().getDuration());
+        assertEquals(song4.getUrl(), playing.get().getUrl());
 
         assertEquals(1, playList.getListSong().size());
-        assertThat(playing).isEqualToComparingFieldByField(playList.getNowPlaying());
+        assertThat(playing.get()).isEqualToComparingFieldByField(playList.getNowPlaying());
 
         song4.setStatus(SongStatus.not_play_yet);
         song4.setMessage(null);
