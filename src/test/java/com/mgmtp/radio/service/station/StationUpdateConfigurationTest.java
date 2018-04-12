@@ -10,7 +10,6 @@ import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.sdo.SkipRuleType;
-import com.mgmtp.radio.support.ActiveStationStore;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +21,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -47,7 +45,7 @@ public class StationUpdateConfigurationTest {
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(stationRepository);
-		stationService = new StationServiceImpl(stationMapper, stationRepository, songService, new ActiveStationStore());
+		stationService = new StationServiceImpl(stationMapper, stationRepository, songService);
 	}
 
 	/**

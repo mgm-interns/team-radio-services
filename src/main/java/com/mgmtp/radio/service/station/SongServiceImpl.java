@@ -383,13 +383,14 @@ public class SongServiceImpl implements SongService {
 
 
     @Override
-    public Mono<Song> updateSongSkippedStatusToDb(String songId) {
-        Mono<Song> updateSong = songRepository.findById(songId)
-            .flatMap(song ->{
+    public Mono<SongDTO> updateSongSkippedStatusToDb(Mono<SongDTO> songDTOMono) {
+        return songDTOMono.map(songDTO -> {
+            songRepository.findById(songDTO.getId()).flatMap(song -> {
                 song.setSkipped(true);
                 return songRepository.save(song);
-            });
-        updateSong.subscribe();
-        return updateSong;
+            }).doOnSuccess(song -> songDTO.setSkipped(song.isSkipped())).subscribe();
+
+            return songDTO;
+        });
     }
 }

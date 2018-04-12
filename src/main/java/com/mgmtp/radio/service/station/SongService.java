@@ -30,5 +30,5 @@ public interface SongService {
 
 	@AfterReturning(value = "execution(* com.mgmtp.radio.service.station.StationServiceImpl.checkAndSkipSongIfNeeded(..)"
 		, returning = "songDTO")
-	Mono<Song> updateSongSkippedStatusToDb(String songId);
+	Mono<SongDTO> updateSongSkippedStatusToDb(Mono<SongDTO> songDTOMono);
 }

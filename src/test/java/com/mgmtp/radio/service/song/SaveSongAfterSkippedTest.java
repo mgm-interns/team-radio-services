@@ -6,6 +6,7 @@ import com.mgmtp.radio.config.YouTubeConfig;
 import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.user.User;
+import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.mapper.station.SongMapper;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
@@ -17,6 +18,7 @@ import com.mgmtp.radio.support.DateHelper;
 import com.mgmtp.radio.support.StationPlayerHelper;
 import com.mgmtp.radio.support.TransferHelper;
 import com.mgmtp.radio.support.YouTubeHelper;
+import com.mongodb.Mongo;
 import lombok.extern.log4j.Log4j2;
 import org.junit.Before;
 import org.junit.Test;
@@ -133,14 +135,23 @@ public class SaveSongAfterSkippedTest {
 		song.setUpVoteUserIdList(new ArrayList<>());
 
 		when(songRepository.findById(anyString())).thenReturn(Mono.just(song));
-		when(songRepository.save(song)).thenReturn(Mono.just(song));
 
+		when(songRepository.save(song)).thenReturn(Mono.just(song));
 	}
 
 	@Test
 	public void updateSongAfterSkippedTest() {
-		Song updatedSong = songService.updateSongSkippedStatusToDb(songId).block();
 
-		assertEquals(updatedSong.isSkipped(), true);
+		SongDTO songDTO = new SongDTO();
+		songDTO.setId("1");
+		songDTO.setSongId("1");
+		songDTO.setSkipped(false);
+		Mono<SongDTO> monoSongDto = Mono.just(songDTO);
+
+		Mono<SongDTO> monoSongDTO = songService.updateSongSkippedStatusToDb(monoSongDto);
+
+		SongDTO updatedSong = monoSongDTO.block();
+
+		assertEquals(true, updatedSong.isSkipped());
 	}
 }
