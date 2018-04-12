@@ -42,42 +42,38 @@ public class StationServiceImpl implements StationService {
 		final int numberOnline = getOnlineUsersNumber(station);
 		double currentSongDislikePercent = 0;
 		if (numberOnline > 0) {
-			currentSongDislikePercent = songDTO.getDownVoteCount() / (float) numberOnline;
+			currentSongDislikePercent = songDTO.getDownVoteCount() / (double) numberOnline;
 		}
 		return currentSongDislikePercent;
 	}
 
 	private boolean isOwnerDownvote(Station station, SongDTO songDTO) {
-		for (UserDTO user: songDTO.getDownvoteUserList()) {
-			if (station.getOwnerId().equals(user.getId())) {
-				return true;
-			}
-		}
-		return false;
+		return songDTO.getDownvoteUserList().stream().anyMatch(userDTO -> userDTO.getId().equals(station.getOwnerId()));
 	}
 
 	@AfterReturning(value = "execution(* com.mgmtp.radio.service.station.SongService.downVoteSongInStationPlaylist(..))", returning = "monoSongDTO")
-	public String checkAndSkipSongIfNeeded(Mono<SongDTO> monoSongDTO) {
-		Mono<SongDTO> songDTOMono = monoSongDTO.map(songDTO -> {
-			final Station station = stationRepository.findById(songDTO.getStationId()).block();
-			final StationConfiguration stationConfiguration = station.getStationConfiguration();
-			boolean isSkipped = false;
+	public Mono<SongDTO> checkAndSkipSongIfNeeded(Mono<SongDTO> monoSongDTO) {
+			Mono<SongDTO> monoSongDtoReturn = monoSongDTO.map(songDTO -> {
+				stationRepository.findById(songDTO.getStationId()).map(tempStation ->{
+					final StationConfiguration stationConfiguration = tempStation.getStationConfiguration();
+					boolean isSkipped = false;
 
-			if (stationConfiguration.getSkipRule().getSkipRuleType() == SkipRuleType.ADVANCE) {
-				if (isOwnerDownvote(station, songDTO)) {
-					isSkipped = true;
-				}
-			} else {
-				double downvotePercent = 0;
-				downvotePercent = calcCurrentSongDislikePercent(songDTO, new StationDTO());
-				if (downvotePercent > DOWN_VOTE_THRES_PERCENT) {
-					isSkipped = true;
-				}
-			}
-			songDTO.setSkipped(isSkipped);
-			return songDTO;
-		});
-		return songDTOMono.block().getSongId();
+					if (stationConfiguration.getSkipRule().getSkipRuleType() == SkipRuleType.ADVANCE) {
+						if (isOwnerDownvote(tempStation, songDTO)) {
+							isSkipped = true;
+						}
+					} else {
+						double downvotePercent = calcCurrentSongDislikePercent(songDTO, new StationDTO());
+						if (downvotePercent > DOWN_VOTE_THRES_PERCENT) {
+							isSkipped = true;
+						}
+					}
+					songDTO.setSkipped(isSkipped);
+					return tempStation;
+				});
+				return songDTO;
+			});
+			return monoSongDtoReturn;
 	}
 
     public StationServiceImpl(StationMapper stationMapper,
@@ -175,8 +171,6 @@ public class StationServiceImpl implements StationService {
 				station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO));
 				station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationConfigurationDTO.getSkipRule()));
 					stationRepository.save(station).subscribe();
-				System.out.println(station);
-				System.out.println(stationConfiguration.getSkipRule());
 					return stationConfiguration;
 			})
 			.map(stationMapper::stationConfigurationToStationConfigurationDto);

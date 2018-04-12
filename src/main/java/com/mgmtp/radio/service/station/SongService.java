@@ -25,6 +25,6 @@ public interface SongService {
     Mono<Boolean> existsById(String id);
 
     @AfterReturning(value = "execution(* com.mgmtp.radio.service.station.StationServiceImpl.checkAndSkipSongIfNeeded(..)"
-        , returning = "songDTO")
-    Mono<Song> updateSongSkippedStatusToDb(String songId);
+        , returning = "monoSongDTO")
+    Mono<SongDTO> updateSongSkippedStatusToDb(Mono<SongDTO> songDTOMono);
 }

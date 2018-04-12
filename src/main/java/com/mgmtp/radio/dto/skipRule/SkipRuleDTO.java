@@ -8,9 +8,6 @@ import lombok.Setter;
 @Data
 public class SkipRuleDTO {
 
-//	public static final SkipRuleType BASIC = SkipRuleType.BASIC;
-//	public static final SkipRuleType ADVANCE = SkipRuleType.ADVANCE;
-
 	SkipRuleType skipRuleType;
 
     public SkipRuleDTO() {
