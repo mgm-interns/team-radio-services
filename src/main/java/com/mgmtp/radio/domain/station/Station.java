@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 
 @Document(collection = "station")
@@ -28,7 +29,9 @@ public class Station {
 
 	private String ownerId;
 
-	private List<String> playlist;
+	private List<String> playlist = Collections.emptyList();
+
+	private List<String> history = Collections.emptyList();
 
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonSerialize(using = LocalDateSerializer.class)

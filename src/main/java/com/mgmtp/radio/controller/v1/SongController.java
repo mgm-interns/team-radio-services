@@ -52,10 +52,10 @@ public class SongController extends BaseRadioController {
     })
     @GetMapping("/{stationId}/history")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<ServerSentEvent<List<SongDTO>>> getListSongHistory(@PathVariable(value = "stationId") String stationId, @RequestParam(value = "limit") Integer limit) {
-        return Flux.interval(Duration.ofSeconds(1))
-                .map(thisSecond -> Tuples.of(thisSecond, songService.getListSongByStationId(stationId), limit, songDTODateDescComparator))
-                .map(createDataForGetListHistorySong);
+    public Flux<SongDTO> getListSongHistory(@PathVariable(value = "stationId") String stationId, @RequestParam(value = "limit") Integer limit) {
+        return songService.getHistoryByStationId(stationId)
+                .filter(distinctUrl(SongDTO::getUrl))
+                .take(limit);
     }
 
     private Function<Tuple4<Long, Flux<SongDTO>, Integer, Comparator<SongDTO>>, ServerSentEvent<List<SongDTO>>> createDataForGetListHistorySong =
