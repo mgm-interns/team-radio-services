@@ -1,7 +1,9 @@
 package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.domain.station.PlayList;
+import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.dto.station.SongDTO;
+import org.aspectj.lang.annotation.AfterReturning;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -21,4 +23,8 @@ public interface SongService {
     Mono<SongDTO> addSongToStationPlaylist(String stationId, String videoId, String message, String creatorId) ;
 
     Mono<Boolean> existsById(String id);
+
+    @AfterReturning(value = "execution(* com.mgmtp.radio.service.station.StationServiceImpl.checkAndSkipSongIfNeeded(..)"
+        , returning = "monoSongDTO")
+    Mono<SongDTO> updateSongSkippedStatusToDb(Mono<SongDTO> songDTOMono);
 }
