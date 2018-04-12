@@ -71,7 +71,7 @@ public class StationController extends BaseRadioController {
     public Flux<ServerSentEvent<ActiveStation>> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException, IOException {
         if (getCurrentUser().isPresent()) {
             UserDTO userDTO = userMapper.userToUserDTO(getCurrentUser().get());
-            return Flux.interval(Duration.ofSeconds(1))
+            return Flux.interval(Duration.ofSeconds(5))
                 .map(theSecond -> Tuples.of(theSecond, this.stationService.findByStationId(userDTO, stationId)))
                 .map(tuple2 -> ServerSentEvent.<ActiveStation>builder()
                     .event(constant.getEvent_join_station())
