@@ -17,8 +17,6 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-import reactor.util.function.Tuple2;
 import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
@@ -34,8 +32,8 @@ import java.util.stream.Collectors;
 @RequestMapping(SongController.BASE_URL)
 public class SongController extends BaseRadioController {
     public static final String BASE_URL = "/api/v1/station";
-    private static final ConcurrentHashMap<String, Flux<ServerSentEvent<PlayList>>> stationStream = new ConcurrentHashMap<>();
-    private static final Map<String, Integer> compareHash = new HashMap<>();
+    private static ConcurrentHashMap<String, Flux<ServerSentEvent<PlayList>>> stationStream = new ConcurrentHashMap<>();
+    private static Map<String, Integer> compareHash = new HashMap<>();
 
     private final SongService songService;
 
