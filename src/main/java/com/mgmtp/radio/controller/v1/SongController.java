@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class SongController extends BaseRadioController {
     public static final String BASE_URL = "/api/v1/station";
     private static ConcurrentHashMap<String, Flux<ServerSentEvent<PlayList>>> stationStream = new ConcurrentHashMap<>();
-    private static Map<String, Integer> compareHash = new HashMap<>();
+    private static ConcurrentHashMap<String, Integer> compareHash = new ConcurrentHashMap<>();
 
     private final SongService songService;
 
@@ -102,8 +102,8 @@ public class SongController extends BaseRadioController {
                     Flux.interval(Duration.ofMillis(1100)).map(tick -> Tuples.of(tick, songService.getPlayListByStationId(stationId)))
                             .map(data -> data.getT2().map(playList -> {
                                         int currentHash = playList.hashCode();
-                                        Integer previousHash = compareHash.get(stationId);
-                                        if (previousHash == null || previousHash != currentHash) {
+                                        Optional<Integer> previousHash = Optional.ofNullable(compareHash.get(stationId));
+                                        if (!previousHash.isPresent() || previousHash.get() != currentHash) {
                                             compareHash.put(stationId, currentHash);
                                             return ServerSentEvent.<PlayList>builder().id(Long.toString(data.getT1())).event("fetch").data(playList).build();
                                         } else {

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
@@ -13,7 +14,7 @@ public class StationPlayerHelper {
     public static final int TIME_BUFFER = 5;
     private ConcurrentHashMap<String, NowPlaying> stationPlayer = new ConcurrentHashMap<>();
 
-    public NowPlaying addNowPlaying(String stationId, SongDTO song) {
+    public Optional<NowPlaying> addNowPlaying(String stationId, SongDTO song) {
         NowPlaying nowPlaying = new NowPlaying();
         nowPlaying.setSongId(song.getId());
         nowPlaying.setDuration(song.getDuration());
@@ -25,17 +26,17 @@ public class StationPlayerHelper {
 
         stationPlayer.put(stationId, nowPlaying);
 
-        return nowPlaying;
+        return Optional.of(nowPlaying);
     }
 
-    public NowPlaying getStationNowPlaying(String stationId) {
-        NowPlaying currentPlayer = stationPlayer.get(stationId);
-        if (currentPlayer != null) {
+    public Optional<NowPlaying> getStationNowPlaying(String stationId) {
+        Optional<NowPlaying> currentPlayer = Optional.ofNullable(stationPlayer.get(stationId));
+        if (currentPlayer.isPresent()) {
             long currentTimestamp = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
-            long durationInSecond = currentPlayer.getDuration() / 1000;
-            long songEndTime = currentPlayer.getStartingTime() + durationInSecond + TIME_BUFFER;
+            long durationInSecond = currentPlayer.get().getDuration() / 1000;
+            long songEndTime = currentPlayer.get().getStartingTime() + durationInSecond + TIME_BUFFER;
             if (currentTimestamp > songEndTime) {
-                currentPlayer.setEnded(true);
+                currentPlayer.get().setEnded(true);
             }
         }
         return currentPlayer;
