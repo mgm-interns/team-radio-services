@@ -1,9 +1,11 @@
 package com.mgmtp.radio.service.user.favorite;
 
 import com.mgmtp.radio.domain.user.FavoriteSong;
+import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
 import com.mgmtp.radio.mapper.user.FavoriteSongMapper;
 import com.mgmtp.radio.respository.user.FavoriteSongRepository;
+import com.mgmtp.radio.service.station.SongService;
 import com.mgmtp.radio.service.user.FavoriteSongService;
 import com.mgmtp.radio.service.user.FavoriteSongServiceImpl;
 import org.junit.Before;
@@ -11,6 +13,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
@@ -24,6 +27,9 @@ public class GetFavoriteSongByUserIdImplTest {
     @Mock
     FavoriteSongRepository favoriteSongRepository;
 
+    @Mock
+    SongService songService;
+
     FavoriteSongMapper favoriteSongMapper = FavoriteSongMapper.INSTANCE;
 
     FavoriteSongService favoriteSongService;
@@ -31,7 +37,7 @@ public class GetFavoriteSongByUserIdImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        favoriteSongService = new FavoriteSongServiceImpl(favoriteSongRepository, favoriteSongMapper);
+        favoriteSongService = new FavoriteSongServiceImpl(favoriteSongRepository, favoriteSongMapper, songService);
     }
 
     @Test
@@ -42,19 +48,26 @@ public class GetFavoriteSongByUserIdImplTest {
         favoriteSongDTO.setUserId("001");
         favoriteSongDTO.setSongId("001");
 
+        SongDTO songDTO = new SongDTO();
+        songDTO.setId(favoriteSongDTO.getId());
+        songDTO.setSongId(favoriteSongDTO.getId());
+        songDTO.setSource("youtube");
+
         FavoriteSong favoriteSong = new FavoriteSong();
         favoriteSong.setId(favoriteSongDTO.getId());
         favoriteSong.setUserId(favoriteSongDTO.getUserId());
         favoriteSong.setSongId(favoriteSongDTO.getSongId());
 
         when(favoriteSongRepository.findByUserId(anyString())).thenReturn(Flux.just(favoriteSong));
-
+        when(songService.getById(favoriteSongDTO.getSongId())).thenReturn(Mono.just(songDTO));
         // when
         Flux<FavoriteSongDTO> result = favoriteSongService.findByUserId(favoriteSongDTO.getUserId());
         FavoriteSongDTO expected = result.log().next().block();
 
         // then
-        assertEquals(favoriteSongDTO, expected);
+        assertEquals(favoriteSongDTO.getId(), expected.getId());
+        assertEquals(favoriteSongDTO.getSongId(), expected.getSongId());
+        assertEquals(favoriteSongDTO.getUserId(), expected.getUserId());
     }
 
     @Test

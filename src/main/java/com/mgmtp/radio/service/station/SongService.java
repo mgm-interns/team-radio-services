@@ -21,4 +21,8 @@ public interface SongService {
     Mono<SongDTO> addSongToStationPlaylist(String stationId, String videoId, String message, String creatorId) ;
 
     Mono<Boolean> existsById(String id);
+
+    Mono<SongDTO> getById(String id);
+
+    Flux<SongDTO> getListSongByListSongId(List<String> listSongId);
 }
