@@ -96,10 +96,6 @@ public class StationController extends BaseRadioController {
     })
     @PostMapping
     public Mono<StationDTO> createStation(@Valid @RequestBody StationDTO stationDTO) throws RadioException {
-        if(StringUtils.isEmpty(stationDTO.getId())) {
-            throw new RadioBadRequestException("station id is invalid");
-        }
-
         String userId = getCurrentUser().isPresent() ? getCurrentUser().get().getId() : null;
 
         return stationService.create(userId, stationDTO);
