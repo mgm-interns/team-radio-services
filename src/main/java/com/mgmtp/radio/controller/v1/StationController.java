@@ -4,9 +4,7 @@ import com.cloudinary.utils.StringUtils;
 import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
-import com.mgmtp.radio.domain.station.ActiveStation;
 import com.mgmtp.radio.dto.station.StationDTO;
-import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
@@ -17,15 +15,11 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuples;
 
 import javax.validation.Valid;
-import java.io.IOException;
-import java.time.Duration;
 
 @Log4j2
 @RestController
@@ -68,21 +62,8 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<ServerSentEvent<ActiveStation>> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException, IOException {
-        if (getCurrentUser().isPresent()) {
-            UserDTO userDTO = userMapper.userToUserDTO(getCurrentUser().get());
-            return Flux.interval(Duration.ofSeconds(5))
-                .map(theSecond -> Tuples.of(theSecond, this.stationService.findByStationId(userDTO, stationId)))
-                .map(tuple2 -> ServerSentEvent.<ActiveStation>builder()
-                    .event(constant.getEvent_join_station())
-                    .id(Long.toString(tuple2.getT1()))
-                    .data(tuple2.getT2().log().block())
-                    .build()
-                );
-        } else {
-            throw new RadioNotFoundException("unauthorized");
-        }
-
+    public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
+        return this.stationService.findById(stationId);
     }
 
     @ApiOperation(
