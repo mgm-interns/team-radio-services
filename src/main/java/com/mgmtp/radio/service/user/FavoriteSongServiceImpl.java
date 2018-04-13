@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -38,25 +39,19 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
 
 	@Override
 	public Flux<FavoriteSongDTO> findByUserId(String userId) {
-		Flux<FavoriteSongDTO> favoriteSongFlux = favoriteSongRepository.findByUserId(userId).map(favoriteSongMapper::favoriteSongToFavoriteSongDTO);
+		Mono<Map<String, FavoriteSongDTO>> favoriteSongDTOMapMono = favoriteSongRepository.findByUserId(userId)
+									.map(favoriteSongMapper::favoriteSongToFavoriteSongDTO)
+									.collectMap(FavoriteSongDTO::getSongId, favoriteSongDTO -> favoriteSongDTO);
 
-		Mono<Map<String, FavoriteSongDTO>> favoriteSongDTOMapMono = favoriteSongFlux.collectMap(
-			FavoriteSongDTO::getSongId,
-			favoriteSongDTO -> favoriteSongDTO
-		);
-
-		Flux<FavoriteSongDTO> result = favoriteSongDTOMapMono.map(favoriteSongDTOList -> {
-			List<String> listSongId = new ArrayList<>(favoriteSongDTOList.keySet());
-			songService.getListSongByListSongId(listSongId).map(songDTO -> {
-				favoriteSongDTOList.get(songDTO.getId()).setSong(songDTO);
-				return songDTO;
-			}).subscribe();
+		Mono<List<FavoriteSongDTO>> result = favoriteSongDTOMapMono.map(favoriteSongDTOMap -> {
+			List<String> listSongId = new ArrayList<>(favoriteSongDTOMap.keySet());
+			songService.getListSongByListSongId(listSongId)
+				.subscribe(songDTO -> favoriteSongDTOMap.get(songDTO.getId()).setSong(songDTO));
+			List<FavoriteSongDTO> favoriteSongDTOList = new ArrayList<>(favoriteSongDTOMap.values());
 			return favoriteSongDTOList;
-		}).flatMapMany(map ->
-			Flux.fromIterable(new ArrayList<>(map.values()))
-		);
+		}).delayElement(Duration.ofMillis(100));
 
-		return result;
+		return result.flatMapMany(Flux::fromIterable);
 	}
 
 	@Override
