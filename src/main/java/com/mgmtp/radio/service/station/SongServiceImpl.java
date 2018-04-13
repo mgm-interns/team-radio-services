@@ -77,7 +77,7 @@ public class SongServiceImpl implements SongService {
         }).switchIfEmpty(Mono.error(new RadioBadRequestException("Invalid station ID!")));
     }
 
-    private Flux<SongDTO> getListSongByListSongId(List<String> listSongId) {
+    public Flux<SongDTO> getListSongByListSongId(List<String> listSongId) {
         return songRepository.findByIdIn(listSongId).handle((song, sink) -> {
             SongDTO result = songMapper.songToSongDTO(song);
             Optional<User> creator = userRepository.findById(song.getCreatorId());
@@ -368,6 +368,8 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public Mono<SongDTO> getById(String id) {
-        return songRepository.findById(id).map(songMapper::songToSongDTO).switchIfEmpty(Mono.error(new RadioNotFoundException()));
+        return songRepository.findById(id)
+                    .map(songMapper::songToSongDTO)
+                    .switchIfEmpty(Mono.error(new RadioNotFoundException()));
     }
 }

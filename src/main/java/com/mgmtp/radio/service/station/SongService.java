@@ -23,4 +23,6 @@ public interface SongService {
     Mono<Boolean> existsById(String id);
 
     Mono<SongDTO> getById(String id);
+
+    Flux<SongDTO> getListSongByListSongId(List<String> listSongId);
 }

@@ -11,6 +11,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class FavoriteSongServiceImpl implements FavoriteSongService {
@@ -35,14 +38,25 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
 
 	@Override
 	public Flux<FavoriteSongDTO> findByUserId(String userId) {
-		return favoriteSongRepository.findByUserId(userId).map(favoriteSong -> {
-			FavoriteSongDTO favoriteSongDTO = favoriteSongMapper.favoriteSongToFavoriteSongDTO(favoriteSong);
-			songService.getById(favoriteSongDTO.getSongId()).map(songDTO -> {
-				favoriteSongDTO.setSong(songDTO);
+		Flux<FavoriteSongDTO> favoriteSongFlux = favoriteSongRepository.findByUserId(userId).map(favoriteSongMapper::favoriteSongToFavoriteSongDTO);
+
+		Mono<Map<String, FavoriteSongDTO>> favoriteSongDTOMapMono = favoriteSongFlux.collectMap(
+			FavoriteSongDTO::getSongId,
+			favoriteSongDTO -> favoriteSongDTO
+		);
+
+		Flux<FavoriteSongDTO> result = favoriteSongDTOMapMono.map(favoriteSongDTOList -> {
+			List<String> listSongId = new ArrayList<>(favoriteSongDTOList.keySet());
+			songService.getListSongByListSongId(listSongId).map(songDTO -> {
+				favoriteSongDTOList.get(songDTO.getId()).setSong(songDTO);
 				return songDTO;
 			}).subscribe();
-			return favoriteSongDTO;
-		});
+			return favoriteSongDTOList;
+		}).flatMapMany(map ->
+			Flux.fromIterable(new ArrayList<>(map.values()))
+		);
+
+		return result;
 	}
 
 	@Override
