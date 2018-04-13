@@ -123,7 +123,7 @@ public class UserServiceImplTest {
         savedUser.setCity(userDTO.getCity());
         savedUser.setEmail(userDTO.getEmail());
 
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.ofNullable(savedUser));
+        when(userRepository.findById(anyString())).thenReturn(Optional.of(savedUser));
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         //when
@@ -151,7 +151,7 @@ public class UserServiceImplTest {
         User savedUser = new User();
         savedUser.setAvatarUrl(URL);
 
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.ofNullable(savedUser));
+        when(userRepository.findById(anyString())).thenReturn(Optional.ofNullable(savedUser));
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         //when
@@ -172,7 +172,7 @@ public class UserServiceImplTest {
         User savedUser = new User();
         savedUser.setAvatarUrl(URL);
 
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.ofNullable(savedUser));
+        when(userRepository.findById(anyString())).thenReturn(Optional.of(savedUser));
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         //when
