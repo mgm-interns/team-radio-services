@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
+import javax.validation.Valid;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -136,7 +137,7 @@ public class SongController extends BaseRadioController {
     public Mono<SongDTO> addSong(
             @PathVariable String stationId,
             @PathVariable String youTubeVideoId,
-            @RequestParam(value = "message", required = false) String message
+            @RequestBody(required = false) String message
     ) {
         log.info("POST /api/v1/song  - data: " + youTubeVideoId.toString());
 
