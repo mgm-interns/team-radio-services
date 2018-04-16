@@ -19,6 +19,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +60,7 @@ public class GetFavoriteSongByUserIdImplTest {
         favoriteSong.setSongId(favoriteSongDTO.getSongId());
 
         when(favoriteSongRepository.findByUserId(anyString())).thenReturn(Flux.just(favoriteSong));
+        when(songService.getListSongByListSongIdId(anyList())).thenReturn(Flux.just(songDTO));
         when(songService.getById(favoriteSongDTO.getSongId())).thenReturn(Mono.just(songDTO));
         // when
         Flux<FavoriteSongDTO> result = favoriteSongService.findByUserId(favoriteSongDTO.getUserId());
@@ -78,7 +80,13 @@ public class GetFavoriteSongByUserIdImplTest {
         favoriteSongDTO.setUserId("001");
         favoriteSongDTO.setSongId("001");
 
+        SongDTO songDTO = new SongDTO();
+        songDTO.setId(favoriteSongDTO.getId());
+        songDTO.setSongId(favoriteSongDTO.getId());
+        songDTO.setSource("youtube");
+
         when(favoriteSongRepository.findByUserId(anyString())).thenReturn(Flux.empty());
+        when(songService.getListSongByListSongIdId(anyList())).thenReturn(Flux.just(songDTO));
 
         // when
         Flux<FavoriteSongDTO> result = favoriteSongService.findByUserId(favoriteSongDTO.getUserId());
