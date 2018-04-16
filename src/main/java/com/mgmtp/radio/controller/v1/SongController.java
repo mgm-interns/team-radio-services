@@ -146,7 +146,7 @@ public class SongController extends BaseRadioController {
     }
 
     @ApiOperation(
-            value = "UpVote a song in station playlist",
+            value = "Up vote a song in station playlist",
             notes = "Return updated song in station playlist"
     )
     @ApiResponses(value = {
@@ -171,7 +171,7 @@ public class SongController extends BaseRadioController {
     }
 
     @ApiOperation(
-            value = "Upvote a song in station playlist",
+            value = "Down vote a song in station playlist",
             notes = "Return updated song in station playlist"
     )
     @ApiResponses(value = {

@@ -284,15 +284,19 @@ public class SongServiceImpl implements SongService {
                 return Mono.error(new RadioBadRequestException("You can not upvote your own song."));
             }
 
-            List<String> userIdList = song.getUpVoteUserIdList();
+            List<String> upVoteUserIdList = song.getUpVoteUserIdList();
+            List<String> downVoteUserIdList = song.getDownVoteUserIdList();
+
             // Check if user is already upvote this station
-            if (userIdList.contains(userId)) {
+            if (upVoteUserIdList.contains(userId)) {
                 // if upvoted, remove userID record
-                userIdList.remove(userId);
+                upVoteUserIdList.remove(userId);
             } else {
                 // if NOT upvoted, add userID record
-                userIdList.add(userId);
+                downVoteUserIdList.remove(userId);
+                upVoteUserIdList.add(userId);
             }
+
             return songRepository
                     .save(song)
                     .flatMap(this::mapSongToSongDTO);
@@ -310,15 +314,19 @@ public class SongServiceImpl implements SongService {
                 return Mono.error(new RadioBadRequestException("You can not downvote your own song."));
             }
 
-            List<String> userIdList = song.getDownVoteUserIdList();
+            List<String> downVoteUserIdList = song.getDownVoteUserIdList();
+            List<String> upVoteUserIdList = song.getUpVoteUserIdList();
+
             // Check if user is already downvote this station
-            if (userIdList.contains(userId)) {
+            if (downVoteUserIdList.contains(userId)) {
                 // if downvoted, remove userID record
-                userIdList.remove(userId);
+                downVoteUserIdList.remove(userId);
             } else {
                 // if NOT downvoted, add userID record
-                userIdList.add(userId);
+                upVoteUserIdList.remove(userId);
+                downVoteUserIdList.add(userId);
             }
+
             return songRepository
                     .save(song)
                     .flatMap(this::mapSongToSongDTO);
