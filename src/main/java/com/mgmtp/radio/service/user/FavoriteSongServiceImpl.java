@@ -1,6 +1,7 @@
 package com.mgmtp.radio.service.user;
 
 import com.mgmtp.radio.domain.user.FavoriteSong;
+import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.user.FavoriteSongMapper;
@@ -10,11 +11,11 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.Duration;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class FavoriteSongServiceImpl implements FavoriteSongService {
@@ -39,19 +40,24 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
 
 	@Override
 	public Flux<FavoriteSongDTO> findByUserId(String userId) {
-		Mono<Map<String, FavoriteSongDTO>> favoriteSongDTOMapMono = favoriteSongRepository.findByUserId(userId)
-									.map(favoriteSongMapper::favoriteSongToFavoriteSongDTO)
-									.collectMap(FavoriteSongDTO::getSongId, favoriteSongDTO -> favoriteSongDTO);
+        Flux<FavoriteSongDTO> favoriteSongDTOFlux = favoriteSongRepository.findByUserId(userId)
+                .map(favoriteSongMapper::favoriteSongToFavoriteSongDTO);
 
-		Mono<List<FavoriteSongDTO>> result = favoriteSongDTOMapMono.map(favoriteSongDTOMap -> {
-			List<String> listSongId = new ArrayList<>(favoriteSongDTOMap.keySet());
-			songService.getListSongByListSongId(listSongId)
-				.subscribe(songDTO -> favoriteSongDTOMap.get(songDTO.getId()).setSong(songDTO));
-			List<FavoriteSongDTO> favoriteSongDTOList = new ArrayList<>(favoriteSongDTOMap.values());
-			return favoriteSongDTOList;
-		}).delayElement(Duration.ofMillis(100));
+        List<String> favoriteSongIdList = favoriteSongDTOFlux.map(FavoriteSongDTO::getSongId)
+                .toStream()
+                .collect(Collectors.toList());
 
-		return result.flatMapMany(Flux::fromIterable);
+        Stream<SongDTO> songDTOStream = songService.getListSongByListSongId(favoriteSongIdList).toStream();
+
+        return favoriteSongDTOFlux.map(favoriteSongDTO -> {
+            Optional<SongDTO> songDTO = songDTOStream.filter(song -> song.getSongId().equals(favoriteSongDTO.getSongId()))
+                    .findFirst();
+
+            if (songDTO.isPresent()) {
+                favoriteSongDTO.setSong(songDTO.get());
+            }
+            return favoriteSongDTO;
+        });
 	}
 
 	@Override
