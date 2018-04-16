@@ -1,7 +1,5 @@
 package com.mgmtp.radio.service.station;
 
-import com.mgmtp.radio.domain.station.NowPlaying;
-import com.mgmtp.radio.domain.station.PlayList;
 import com.google.api.services.youtube.model.Video;
 import com.mgmtp.radio.config.YouTubeConfig;
 import com.mgmtp.radio.domain.station.NowPlaying;
@@ -29,11 +27,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -84,7 +78,7 @@ public class SongServiceImpl implements SongService {
     }
 
     public Flux<SongDTO> getListSongByListSongId(List<String> listSongId) {
-        return songRepository.findBySongIdIn(listSongId).handle((song, sink) -> {
+        return songRepository.findByIdIn(listSongId).handle((song, sink) -> {
             SongDTO result = songMapper.songToSongDTO(song);
             if (song.getCreatorId() != null) {
                 Optional<User> creator = userRepository.findById(song.getCreatorId());
@@ -94,6 +88,11 @@ public class SongServiceImpl implements SongService {
                 }
             }
         });
+    }
+
+    @Override
+    public Flux<SongDTO> getListSongByListSongIdId(List<String> listSongId) {
+        return songRepository.findBySongIdIn(listSongId).map(songMapper::songToSongDTO);
     }
 
     @Override

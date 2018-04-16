@@ -46,7 +46,7 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
                 .toStream()
                 .collect(Collectors.toList());
 
-        List<SongDTO> songDTOList = songService.getListSongByListSongId(favoriteSongIdList)
+        List<SongDTO> songDTOList = songService.getListSongByListSongIdId(favoriteSongIdList)
 			.toStream()
 			.collect(Collectors.toList());
 

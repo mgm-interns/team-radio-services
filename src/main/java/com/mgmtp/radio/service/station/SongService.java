@@ -1,7 +1,6 @@
 package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.domain.station.PlayList;
-import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.dto.station.SongDTO;
 import org.aspectj.lang.annotation.AfterReturning;
 import reactor.core.publisher.Flux;
@@ -31,4 +30,6 @@ public interface SongService {
 	@AfterReturning(value = "execution(* com.mgmtp.radio.service.station.StationServiceImpl.checkAndSkipSongIfNeeded(..)"
 		, returning = "songDTO")
 	Mono<SongDTO> updateSongSkippedStatusToDb(Mono<SongDTO> songDTOMono);
+
+    Flux<SongDTO> getListSongByListSongIdId(List<String> listSongId);
 }
