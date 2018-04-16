@@ -134,6 +134,7 @@ public class SongServiceImpl implements SongService {
         Optional<NowPlaying> nowPlaying = stationPlayerHelper.getStationNowPlaying(stationId);
         listSong = listSong.stream()
                            .filter(songDTO -> songDTO.getStatus() != SongStatus.played)
+                           .sorted(sortByVote)
                            .collect(Collectors.toList());
         Optional<SongDTO> nowPlayingSong = listSong.stream()
                                                    .filter(songDTO -> songDTO.getStatus() == SongStatus.playing)
@@ -154,6 +155,19 @@ public class SongServiceImpl implements SongService {
 
         return playList;
     }
+
+    private Comparator<SongDTO> sortByVote = (SongDTO song1, SongDTO song2) -> {
+        int song1Vote = song1.getUpVoteCount() - song1.getDownVoteCount();
+        int song2Vote = song2.getUpVoteCount() - song2.getDownVoteCount();
+
+        if (song1Vote > song2Vote){
+            return -1;
+        } else if (song1Vote < song2Vote){
+            return 1;
+        } else{
+            return 0;
+        }
+    };
 
     private Optional<NowPlaying> handleNowPlaying(Optional<SongDTO> nowPlayingSong, Optional<NowPlaying> nowPlaying, String stationId, List<SongDTO> listSong) {
         if (nowPlayingSong.isPresent() && !nowPlaying.get().getSongId().equals(nowPlayingSong.get().getId())){
