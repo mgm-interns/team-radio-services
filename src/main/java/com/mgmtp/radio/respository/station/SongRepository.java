@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface SongRepository extends ReactiveMongoRepository<Song, String> {
     Flux<Song> findByIdIn(List<String> songId);
+    Flux<Song> findBySongIdIn(List<String> songId);
 }

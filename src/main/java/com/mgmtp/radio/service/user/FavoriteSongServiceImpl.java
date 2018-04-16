@@ -1,6 +1,7 @@
 package com.mgmtp.radio.service.user;
 
 import com.mgmtp.radio.domain.user.FavoriteSong;
+import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.user.FavoriteSongMapper;
@@ -11,9 +12,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class FavoriteSongServiceImpl implements FavoriteSongService {
@@ -38,25 +39,27 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
 
 	@Override
 	public Flux<FavoriteSongDTO> findByUserId(String userId) {
-		Flux<FavoriteSongDTO> favoriteSongFlux = favoriteSongRepository.findByUserId(userId).map(favoriteSongMapper::favoriteSongToFavoriteSongDTO);
+        Flux<FavoriteSongDTO> favoriteSongDTOFlux = favoriteSongRepository.findByUserId(userId)
+                .map(favoriteSongMapper::favoriteSongToFavoriteSongDTO);
 
-		Mono<Map<String, FavoriteSongDTO>> favoriteSongDTOMapMono = favoriteSongFlux.collectMap(
-			FavoriteSongDTO::getSongId,
-			favoriteSongDTO -> favoriteSongDTO
-		);
+        List<String> favoriteSongIdList = favoriteSongDTOFlux.map(FavoriteSongDTO::getSongId)
+                .toStream()
+                .collect(Collectors.toList());
 
-		Flux<FavoriteSongDTO> result = favoriteSongDTOMapMono.map(favoriteSongDTOList -> {
-			List<String> listSongId = new ArrayList<>(favoriteSongDTOList.keySet());
-			songService.getListSongByListSongId(listSongId).map(songDTO -> {
-				favoriteSongDTOList.get(songDTO.getId()).setSong(songDTO);
-				return songDTO;
-			}).subscribe();
-			return favoriteSongDTOList;
-		}).flatMapMany(map ->
-			Flux.fromIterable(new ArrayList<>(map.values()))
-		);
+        List<SongDTO> songDTOList = songService.getListSongByListSongId(favoriteSongIdList)
+			.toStream()
+			.collect(Collectors.toList());
 
-		return result;
+        return favoriteSongDTOFlux.map(favoriteSongDTO -> {
+            Optional<SongDTO> songDTO = songDTOList.stream()
+				.filter(song -> song.getSongId().equals(favoriteSongDTO.getSongId()))
+				.findFirst();
+
+            if (songDTO.isPresent()) {
+                favoriteSongDTO.setSong(songDTO.get());
+            }
+            return favoriteSongDTO;
+        });
 	}
 
 	@Override

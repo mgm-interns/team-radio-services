@@ -78,7 +78,7 @@ public class SongServiceImpl implements SongService {
     }
 
     public Flux<SongDTO> getListSongByListSongId(List<String> listSongId) {
-        return songRepository.findByIdIn(listSongId).handle((song, sink) -> {
+        return songRepository.findBySongIdIn(listSongId).handle((song, sink) -> {
             SongDTO result = songMapper.songToSongDTO(song);
             if (song.getCreatorId() != null) {
                 Optional<User> creator = userRepository.findById(song.getCreatorId());
