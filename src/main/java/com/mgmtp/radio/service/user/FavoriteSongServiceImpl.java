@@ -15,7 +15,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class FavoriteSongServiceImpl implements FavoriteSongService {
@@ -47,11 +46,14 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
                 .toStream()
                 .collect(Collectors.toList());
 
-        Stream<SongDTO> songDTOStream = songService.getListSongByListSongId(favoriteSongIdList).toStream();
+        List<SongDTO> songDTOList = songService.getListSongByListSongId(favoriteSongIdList)
+			.toStream()
+			.collect(Collectors.toList());
 
         return favoriteSongDTOFlux.map(favoriteSongDTO -> {
-            Optional<SongDTO> songDTO = songDTOStream.filter(song -> song.getSongId().equals(favoriteSongDTO.getSongId()))
-                    .findFirst();
+            Optional<SongDTO> songDTO = songDTOList.stream()
+				.filter(song -> song.getSongId().equals(favoriteSongDTO.getSongId()))
+				.findFirst();
 
             if (songDTO.isPresent()) {
                 favoriteSongDTO.setSong(songDTO.get());
