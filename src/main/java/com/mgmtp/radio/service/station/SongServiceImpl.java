@@ -4,14 +4,16 @@ import com.mgmtp.radio.domain.station.NowPlaying;
 import com.mgmtp.radio.domain.station.PlayList;
 import com.google.api.services.youtube.model.Video;
 import com.mgmtp.radio.config.YouTubeConfig;
+import com.mgmtp.radio.domain.station.NowPlaying;
+import com.mgmtp.radio.domain.station.PlayList;
 import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
-import com.mgmtp.radio.exception.SongNotFoundException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
+import com.mgmtp.radio.exception.SongNotFoundException;
 import com.mgmtp.radio.exception.StationNotFoundException;
 import com.mgmtp.radio.mapper.station.SongMapper;
 import com.mgmtp.radio.mapper.user.UserMapper;
@@ -20,14 +22,18 @@ import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.support.DateHelper;
+import com.mgmtp.radio.support.StationPlayerHelper;
 import com.mgmtp.radio.support.TransferHelper;
 import com.mgmtp.radio.support.YouTubeHelper;
-import com.mgmtp.radio.support.StationPlayerHelper;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -373,5 +379,18 @@ public class SongServiceImpl implements SongService {
         return songRepository.findById(id)
                     .map(songMapper::songToSongDTO)
                     .switchIfEmpty(Mono.error(new RadioNotFoundException()));
+    }
+
+
+    @Override
+    public Mono<SongDTO> updateSongSkippedStatusToDb(Mono<SongDTO> songDTOMono) {
+        return songDTOMono.map(songDTO -> {
+            songRepository.findById(songDTO.getId()).flatMap(song -> {
+                song.setSkipped(true);
+                return songRepository.save(song);
+            }).doOnSuccess(song -> songDTO.setSkipped(song.isSkipped())).subscribe();
+
+            return songDTO;
+        });
     }
 }
