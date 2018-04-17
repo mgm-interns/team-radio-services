@@ -63,8 +63,8 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
 	}
 
 	@Override
-	public Mono<Boolean> existsByUserIdAndSongId(String userId, String songId) {
-		return favoriteSongRepository.findByUserIdAndSongId(userId, songId).map(song -> true).switchIfEmpty(Mono.just(false));
+	public boolean existsByUserIdAndSongId(String userId, String songId) {
+		return favoriteSongRepository.findByUserIdAndSongId(userId, songId).blockOptional().isPresent();
 	}
 
 	@Override

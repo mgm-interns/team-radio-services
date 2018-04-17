@@ -1,10 +1,8 @@
 package com.mgmtp.radio.support.validator.user;
 
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
-import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.service.station.SongService;
 import com.mgmtp.radio.service.user.FavoriteSongService;
-import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.support.UserHelper;
 import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.stereotype.Component;
@@ -15,14 +13,12 @@ import org.springframework.validation.Validator;
 public class CreateFavoriteSongValidator implements Validator {
 
 	private final FavoriteSongService favoriteSongService;
-	private final UserService userService;
 	private final SongService songService;
 	private final MessageSourceAccessor messageSourceAccessor;
 	private final UserHelper userHelper;
 
-	public CreateFavoriteSongValidator(FavoriteSongService favoriteSongService, UserService userService, SongService songService, MessageSourceAccessor messageSourceAccessor, UserHelper userHelper) {
+	public CreateFavoriteSongValidator(FavoriteSongService favoriteSongService, SongService songService, MessageSourceAccessor messageSourceAccessor, UserHelper userHelper) {
 		this.favoriteSongService = favoriteSongService;
-		this.userService = userService;
 		this.songService = songService;
 		this.messageSourceAccessor = messageSourceAccessor;
 		this.userHelper = userHelper;
@@ -48,10 +44,6 @@ public class CreateFavoriteSongValidator implements Validator {
 	}
 
 	private void validateExists(FavoriteSongDTO favoriteSongDTO, Errors errors) {
-		if (!isUserExisted(favoriteSongDTO.getUserId())) {
-			errors.rejectValue("userId", "", messageSourceAccessor.getMessage("validation.error.exist", new String[]{"userId: " + favoriteSongDTO.getUserId()}));
-		}
-
 		if (!isSongExisted(favoriteSongDTO.getSongId())) {
 			errors.rejectValue("songId", "", messageSourceAccessor.getMessage("validation.error.exist", new String[]{"songId: " + favoriteSongDTO.getSongId()}));
 		}
@@ -63,21 +55,12 @@ public class CreateFavoriteSongValidator implements Validator {
 		}
 	}
 
-	private boolean isUserExisted(String userId) {
-		try {
-			userService.getUserById(userId);
-			return true;
-		} catch (RadioNotFoundException exception) {
-			return false;
-		}
-	}
-
 	private boolean isSongExisted(String songId) {
-		return songService.existsById(songId).block();
+		return songService.existsBySongId(songId);
 	}
 
 	private boolean isFavoriteSongExisted(String userId, String songId) {
-	    return favoriteSongService.existsByUserIdAndSongId(userId, songId).block();
+		return favoriteSongService.existsByUserIdAndSongId(userId, songId);
 	}
 
 }
