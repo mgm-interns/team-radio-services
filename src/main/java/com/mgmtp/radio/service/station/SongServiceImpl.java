@@ -91,6 +91,12 @@ public class SongServiceImpl implements SongService {
     }
 
     @Override
+    public boolean existsBySongId(String songId) {
+        return songRepository.findFirstBySongId(songId)
+            .blockOptional().isPresent();
+    }
+
+    @Override
     public Flux<SongDTO> getListSongByListSongIdId(List<String> listSongId) {
         return songRepository.findBySongIdIn(listSongId).map(songMapper::songToSongDTO);
     }

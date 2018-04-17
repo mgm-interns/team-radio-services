@@ -32,4 +32,6 @@ public interface SongService {
 	Mono<SongDTO> updateSongSkippedStatusToDb(Mono<SongDTO> songDTOMono);
 
     Flux<SongDTO> getListSongByListSongIdId(List<String> listSongId);
+
+    boolean existsBySongId(String songId);
 }

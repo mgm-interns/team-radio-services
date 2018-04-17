@@ -10,7 +10,7 @@ public interface FavoriteSongService {
 
 	Flux<FavoriteSongDTO> findByUserId(String userId);
 
-	Mono<Boolean> existsByUserIdAndSongId(String userId, String songId);
+	boolean existsByUserIdAndSongId(String userId, String songId);
 
 	Mono<FavoriteSongDTO> delete(String id, String userId);
 }
