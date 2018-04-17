@@ -47,8 +47,6 @@ public class DeleteFavoriteSongImplTest {
         favoriteSong.setUserId(favoriteSongDTO.getUserId());
         favoriteSong.setSongId(favoriteSongDTO.getSongId());
 
-        when(favoriteSongRepository.findByIdAndUserId(anyString(), anyString())).thenReturn(Mono.just(favoriteSong));
-
         // when
         favoriteSongRepository.delete(favoriteSong);
 
@@ -70,7 +68,6 @@ public class DeleteFavoriteSongImplTest {
         favoriteSong.setSongId(favoriteSongDTO.getSongId());
 
 
-        when(favoriteSongRepository.findByIdAndUserId(anyString(), anyString())).thenThrow(new RadioNotFoundException());
         when(favoriteSongRepository.delete(any(FavoriteSong.class)));
 
         // when
