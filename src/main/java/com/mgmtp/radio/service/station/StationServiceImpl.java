@@ -142,4 +142,10 @@ public class StationServiceImpl implements StationService {
 			})
 			.map(stationMapper::stationConfigurationToStationConfigurationDto);
 	}
+
+	@Override
+	public boolean existsByName(String name) {
+		return stationRepository.findFirstByName(name)
+			.blockOptional().isPresent();
+	}
 }
