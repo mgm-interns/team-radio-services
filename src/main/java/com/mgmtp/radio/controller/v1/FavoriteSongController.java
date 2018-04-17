@@ -9,6 +9,7 @@ import com.mgmtp.radio.service.user.FavoriteSongService;
 import com.mgmtp.radio.support.validator.user.CreateFavoriteSongValidator;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
@@ -66,12 +67,17 @@ public class FavoriteSongController extends BaseRadioController {
         }
 	}
 
-	@DeleteMapping("/{id}")
+	@DeleteMapping("/{songId}")
 	@ResponseStatus(HttpStatus.OK)
-	public Mono<FavoriteSongDTO> delete(@PathVariable(value = "id") String id) throws RadioException {
-        if(getCurrentUser().isPresent()) {
+	public Mono<ResponseEntity> delete(@PathVariable(value = "songId") String songId) throws RadioException {
+        if (getCurrentUser().isPresent()) {
             String userId = getCurrentUser().get().getId();
-            return favoriteSongService.delete(id, userId);
+            return favoriteSongService.delete(songId, userId).map(result -> {
+            	if (Long.compare(result, 0L) != 0) {
+            		return ResponseEntity.ok().build();
+				}
+				return ResponseEntity.notFound().build();
+			});
         } else {
             throw new RadioNotFoundException("unauthorized");
         }

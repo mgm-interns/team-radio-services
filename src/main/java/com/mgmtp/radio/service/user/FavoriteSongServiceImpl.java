@@ -3,7 +3,6 @@ package com.mgmtp.radio.service.user;
 import com.mgmtp.radio.domain.user.FavoriteSong;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.user.FavoriteSongDTO;
-import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.user.FavoriteSongMapper;
 import com.mgmtp.radio.respository.user.FavoriteSongRepository;
 import com.mgmtp.radio.service.station.SongService;
@@ -68,9 +67,7 @@ public class FavoriteSongServiceImpl implements FavoriteSongService {
 	}
 
 	@Override
-	public Mono<FavoriteSongDTO> delete(String id, String userId) {
-		return favoriteSongRepository.findByIdAndUserId(id, userId).flatMap(song -> {
-			return favoriteSongRepository.delete(song).then(Mono.just(favoriteSongMapper.favoriteSongToFavoriteSongDTO(song)));
-		}).switchIfEmpty(Mono.error(new RadioNotFoundException()));
+	public Mono<Long> delete(String songId, String userId) {
+		return favoriteSongRepository.deleteBySongIdAndUserId(songId, userId);
 	}
 }
