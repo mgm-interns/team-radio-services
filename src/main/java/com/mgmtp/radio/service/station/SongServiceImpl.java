@@ -310,9 +310,6 @@ public class SongServiceImpl implements SongService {
             String userId
     ) {
         return findSong(stationId, songId).flatMap(song -> {
-            if (song.getCreatorId().equals(userId)) {
-                return Mono.error(new RadioBadRequestException("You can not downvote your own song."));
-            }
 
             List<String> downVoteUserIdList = song.getDownVoteUserIdList();
             List<String> upVoteUserIdList = song.getUpVoteUserIdList();
