@@ -6,6 +6,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -14,29 +15,20 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
-@Document(collection = "station")
+@Document(collection = "history")
 @Data
-public class Station {
-	@Id
-	private String id;
-
-	@Indexed(unique = true)
-	private String name;
-
-	private String friendlyId;
-
-	private StationPrivacy privacy = StationPrivacy.station_public;
-
-	private String ownerId;
-
-	private List<String> playlist = Collections.emptyList();
-
-	@JsonDeserialize(using = LocalDateDeserializer.class)
-	@JsonSerialize(using = LocalDateSerializer.class)
-	private LocalDate createdAt;
-	private StationConfiguration stationConfiguration;
-
-	public Station() {
-		this.stationConfiguration = new StationConfiguration();
-	}
+@NoArgsConstructor
+public class History {
+    @Id
+    private String id;
+    private String stationId;
+    private String songId;
+    private String url;
+    private String title;
+    private String thumbnail;
+    private long duration;
+    private String creatorId;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    private LocalDate createdAt;
 }

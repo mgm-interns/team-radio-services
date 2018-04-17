@@ -2,11 +2,15 @@ package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.domain.station.PlayList;
+import com.mgmtp.radio.dto.station.HistoryDTO;
 import com.mgmtp.radio.dto.station.SongDTO;
+import com.mgmtp.radio.sdo.HistoryLimitation;
+import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.sdo.SongStatus;
+import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -37,9 +41,11 @@ public class SongController extends BaseRadioController {
     private static ConcurrentHashMap<String, Integer> compareHash = new ConcurrentHashMap<>();
 
     private final SongService songService;
+    private final HistoryService historyService;
 
-    public SongController(SongService songService) {
+    public SongController(SongService songService, HistoryService historyService) {
         this.songService = songService;
+        this.historyService = historyService;
     }
 
     @ApiOperation(
@@ -52,10 +58,9 @@ public class SongController extends BaseRadioController {
     })
     @GetMapping("/{stationId}/history")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<SongDTO> getListSongHistory(@PathVariable(value = "stationId") String stationId, @RequestParam(value = "limit") Integer limit) {
-        return songService.getHistoryByStationId(stationId)
-                .filter(distinctUrl(SongDTO::getUrl))
-                .take(limit);
+    public Flux<HistoryDTO> getListSongHistory(@PathVariable(value = "stationId") String stationId) {
+        return historyService.getHistoryByStationId(stationId)
+                .take(HistoryLimitation.first.getLimit());
     }
 
     private Function<Tuple4<Long, Flux<SongDTO>, Integer, Comparator<SongDTO>>, ServerSentEvent<List<SongDTO>>> createDataForGetListHistorySong =
