@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -116,7 +117,9 @@ public class StationServiceImpl implements StationService {
     }
 
     private String createFriendlyIdFromStationName(String stationName) {
-        String friendlyId = stationName.replaceAll("\\s+", "-");
+	    String friendlyId = Normalizer.normalize(stationName, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+	    friendlyId = friendlyId.replaceAll("đ", "d").replaceAll("Đ", "D");
+        friendlyId = friendlyId.replaceAll("\\s+", "-");
         Optional<Station> station = stationRepository.findByFriendlyId(friendlyId).blockOptional();
         if(station.isPresent()) {
             Long now = LocalDate.now().toEpochDay();
