@@ -1,10 +1,9 @@
 package com.mgmtp.radio.schedule;
 
+import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.dto.conversation.FromUserDTO;
-import com.mgmtp.radio.mapper.conversation.MessageMapper;
 import com.mgmtp.radio.service.conversation.MessageService;
 import com.mgmtp.radio.service.user.UserService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -15,24 +14,20 @@ public class UpdateConversationAvatarJob {
 
     private final UserService userService;
     private final MessageService messageService;
-    private final MessageMapper messageMapper;
-    @Value("${user.limit.username}")
-    private String usernameLimit;
-    @Value("${user.limit.avatar}")
-    private String avatarLimit;
+    private final Constant constant;
 
-    public UpdateConversationAvatarJob(UserService userService, MessageService messageService, MessageMapper messageMapper) {
+    public UpdateConversationAvatarJob(UserService userService, MessageService messageService, Constant constant) {
         this.userService = userService;
         this.messageService = messageService;
-        this.messageMapper = messageMapper;
+        this.constant = constant;
     }
 
     @Scheduled(cron = "0 0 23 * * ?")
     public void scheduleUpdateMessageTask() {
         LocalDate today = LocalDate.now();
 
-        String userNameFormat = "%-"+usernameLimit+"s";
-        String avatarUrlFormat = "%-"+avatarLimit+"s";
+        String userNameFormat = "%-"+constant.getAvatarLimit()+"s";
+        String avatarUrlFormat = "%-"+constant.getAvatarLimit()+"s";
 
         userService.findUserByUpdatedAt(today).forEach(userDTO -> {
             FromUserDTO fromUserDTO = new FromUserDTO();

@@ -1,5 +1,6 @@
 package com.mgmtp.radio.service.conversation;
 
+import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.config.MessageConfigTests;
 import com.mgmtp.radio.domain.conversation.FromUser;
 import com.mgmtp.radio.domain.conversation.Message;
@@ -21,8 +22,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.core.publisher.Mono;
 
-import java.lang.reflect.Field;
-
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
@@ -33,6 +32,9 @@ public class CreateMessageTest {
 
     @Mock
     MessageRepository messageRepository;
+
+    @Mock
+    Constant constant;
 
     @Autowired
     @Qualifier("messageMapperImpl")
@@ -48,15 +50,7 @@ public class CreateMessageTest {
     public void setUp() throws Exception {
         userHelper = new UserHelper();
         MockitoAnnotations.initMocks(this);
-        messageService = new MessageServiceImpl(messageRepository, messageMapper, userHelper);
-
-        Field usernameLimit = messageService.getClass().getDeclaredField("usernameLimit");
-        usernameLimit.setAccessible(true);
-        usernameLimit.set(messageService, "50");
-
-        Field avatarLimit = messageService.getClass().getDeclaredField("avatarLimit");
-        avatarLimit.setAccessible(true);
-        avatarLimit.set(messageService, "256");
+        messageService = new MessageServiceImpl(messageRepository, messageMapper, userHelper, constant);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.mgmtp.radio.service.conversation;
 
+import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.config.MessageConfigTests;
 import com.mgmtp.radio.domain.conversation.FromUser;
 import com.mgmtp.radio.domain.conversation.Message;
@@ -33,6 +34,9 @@ public class FindByFromUserIdTest {
     @Mock
     MessageRepository messageRepository;
 
+    @Mock
+    Constant constant;
+
     @Autowired
     @Qualifier("messageMapperImpl")
     MessageMapper messageMapper = MessageMapper.INSTANCE;
@@ -47,7 +51,7 @@ public class FindByFromUserIdTest {
     public void setUp() throws Exception {
         userHelper = new UserHelper();
         MockitoAnnotations.initMocks(this);
-        messageService = new MessageServiceImpl(messageRepository, messageMapper, userHelper);
+        messageService = new MessageServiceImpl(messageRepository, messageMapper, userHelper, constant);
     }
 
     @Test

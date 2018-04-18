@@ -12,4 +12,10 @@ public class Constant {
 
     @Value("${event.join_station}")
     private String event_join_station;
+
+    @Value("${user.limit.username}")
+    private String usernameLimit;
+
+    @Value("${user.limit.avatar}")
+    private String avatarLimit;
 }
