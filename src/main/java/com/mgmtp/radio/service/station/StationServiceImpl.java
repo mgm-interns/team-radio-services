@@ -137,11 +137,6 @@ public class StationServiceImpl implements StationService {
     }
 
     @Override
-    public Mono<Boolean> existsById(String id) {
-        return stationRepository.findById(id).map(station -> true).switchIfEmpty(Mono.just(false));
-    }
-
-    @Override
 	public Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO) {
 		return stationRepository.findById(id)
 			.map(station -> {
