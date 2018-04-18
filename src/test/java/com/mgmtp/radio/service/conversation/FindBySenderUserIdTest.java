@@ -2,12 +2,12 @@ package com.mgmtp.radio.service.conversation;
 
 import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.config.MessageConfigTests;
-import com.mgmtp.radio.domain.conversation.FromUser;
+import com.mgmtp.radio.domain.conversation.Sender;
 import com.mgmtp.radio.domain.conversation.Message;
 import com.mgmtp.radio.domain.user.User;
-import com.mgmtp.radio.dto.conversation.FromUserDTO;
+import com.mgmtp.radio.dto.conversation.SenderDTO;
 import com.mgmtp.radio.dto.conversation.MessageDTO;
-import com.mgmtp.radio.mapper.conversation.FromUserMapper;
+import com.mgmtp.radio.mapper.conversation.SenderMapper;
 import com.mgmtp.radio.mapper.conversation.MessageMapper;
 import com.mgmtp.radio.respository.conversation.MessageRepository;
 import com.mgmtp.radio.support.UserHelper;
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = MessageConfigTests.class)
-public class FindByFromUserIdTest {
+public class FindBySenderUserIdTest {
 
     @Mock
     MessageRepository messageRepository;
@@ -41,7 +41,7 @@ public class FindByFromUserIdTest {
     @Qualifier("messageMapperImpl")
     MessageMapper messageMapper = MessageMapper.INSTANCE;
 
-    FromUserMapper fromUserMapper = FromUserMapper.INSTANCE;
+    SenderMapper senderMapper = SenderMapper.INSTANCE;
 
     MessageService messageService;
 
@@ -55,30 +55,30 @@ public class FindByFromUserIdTest {
     }
 
     @Test
-    public void getByFromUserIdSuccess() {
+    public void getBySenderUserIdSuccess() {
         // given
         User user = new User();
         user.setId("001");
         user.setUsername("John Doe");
         user.setAvatarUrl("http://image.com/avatar");
-        FromUser fromUser = userHelper.convertUserToFromUser(user);
-        FromUserDTO fromUserDTO = fromUserMapper.fromUserToFromUserDTO(fromUser);
+        Sender sender = userHelper.convertUserToSender(user);
+        SenderDTO senderDTO = senderMapper.senderToSenderDTO(sender);
 
         MessageDTO messageDTO = new MessageDTO();
-        fromUserDTO.setAvatarUrl(user.getAvatarUrl());
-        messageDTO.setFrom(fromUserDTO);
+        senderDTO.setAvatarUrl(user.getAvatarUrl());
+        messageDTO.setSender(senderDTO);
         messageDTO.setContent("hello world");
         messageDTO.setStationId("S001");
 
         Message message = new Message();
-        message.setFrom(fromUser);
+        message.setSender(sender);
         message.setContent(messageDTO.getContent());
         message.setStationId(messageDTO.getStationId());
 
-        when(messageRepository.findByFrom_Id(anyString())).thenReturn(Flux.just(message));
+        when(messageRepository.findBySender_UserId(anyString())).thenReturn(Flux.just(message));
 
         // when
-        Flux<MessageDTO> result = messageService.findByFromUserId(messageDTO.getFrom().getId());
+        Flux<MessageDTO> result = messageService.findBySenderUserId(messageDTO.getSender().getUserId());
         MessageDTO expected = result.log().next().block();
 
         // then
@@ -92,19 +92,19 @@ public class FindByFromUserIdTest {
         user.setId("001");
         user.setUsername("John Doe");
         user.setAvatarUrl("http://image.com/avatar");
-        FromUser fromUser = userHelper.convertUserToFromUser(user);
-        FromUserDTO fromUserDTO = fromUserMapper.fromUserToFromUserDTO(fromUser);
+        Sender sender = userHelper.convertUserToSender(user);
+        SenderDTO senderDTO = senderMapper.senderToSenderDTO(sender);
 
         MessageDTO messageDTO = new MessageDTO();
-        fromUserDTO.setAvatarUrl(user.getAvatarUrl());
-        messageDTO.setFrom(fromUserDTO);
+        senderDTO.setAvatarUrl(user.getAvatarUrl());
+        messageDTO.setSender(senderDTO);
         messageDTO.setContent("hello world");
         messageDTO.setStationId("S001");
 
-        when(messageRepository.findByFrom_Id(anyString())).thenReturn(Flux.empty());
+        when(messageRepository.findBySender_UserId(anyString())).thenReturn(Flux.empty());
 
         // when
-        Flux<MessageDTO> result = messageService.findByFromUserId(messageDTO.getFrom().getId());
+        Flux<MessageDTO> result = messageService.findBySenderUserId(messageDTO.getSender().getUserId());
 
         // then
         assertNull(result.log().next().block());

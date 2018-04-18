@@ -5,8 +5,8 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 @Data
-public class FromUserDTO {
-    String id;
+public class SenderDTO {
+    String userId;
     String username;
     String avatarUrl;
 }

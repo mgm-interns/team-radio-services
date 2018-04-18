@@ -2,12 +2,12 @@ package com.mgmtp.radio.service.conversation;
 
 import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.config.MessageConfigTests;
-import com.mgmtp.radio.domain.conversation.FromUser;
+import com.mgmtp.radio.domain.conversation.Sender;
 import com.mgmtp.radio.domain.conversation.Message;
 import com.mgmtp.radio.domain.user.User;
-import com.mgmtp.radio.dto.conversation.FromUserDTO;
+import com.mgmtp.radio.dto.conversation.SenderDTO;
 import com.mgmtp.radio.dto.conversation.MessageDTO;
-import com.mgmtp.radio.mapper.conversation.FromUserMapper;
+import com.mgmtp.radio.mapper.conversation.SenderMapper;
 import com.mgmtp.radio.mapper.conversation.MessageMapper;
 import com.mgmtp.radio.respository.conversation.MessageRepository;
 import com.mgmtp.radio.support.UserHelper;
@@ -40,7 +40,7 @@ public class UpdateMessageTest {
     @Qualifier("messageMapperImpl")
     MessageMapper messageMapper = MessageMapper.INSTANCE;
 
-    FromUserMapper fromUserMapper = FromUserMapper.INSTANCE;
+    SenderMapper senderMapper = SenderMapper.INSTANCE;
 
     MessageServiceImpl messageService;
 
@@ -60,17 +60,17 @@ public class UpdateMessageTest {
         user.setId("001");
         user.setUsername("John Doe");
         user.setAvatarUrl("http://image.com/avatar");
-        FromUser fromUser = userHelper.convertUserToFromUser(user);
-        FromUserDTO fromUserDTO = fromUserMapper.fromUserToFromUserDTO(fromUser);
+        Sender sender = userHelper.convertUserToSender(user);
+        SenderDTO senderDTO = senderMapper.senderToSenderDTO(sender);
 
         MessageDTO messageDTO = new MessageDTO();
-        fromUserDTO.setAvatarUrl(user.getAvatarUrl());
-        messageDTO.setFrom(fromUserDTO);
+        senderDTO.setAvatarUrl(user.getAvatarUrl());
+        messageDTO.setSender(senderDTO);
         messageDTO.setContent("hello world");
         messageDTO.setStationId("S001");
 
         Message updatedMessage = new Message();
-        updatedMessage.setFrom(fromUser);
+        updatedMessage.setSender(sender);
         updatedMessage.setContent(messageDTO.getContent());
         updatedMessage.setStationId(messageDTO.getStationId());
 
@@ -80,7 +80,7 @@ public class UpdateMessageTest {
         MessageDTO expected = result.log().block();
 
         // then
-        assertEquals(messageDTO.getFrom(), expected.getFrom());
+        assertEquals(messageDTO.getSender(), expected.getSender());
         assertEquals(messageDTO.getContent(), expected.getContent());
         assertEquals(messageDTO.getStationId(), expected.getStationId());
     }

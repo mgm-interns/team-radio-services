@@ -4,15 +4,13 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 @NoArgsConstructor
 @Data
 public class MessageDTO {
     String id;
-    @NotNull
-    FromUserDTO from;
+    SenderDTO sender;
     @NotEmpty
     String content;
     @NotEmpty

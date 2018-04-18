@@ -1,7 +1,7 @@
 package com.mgmtp.radio.service.conversation;
 
 import com.mgmtp.radio.config.Constant;
-import com.mgmtp.radio.domain.conversation.FromUser;
+import com.mgmtp.radio.domain.conversation.Sender;
 import com.mgmtp.radio.domain.conversation.Message;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.conversation.MessageDTO;
@@ -33,17 +33,22 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public Mono<MessageDTO> create(String stationId, User user, MessageDTO messageDTO) {
-        FromUser fromUser = userHelper.convertUserToFromUser(user);
-        String userNameFormat = "%-"+constant.getUsernameLimit()+"s";
-        String avatarUrlFormat = "%-"+constant.getAvatarLimit()+"s";
-        fromUser.setUsername(String.format(userNameFormat, fromUser.getUsername()));
-        fromUser.setAvatarUrl(String.format(avatarUrlFormat, fromUser.getAvatarUrl()));
         messageDTO.setStationId(stationId);
         messageDTO.setCreatedAt(LocalDate.now());
 
         Message message = messageMapper.messageDtoToMessage(messageDTO);
-        message.setFrom(fromUser);
+        message.setSender(setSender(user));
         return messageRepository.save(message).map(messageMapper::messageToMessageDTO).switchIfEmpty(Mono.error(new RadioException()));
+    }
+
+    private Sender setSender(User user) {
+        Sender sender = new Sender();
+        String userNameFormat = "%-"+constant.getUsernameLimit()+"s";
+        String avatarUrlFormat = "%-"+constant.getAvatarLimit()+"s";
+        sender.setUserId(user.getId());
+        sender.setUsername(String.format(userNameFormat, user.getUsername()));
+        sender.setAvatarUrl(String.format(avatarUrlFormat, user.getAvatarUrl()));
+        return sender;
     }
 
     @Override
@@ -57,8 +62,8 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Flux<MessageDTO> findByFromUserId(String id) {
-        return messageRepository.findByFrom_Id(id).map(messageMapper::messageToMessageDTO);
+    public Flux<MessageDTO> findBySenderUserId(String id) {
+        return messageRepository.findBySender_UserId(id).map(messageMapper::messageToMessageDTO);
     }
 
     @Override

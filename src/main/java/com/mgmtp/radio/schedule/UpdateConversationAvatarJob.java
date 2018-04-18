@@ -1,7 +1,7 @@
 package com.mgmtp.radio.schedule;
 
 import com.mgmtp.radio.config.Constant;
-import com.mgmtp.radio.dto.conversation.FromUserDTO;
+import com.mgmtp.radio.dto.conversation.SenderDTO;
 import com.mgmtp.radio.service.conversation.MessageService;
 import com.mgmtp.radio.service.user.UserService;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,16 +26,16 @@ public class UpdateConversationAvatarJob {
     public void scheduleUpdateMessageTask() {
         LocalDate today = LocalDate.now();
 
-        String userNameFormat = "%-"+constant.getAvatarLimit()+"s";
+        String userNameFormat = "%-"+constant.getUsernameLimit()+"s";
         String avatarUrlFormat = "%-"+constant.getAvatarLimit()+"s";
 
         userService.findUserByUpdatedAt(today).forEach(userDTO -> {
-            FromUserDTO fromUserDTO = new FromUserDTO();
-            fromUserDTO.setId(userDTO.getId());
-            fromUserDTO.setUsername(String.format(userNameFormat, userDTO.getUsername()));
-            fromUserDTO.setAvatarUrl(String.format(avatarUrlFormat, userDTO.getAvatarUrl()));
-            messageService.findByFromUserId(userDTO.getId()).flatMap(messageDTO -> {
-                messageDTO.setFrom(fromUserDTO);
+            SenderDTO senderDTO = new SenderDTO();
+            senderDTO.setUserId(userDTO.getId());
+            senderDTO.setUsername(String.format(userNameFormat, userDTO.getUsername()));
+            senderDTO.setAvatarUrl(String.format(avatarUrlFormat, userDTO.getAvatarUrl()));
+            messageService.findBySenderUserId(userDTO.getId()).flatMap(messageDTO -> {
+                messageDTO.setSender(senderDTO);
                 return messageService.save(messageDTO);
             }).subscribe();
         });

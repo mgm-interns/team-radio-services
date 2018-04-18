@@ -17,7 +17,7 @@ import java.time.LocalDate;
 public class Message {
     @Id
     private String id;
-    private FromUser from;
+    private Sender sender;
     private String content;
     private String stationId;
     @JsonDeserialize(using = LocalDateDeserializer.class)

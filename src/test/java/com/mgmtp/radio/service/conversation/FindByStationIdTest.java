@@ -2,12 +2,12 @@ package com.mgmtp.radio.service.conversation;
 
 import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.config.MessageConfigTests;
-import com.mgmtp.radio.domain.conversation.FromUser;
+import com.mgmtp.radio.domain.conversation.Sender;
 import com.mgmtp.radio.domain.conversation.Message;
 import com.mgmtp.radio.domain.user.User;
-import com.mgmtp.radio.dto.conversation.FromUserDTO;
+import com.mgmtp.radio.dto.conversation.SenderDTO;
 import com.mgmtp.radio.dto.conversation.MessageDTO;
-import com.mgmtp.radio.mapper.conversation.FromUserMapper;
+import com.mgmtp.radio.mapper.conversation.SenderMapper;
 import com.mgmtp.radio.mapper.conversation.MessageMapper;
 import com.mgmtp.radio.respository.conversation.MessageRepository;
 import com.mgmtp.radio.support.UserHelper;
@@ -41,7 +41,7 @@ public class FindByStationIdTest {
     @Qualifier("messageMapperImpl")
     MessageMapper messageMapper = MessageMapper.INSTANCE;
 
-    FromUserMapper fromUserMapper = FromUserMapper.INSTANCE;
+    SenderMapper senderMapper = SenderMapper.INSTANCE;
 
     MessageService messageService;
 
@@ -61,17 +61,17 @@ public class FindByStationIdTest {
         user.setId("001");
         user.setUsername("John Doe");
         user.setAvatarUrl("http://image.com/avatar");
-        FromUser fromUser = userHelper.convertUserToFromUser(user);
-        FromUserDTO fromUserDTO = fromUserMapper.fromUserToFromUserDTO(fromUser);
+        Sender sender = userHelper.convertUserToSender(user);
+        SenderDTO senderDTO = senderMapper.senderToSenderDTO(sender);
 
         MessageDTO messageDTO = new MessageDTO();
-        fromUserDTO.setAvatarUrl(user.getAvatarUrl());
-        messageDTO.setFrom(fromUserDTO);
+        senderDTO.setAvatarUrl(user.getAvatarUrl());
+        messageDTO.setSender(senderDTO);
         messageDTO.setContent("hello world");
         messageDTO.setStationId("S001");
 
         Message message = new Message();
-        message.setFrom(fromUser);
+        message.setSender(sender);
         message.setContent(messageDTO.getContent());
         message.setStationId(messageDTO.getStationId());
 
@@ -92,12 +92,12 @@ public class FindByStationIdTest {
         user.setId("001");
         user.setUsername("John Doe");
         user.setAvatarUrl("http://image.com/avatar");
-        FromUser fromUser = userHelper.convertUserToFromUser(user);
-        FromUserDTO fromUserDTO = fromUserMapper.fromUserToFromUserDTO(fromUser);
+        Sender sender = userHelper.convertUserToSender(user);
+        SenderDTO senderDTO = senderMapper.senderToSenderDTO(sender);
 
         MessageDTO messageDTO = new MessageDTO();
-        fromUserDTO.setAvatarUrl(user.getAvatarUrl());
-        messageDTO.setFrom(fromUserDTO);
+        senderDTO.setAvatarUrl(user.getAvatarUrl());
+        messageDTO.setSender(senderDTO);
         messageDTO.setContent("hello world");
         messageDTO.setStationId("S001");
 

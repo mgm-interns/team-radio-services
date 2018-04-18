@@ -13,7 +13,7 @@ public interface MessageService {
 
     Mono<Boolean> existsById(String id);
 
-    Flux<MessageDTO> findByFromUserId(String userId);
+    Flux<MessageDTO> findBySenderUserId(String userId);
 
     Mono<MessageDTO> save(MessageDTO messageDTO);
 }
