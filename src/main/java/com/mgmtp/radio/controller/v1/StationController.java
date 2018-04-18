@@ -1,10 +1,13 @@
 package com.mgmtp.radio.controller.v1;
 
+import com.cloudinary.utils.StringUtils;
 import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
+import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
+import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
@@ -25,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.Map;
 
 @Log4j2
 @RestController
@@ -62,8 +66,8 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Flux<StationDTO> getAllStation() {
-        return this.stationService.getAll();
+    public Map<String, StationDTO> getAllStation() {
+            return this.stationService.getAllStationWithArrangement();
     }
 
     @ApiOperation(
@@ -78,6 +82,12 @@ public class StationController extends BaseRadioController {
     @ResponseStatus(HttpStatus.OK)
     public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
         return this.stationService.findById(stationId).switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
+        if(getCurrentUser().isPresent()) {
+            return this.stationService.joinStation(stationId,userMapper.userToUserDTO(getCurrentUser().get()));
+        }else{
+            UserDTO anonymousUserDto = new UserDTO();
+            return this.stationService.joinStation(stationId,anonymousUserDto);
+        }
     }
 
     @ApiOperation(
