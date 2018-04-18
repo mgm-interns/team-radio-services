@@ -56,7 +56,6 @@ public class HistoryChannelEndpoint extends BaseEventMessageEndpoint {
         String stationId = message.get(EventDataKeys.stationId.name()).toString();
         String songId = message.get(EventDataKeys.songId.name()).toString();
         distinctStationAndSong.put(stationId, songId);
-        System.out.println("Station ID: " + stationId + " Song ID: " + songId);
 
         stationRepository.findById(stationId)
                 .map(station -> {
