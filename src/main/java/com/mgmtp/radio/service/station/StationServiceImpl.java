@@ -34,7 +34,7 @@ public class StationServiceImpl implements StationService {
 
 	private final StationRepository stationRepository;
 	private final StationMapper stationMapper;
-    private static Map<String, StationDTO> allStations = new HashMap<>();
+	private final StationOnlineServiceImpl stationOnlineService;
 
 
     @Override
@@ -43,9 +43,10 @@ public class StationServiceImpl implements StationService {
 		return 0;
 	}
 
-    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository) {
+    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, StationOnlineServiceImpl stationOnlineService) {
         this.stationMapper = stationMapper;
         this.stationRepository = stationRepository;
+        this.stationOnlineService = stationOnlineService;
     }
 
     @Override
@@ -56,7 +57,14 @@ public class StationServiceImpl implements StationService {
 
 
     public Map<String, StationDTO> getAllStationWithArrangement(){
-		return allStations;
+	    Map<String, StationDTO> result = stationOnlineService.getAllStation();
+	    if (result.isEmpty()) {
+            getAll().map(stationDTO -> {
+                stationOnlineService.addStationToList(stationDTO);
+                return stationDTO;
+            }).subscribe();
+        }
+        return stationOnlineService.getAllStation();
 
 	}
 
@@ -80,7 +88,7 @@ public class StationServiceImpl implements StationService {
 
         station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationDTO.getStationConfiguration()));
 	    station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationDTO.getStationConfiguration().getSkipRule()));
-        return stationRepository.save(station).map(stationMapper::stationToStationDTO);
+        return stationRepository.save(station).map(stationMapper::stationToStationDTO).doOnSuccess(stationSaveSuccess -> stationOnlineService.addStationToList(stationSaveSuccess));;
     }
 
     private String createFriendlyIdFromStationName(String stationName) {
