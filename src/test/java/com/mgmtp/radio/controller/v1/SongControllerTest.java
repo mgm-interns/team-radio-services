@@ -50,7 +50,7 @@ public class SongControllerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        songController = new SongController(songService);
+        songController = new SongController(songService,null);
         webTestClient = WebTestClient.bindToController(songController).build();
     }
 
