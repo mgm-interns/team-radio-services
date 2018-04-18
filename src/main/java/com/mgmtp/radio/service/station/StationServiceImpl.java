@@ -6,9 +6,14 @@ import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.exception.StationNotFoundException;
+import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.respository.station.StationRepository;
+import org.aspectj.lang.annotation.Aspect;
+import com.mgmtp.radio.sdo.SkipRuleType;
+import lombok.Data;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -19,13 +24,24 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.*;
 
 @Service
+@Aspect
+@Data
 @Aspect
 public class StationServiceImpl implements StationService {
 
 	private final StationRepository stationRepository;
 	private final StationMapper stationMapper;
+    private static Map<String, StationDTO> allStations = new HashMap<>();
+
+
+    @Override
+	public int getOnlineUsersNumber(StationDTO stationDTO) {
+		//TODO Get number of online users id here
+		return 0;
+	}
 
     public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository) {
         this.stationMapper = stationMapper;
@@ -36,6 +52,13 @@ public class StationServiceImpl implements StationService {
     public Mono<Station> findStationByIdAndDeletedFalse(String stationId) {
         return stationRepository.retriveByIdOrFriendlyId(stationId);
     }
+
+
+
+    public Map<String, StationDTO> getAllStationWithArrangement(){
+		return allStations;
+
+	}
 
 	public Flux<StationDTO> getAll() {
         return stationRepository.findAll()
@@ -116,5 +139,36 @@ public class StationServiceImpl implements StationService {
                 .doOnNext(station -> count[0]++)
                 .filter(station -> count[0] == 1)
                 .switchIfEmpty(Mono.error(new StationNotFoundException(friendlyId)));
+    }
+    @Override
+    public Mono<StationDTO> joinStation(String stationId, UserDTO userDto) {
+        final Mono<StationDTO> monoStationDto = findById(stationId);
+        addUserToStationOnlineList(monoStationDto,userDto);
+        return monoStationDto;
+    }
+
+    public void addUserToStationOnlineList(Mono<StationDTO> monoStationDTO, UserDTO userDto) {
+        monoStationDTO.map(tempStationDto -> {
+            if (allStations.get(tempStationDto.getId())==null) {
+                final StationDTO stationDTO = allStations.get(tempStationDto.getId());
+                stationDTO.getUserList().put(userDto.getId(), userDto);
+            }
+            return true;
+        });
+    }
+
+
+    public UserDTO leaveStation (String stationId, String userId){
+        //TODO Call this method after user left station
+        UserDTO userDTO = allStations.get(stationId).getUserList().get(userId);
+        return userDTO;
+    }
+
+    public Mono<StationDTO> removeUserFromStationOnlineList(String stationId, UserDTO userDTO) {
+        if (allStations.get(stationId) !=null){
+            final StationDTO stationDto = allStations.get(stationId);
+            stationDto.getUserList().remove(userDTO.getId());
+        }
+        return null;
     }
 }
