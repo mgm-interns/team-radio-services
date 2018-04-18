@@ -63,35 +63,6 @@ public class SongController extends BaseRadioController {
                 .take(HistoryLimitation.first.getLimit());
     }
 
-    private Function<Tuple4<Long, Flux<SongDTO>, Integer, Comparator<SongDTO>>, ServerSentEvent<List<SongDTO>>> createDataForGetListHistorySong =
-            dataOfTuple -> ServerSentEvent.<List<SongDTO>>builder()
-                    .event("fetch")
-                    .id(Long.toString(dataOfTuple.getT1()))
-                    .data(
-                            dataOfTuple
-                                    .getT2()
-                                    .collectList()
-                                    .block().stream().filter(songDTO -> songDTO.getStatus() != SongStatus.playing)
-                                    .sorted(dataOfTuple.getT4())
-                                    .filter(distinctUrl(SongDTO::getUrl))
-                                    .limit(dataOfTuple.getT3())
-                                    .collect(Collectors.toList()))
-                    .build();
-
-    private Predicate<SongDTO> distinctUrl(Function<SongDTO, String> getUrl) {
-        Set<String> uniqueUrl = ConcurrentHashMap.newKeySet();
-        return url -> uniqueUrl.add(getUrl.apply(url));
-    }
-
-    private Comparator<SongDTO> songDTODateDescComparator = (SongDTO song1, SongDTO song2) -> {
-        if (song1.getCreatedAt().isAfter(song2.getCreatedAt())) {
-            return -1;
-        } else if (song1.getCreatedAt().isBefore(song2.getCreatedAt())) {
-            return 1;
-        }
-        return 0;
-    };
-
     @ApiOperation(
             value = "Get playlist and now playing",
             notes = "Returns playlist and now playing of station"

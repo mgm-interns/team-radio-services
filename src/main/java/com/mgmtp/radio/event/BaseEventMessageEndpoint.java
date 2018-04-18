@@ -12,8 +12,8 @@ import java.util.Map;
 @Log4j2
 public abstract class BaseEventMessageEndpoint {
 
-    private boolean validatesEventId = true;
-    private String associatedEventId;
+    protected boolean validatesEventId = true;
+    protected String associatedEventId;
 
     protected BaseEventMessageEndpoint() {
         validatesEventId = false;
@@ -53,40 +53,7 @@ public abstract class BaseEventMessageEndpoint {
         }
     }
 
-    private boolean canHandleMessage(Map<String, Object> messageData) {
-
-        if (messageData == null ||
-                messageData.get(EventDataKeys.user_id.name()) == null ||
-                messageData.get(EventDataKeys.event_id.name()) == null) {
-            log.error("Invalid event message data received {}", messageData);
-            return false;
-        }
-
-        String userId = (String) messageData.get(EventDataKeys.user_id.name());
-        String eventId = (String) messageData.get(EventDataKeys.event_id.name());
-
-        if (StringUtils.isEmpty(userId)) {
-            log.info("ignoring invalid userId: {}", userId);
-            return false;
-        }
-
-        if (eventId == null) {
-            log.info("null eventId found");
-            return false;
-        }
-
-        if (validatesEventId) {
-            if (!eventId.equals(associatedEventId)) {
-                log.debug("receive() - Associated event id: {}. I cannot handle events of cost: {}", associatedEventId, eventId);
-                return false;
-            }
-        }
-
-        if (!notLogEventIds.contains(eventId)) {
-            log.info("processing event '{}' for userId {}", eventId, userId);
-        }
-        return true;
-    }
+    abstract boolean canHandleMessage(Map<String, Object> messageData);
 
     protected abstract void process(Map<String, Object> message);
 }

@@ -48,6 +48,42 @@ public class SendVerificationMailEvent extends BaseEventMessageEndpoint {
     }
 
     @Override
+    boolean canHandleMessage(Map<String, Object> messageData) {
+
+        if (messageData == null ||
+                messageData.get(EventDataKeys.user_id.name()) == null ||
+                messageData.get(EventDataKeys.event_id.name()) == null) {
+            log.error("Invalid event message data received {}", messageData);
+            return false;
+        }
+
+        String userId = (String) messageData.get(EventDataKeys.user_id.name());
+        String eventId = (String) messageData.get(EventDataKeys.event_id.name());
+
+        if (StringUtils.isEmpty(userId)) {
+            log.info("ignoring invalid userId: {}", userId);
+            return false;
+        }
+
+        if (eventId == null) {
+            log.info("null eventId found");
+            return false;
+        }
+
+        if (validatesEventId) {
+            if (!eventId.equals(associatedEventId)) {
+                log.debug("receive() - Associated event id: {}. I cannot handle events of cost: {}", associatedEventId, eventId);
+                return false;
+            }
+        }
+
+        if (!notLogEventIds.contains(eventId)) {
+            log.info("processing event '{}' for userId {}", eventId, userId);
+        }
+        return true;
+    }
+
+    @Override
     protected void process(Map<String, Object> message) {
         String userId = message.get(EventDataKeys.user_id.name()).toString();
         String eventId = message.get(EventDataKeys.event_id.name()).toString();
