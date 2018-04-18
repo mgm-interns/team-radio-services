@@ -1,8 +1,11 @@
 package com.mgmtp.radio.support;
 
 import com.mgmtp.radio.domain.station.NowPlaying;
+import com.mgmtp.radio.domain.station.PlayList;
 import com.mgmtp.radio.dto.station.SongDTO;
 import org.springframework.stereotype.Component;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -12,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class StationPlayerHelper {
     public static final int TIME_BUFFER = 5;
-    private ConcurrentHashMap<String, NowPlaying> stationPlayer = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, Tuple2<NowPlaying, NowPlaying>> stationPlayer = new ConcurrentHashMap<>();
 
     public Optional<NowPlaying> addNowPlaying(String stationId, SongDTO song) {
         NowPlaying nowPlaying = new NowPlaying();
@@ -24,25 +27,41 @@ public class StationPlayerHelper {
         nowPlaying.setMessages(song.getMessage());
         nowPlaying.setEnded(false);
 
-        stationPlayer.put(stationId, nowPlaying);
+        Optional<Tuple2<NowPlaying, NowPlaying>> currentNowPlaying = Optional.ofNullable(stationPlayer.get(stationId));
+        if (currentNowPlaying.isPresent()){
+            NowPlaying previousPlay = currentNowPlaying.get().getT1().isEnded() ? currentNowPlaying.get().getT1() : new NowPlaying();
+            stationPlayer.put(stationId, Tuples.of(nowPlaying, previousPlay));
+        } else {
+            stationPlayer.put(stationId, Tuples.of(nowPlaying, new NowPlaying()));
+        }
 
-        return Optional.of(nowPlaying);
+        return Optional.of(stationPlayer.get(stationId).getT1());
     }
 
     public Optional<NowPlaying> getStationNowPlaying(String stationId) {
-        Optional<NowPlaying> currentPlayer = Optional.ofNullable(stationPlayer.get(stationId));
+        Optional<Tuple2<NowPlaying, NowPlaying>> currentPlayer = Optional.ofNullable(stationPlayer.get(stationId));
         if (currentPlayer.isPresent()) {
             long currentTimestamp = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
-            long durationInSecond = currentPlayer.get().getDuration() / 1000;
-            long songEndTime = currentPlayer.get().getStartingTime() + durationInSecond + TIME_BUFFER;
+            long durationInSecond = currentPlayer.get().getT1().getDuration() / 1000;
+            long songEndTime = currentPlayer.get().getT1().getStartingTime() + durationInSecond + TIME_BUFFER;
             if (currentTimestamp > songEndTime) {
-                currentPlayer.get().setEnded(true);
+                currentPlayer.get().getT1().setEnded(true);
             }
+
+            return Optional.of(currentPlayer.get().getT1());
         }
-        return currentPlayer;
+        return Optional.empty();
     }
 
     public void clearNowPlayingByStationId(String stationId) {
         stationPlayer.remove(stationId);
+    }
+
+    public Optional<NowPlaying> getPreviousPlay(String stationId) {
+        Optional<Tuple2<NowPlaying, NowPlaying>> currentPlayer = Optional.ofNullable(stationPlayer.get(stationId));
+        if (currentPlayer.isPresent()) {
+            return Optional.of(currentPlayer.get().getT2());
+        }
+        return Optional.empty();
     }
 }
