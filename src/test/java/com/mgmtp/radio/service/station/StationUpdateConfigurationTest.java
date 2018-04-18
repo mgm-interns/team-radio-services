@@ -35,6 +35,9 @@ public class StationUpdateConfigurationTest {
 	@Mock
     StationOnlineService stationOnlineService;
 
+	@Mock
+    StationOnlineServiceImpl stationOnlineService;
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(stationRepository);
