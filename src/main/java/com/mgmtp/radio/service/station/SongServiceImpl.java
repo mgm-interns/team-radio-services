@@ -233,6 +233,7 @@ public class SongServiceImpl implements SongService {
         if (removeSong.isPresent()) {
             listSong.remove(removeSong.get());
             updateSongPlayingStatusAndMessage(removeSong.get().getId(), SongStatus.played, removeSong.get().getMessage());
+            moveToHistory(stationId, currentPlaySongId);
         }
 
         SongDTO nowPlayingSong = listSong.get(0);
