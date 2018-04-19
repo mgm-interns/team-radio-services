@@ -4,11 +4,11 @@ import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Service("stationOnlineService")
 public class StationOnlineServiceImpl implements StationOnlineService {
+
     private static Map<String, StationDTO> allStations = new HashMap<>();
 
     public void addStationToList(StationDTO stationDTO) {
@@ -30,6 +30,30 @@ public class StationOnlineServiceImpl implements StationOnlineService {
     }
 
     public Map<String,StationDTO> getAllStation() {
-        return allStations;
+        return sortByStation(allStations);
+    }
+
+    public StationDTO getStationById(String stationId){
+        return allStations.get(stationId);
+    }
+
+    private Map<String,StationDTO> sortByStation(Map<String,StationDTO> unsortMap){
+
+        List<Map.Entry<String, StationDTO>> list =
+                new LinkedList<Map.Entry<String, StationDTO>>(unsortMap.entrySet());
+
+        Collections.sort(list,new Comparator<Map.Entry<String, StationDTO>>() {
+            public int compare(Map.Entry<String, StationDTO> o1,
+                               Map.Entry<String, StationDTO> o2) {
+                return (o1.getValue()).compareTo(o2.getValue());
+            }
+        });
+
+        Map<String, StationDTO> sortedMap = new LinkedHashMap<String, StationDTO>();
+        for (Map.Entry<String, StationDTO> entry : list) {
+            sortedMap.put(entry.getKey(), entry.getValue());
+        }
+
+        return sortedMap;
     }
 }

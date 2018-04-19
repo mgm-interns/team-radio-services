@@ -18,6 +18,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.text.Normalizer;
 import java.time.Duration;
@@ -27,9 +28,6 @@ import java.util.Optional;
 import java.util.*;
 
 @Service
-@Aspect
-@Data
-@Aspect
 public class StationServiceImpl implements StationService {
 
 	private final StationRepository stationRepository;
@@ -65,7 +63,6 @@ public class StationServiceImpl implements StationService {
             }).subscribe();
         }
         return stationOnlineService.getAllStation();
-
 	}
 
 	public Flux<StationDTO> getAll() {
@@ -153,30 +150,24 @@ public class StationServiceImpl implements StationService {
         final Mono<StationDTO> monoStationDto = findById(stationId);
         addUserToStationOnlineList(monoStationDto,userDto);
         return monoStationDto;
+        final Mono<StationDTO> monoStationDto = findById(stationId);
+        return monoStationDto
+                .doOnNext(stationDTO -> addUserToStationOnlineList(stationDTO,userDto));
     }
 
-    public void addUserToStationOnlineList(Mono<StationDTO> monoStationDTO, UserDTO userDto) {
-        monoStationDTO.map(tempStationDto -> {
-            if (allStations.get(tempStationDto.getId())==null) {
-                final StationDTO stationDTO = allStations.get(tempStationDto.getId());
-                stationDTO.getUserList().put(userDto.getId(), userDto);
-            }
-            return true;
-        });
+    public void addUserToStationOnlineList(StationDTO stationDTO, UserDTO userDto) {
+        //TODO Call this method after user join station
+        stationOnlineService.addOnlineUser(userDto,stationDTO.getId());
     }
 
 
     public UserDTO leaveStation (String stationId, String userId){
         //TODO Call this method after user left station
-        UserDTO userDTO = allStations.get(stationId).getUserList().get(userId);
-        return userDTO;
+        stationOnlineService.addOnlineUser(userDto,stationDTO.getId());
     }
 
-    public Mono<StationDTO> removeUserFromStationOnlineList(String stationId, UserDTO userDTO) {
-        if (allStations.get(stationId) !=null){
-            final StationDTO stationDto = allStations.get(stationId);
-            stationDto.getUserList().remove(userDTO.getId());
-        }
-        return null;
+    public StationDTO removeUserFromStationOnlineList(String stationId, UserDTO userDTO) {
+        stationOnlineService.removeOnlineUser(userDTO,stationId);
+        return stationOnlineService.getStationById(stationId);
     }
 }

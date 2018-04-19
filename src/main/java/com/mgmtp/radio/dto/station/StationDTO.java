@@ -54,8 +54,8 @@ public class StationDTO implements  Comparable<StationDTO> {
 
 	@Override
 	public int compareTo(StationDTO otherStationDto) {
-		int LARGER = 1;
-		int SMALLER = -1;
+		int LARGER = -1;
+		int SMALLER = 1;
 		int EQUAL = 0;
 
 		if(this.hasUser() && !otherStationDto.hasUser())
