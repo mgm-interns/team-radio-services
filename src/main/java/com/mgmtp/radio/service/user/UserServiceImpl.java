@@ -6,8 +6,12 @@ import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.user.UserRepository;
+import com.mgmtp.radio.social.facebook.model.FacebookAvatar;
+import com.mgmtp.radio.social.facebook.model.FacebookUser;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,7 +19,9 @@ import java.util.Set;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.*;
 
+@Log4j2
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -23,7 +29,9 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserMapper userMapper, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserMapper userMapper,
+                           UserRepository userRepository,
+                           PasswordEncoder passwordEncoder) {
         this.userMapper = userMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -42,6 +50,54 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.userDtoToUser(userDTO);
         user.setRoles(getDefaultRole());
         return userMapper.userToUserDTO(userRepository.save(user));
+    }
+
+
+    @Override
+    public User registerByFacebook(FacebookUser facebookUser, FacebookAvatar facebookAvatar) {
+
+        Optional<User> existUser = Optional.empty();
+        if (Optional.of(facebookUser).isPresent()) {
+            existUser = userRepository.findByEmail(facebookUser.email);
+        }
+
+        if (existUser.isPresent()) {
+            User user = existUser.get();
+
+            user.setFacebookId(facebookUser.id);
+
+            String name = StringUtils.isEmpty(user.getName()) ? facebookUser.name : user.getName();
+            user.setName(name);
+
+            String firstName = StringUtils.isEmpty(user.getFirstName()) ? facebookUser.firstName : user.getName();
+            user.setFirstName(firstName);
+
+            String lastName = StringUtils.isEmpty(user.getLastName()) ? facebookUser.lastName : user.getLastName();
+            user.setLastName(lastName);
+
+            String userAvatarUrl = StringUtils.isEmpty(user.getAvatarUrl()) ? facebookAvatar.data.url : user.getAvatarUrl();
+            user.setAvatarUrl(userAvatarUrl);
+
+            return userRepository.save(existUser.get());
+
+        } else {
+
+            User user = new User();
+            user.setFacebookId(facebookUser.id);
+            user.setPassword(UUID.randomUUID().toString());
+            user.setName(facebookUser.name);
+            user.setFirstName(facebookUser.firstName);
+            user.setLastName(facebookUser.lastName);
+            user.setEmail(facebookUser.email);
+            String userAvatarUrl = StringUtils.isEmpty(user.getAvatarUrl()) ? facebookAvatar.data.url : user.getAvatarUrl();
+            user.setAvatarUrl(userAvatarUrl);
+            return user;
+        }
+    }
+
+    @Override
+    public Optional<User> getUserByFacebookId(String facebookId) {
+        return userRepository.findFirstByFacebookId(facebookId);
     }
 
     private Set<Role> getDefaultRole() {

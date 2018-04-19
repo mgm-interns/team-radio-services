@@ -4,6 +4,7 @@ import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.user.UserRepository;
+import com.mgmtp.radio.support.CloudinaryHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;

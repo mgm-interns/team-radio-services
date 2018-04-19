@@ -58,6 +58,10 @@ public class User implements UserDetails, Serializable {
 
     private String coverUrl;
 
+    private String facebookId;
+
+    private String googleId;
+
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate updatedAt;
