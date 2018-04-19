@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import javax.validation.constraints.Email;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -39,5 +40,7 @@ public class UserDTO {
     String avatarUrl;
 
     String coverUrl;
+
+    LocalDate updatedAt;
 
 }
