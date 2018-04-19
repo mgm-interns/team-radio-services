@@ -37,8 +37,10 @@ public class HistoryServiceImpl implements HistoryService{
         return historyRepository.findByStationId(stationId)
             .map(history -> {
                 HistoryDTO result =  historyMapper.historyToHistoryDto(history);
-                Optional<User> creator = userRepository.findById(history.getCreatorId());
-                result.setCreator(creator.isPresent() ? userMapper.userToUserDTO(creator.get()) : null);
+                if (history.getCreatorId() != null) {
+                    Optional<User> creator = userRepository.findById(history.getCreatorId());
+                    result.setCreator(creator.isPresent() ? userMapper.userToUserDTO(creator.get()) : null);
+                }
                 return result;
             })
             .filter(distinctUrl(HistoryDTO::getUrl));
