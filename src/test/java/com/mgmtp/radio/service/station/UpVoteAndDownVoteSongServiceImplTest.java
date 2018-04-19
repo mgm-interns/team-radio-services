@@ -26,6 +26,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.core.publisher.Mono;
 
@@ -75,6 +76,8 @@ public class UpVoteAndDownVoteSongServiceImplTest {
     @Autowired
     private StationPlayerHelper stationPlayerHelper;
 
+    MessageChannel historyChannel;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -95,7 +98,7 @@ public class UpVoteAndDownVoteSongServiceImplTest {
                 transferHelper,
                 dateHelper,
                 youTubeConfig,
-                stationPlayerHelper);
+                stationPlayerHelper, historyChannel);
 
         //given
         user = new User();
@@ -202,26 +205,5 @@ public class UpVoteAndDownVoteSongServiceImplTest {
 
         // user in up vote list is match with userId
         assertEquals(savedSongDTO.getDownvoteUserList().get(0).getId(), user.getId());
-    }
-
-    @Test
-    public void testDownVoteSongInStationPlaylistWithDownVoteOwnSong() {
-        Song savedSong = new Song();
-        savedSong.setId(song.getId());
-        savedSong.setUpVoteUserIdList(new ArrayList<>());
-        savedSong.setDownVoteUserIdList(new ArrayList<>());
-        savedSong.getDownVoteUserIdList().add(user.getId());
-
-        when(songRepository.save(any(Song.class))).thenReturn(Mono.just(savedSong));
-
-        // Service will thrown bad request exception
-        Assertions.assertThatExceptionOfType(Exception.class)
-                .isThrownBy(() ->
-                        songService.downVoteSongInStationPlaylist(
-                                station.getId(),
-                                song.getId(),
-                                user.getId()
-                        ).block())
-                .withCauseInstanceOf(RadioBadRequestException.class);
     }
 }

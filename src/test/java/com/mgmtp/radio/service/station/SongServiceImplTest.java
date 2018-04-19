@@ -27,6 +27,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -79,6 +80,8 @@ public class SongServiceImplTest {
     @Autowired
     YouTubeConfig youTubeConfig;
 
+    MessageChannel historyChannel;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -92,8 +95,8 @@ public class SongServiceImplTest {
                 transferHelper,
                 dateHelper,
                 youTubeConfig,
-                stationPlayerHelper
-        );
+                stationPlayerHelper,
+                historyChannel);
     }
 
     @Test

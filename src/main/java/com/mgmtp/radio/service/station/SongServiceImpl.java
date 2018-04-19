@@ -18,11 +18,16 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
+import com.mgmtp.radio.sdo.EventDataKeys;
 import com.mgmtp.radio.sdo.SongStatus;
+import com.mgmtp.radio.sdo.SubscriptionEvents;
 import com.mgmtp.radio.support.DateHelper;
 import com.mgmtp.radio.support.StationPlayerHelper;
 import com.mgmtp.radio.support.TransferHelper;
 import com.mgmtp.radio.support.YouTubeHelper;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.GenericMessage;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,6 +51,7 @@ public class SongServiceImpl implements SongService {
     private final SongMapper songMapper;
     private final UserMapper userMapper;
     private final StationPlayerHelper stationPlayerHelper;
+    private final MessageChannel historyChannel;
 
     public SongServiceImpl(
             SongMapper songMapper,
@@ -56,7 +62,9 @@ public class SongServiceImpl implements SongService {
             YouTubeHelper youTubeHelper,
             TransferHelper transferHelper,
             DateHelper dateHelper,
-            YouTubeConfig youTubeConfig, StationPlayerHelper stationPlayerHelper) {
+            YouTubeConfig youTubeConfig,
+            StationPlayerHelper stationPlayerHelper,
+            MessageChannel historyChannel) {
         this.songRepository = songRepository;
         this.stationRepository = stationRepository;
         this.userRepository = userRepository;
@@ -67,6 +75,7 @@ public class SongServiceImpl implements SongService {
         this.userMapper = userMapper;
         this.youTubeConfig = youTubeConfig;
         this.stationPlayerHelper = stationPlayerHelper;
+        this.historyChannel = historyChannel;
     }
 
     @Override
@@ -152,6 +161,7 @@ public class SongServiceImpl implements SongService {
         }
         if (nowPlaying.get().isEnded()) {
             String endedSongId = nowPlaying.get().getSongId();
+            moveToHistory(stationId, endedSongId);
             nowPlaying = getNextSongFromList(stationId, endedSongId, listSong);
         } else {
             Set<String> listSkippedSongId = listSong.stream()
@@ -168,6 +178,16 @@ public class SongServiceImpl implements SongService {
             clearMessageOfNotSkipSongAnyMore(listSong, listSkippedSongId);
         }
         return nowPlaying;
+    }
+
+    private void moveToHistory(String stationId, String songId) {
+        Map<String, Object> historyParam = new HashMap<>();
+        historyParam.put(EventDataKeys.user_id.name(), "123");
+        historyParam.put(EventDataKeys.event_id.name(), SubscriptionEvents.song_history.name());
+        historyParam.put(EventDataKeys.stationId.name(), stationId);
+        historyParam.put(EventDataKeys.songId.name(), songId);
+
+        historyChannel.send(new GenericMessage<>(historyParam));
     }
 
     private void addMessageToWillBeSkipSongInList(List<SongDTO> listSong){
@@ -213,6 +233,7 @@ public class SongServiceImpl implements SongService {
         if (removeSong.isPresent()) {
             listSong.remove(removeSong.get());
             updateSongPlayingStatusAndMessage(removeSong.get().getId(), SongStatus.played, removeSong.get().getMessage());
+            moveToHistory(stationId, currentPlaySongId);
         }
 
         SongDTO nowPlayingSong = listSong.get(0);

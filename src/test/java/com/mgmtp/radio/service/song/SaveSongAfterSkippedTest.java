@@ -1,6 +1,5 @@
 package com.mgmtp.radio.service.song;
 
-import com.mgmtp.radio.RadioApplication;
 import com.mgmtp.radio.RadioApplicationTests;
 import com.mgmtp.radio.config.YouTubeConfig;
 import com.mgmtp.radio.domain.station.Song;
@@ -18,23 +17,21 @@ import com.mgmtp.radio.support.DateHelper;
 import com.mgmtp.radio.support.StationPlayerHelper;
 import com.mgmtp.radio.support.TransferHelper;
 import com.mgmtp.radio.support.YouTubeHelper;
-import com.mongodb.Mongo;
 import lombok.extern.log4j.Log4j2;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -81,6 +78,8 @@ public class SaveSongAfterSkippedTest {
 
 	final String songId = "5ab3800f04a97f59986e92f61";
 
+	MessageChannel historyChannel;
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -99,7 +98,7 @@ public class SaveSongAfterSkippedTest {
 			transferHelper,
 			dateHelper,
 			youTubeConfig,
-			stationPlayerHelper);
+			stationPlayerHelper, historyChannel);
 
 		// Init new user
 		user = new User();

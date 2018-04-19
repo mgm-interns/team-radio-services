@@ -26,4 +26,9 @@ public class MessageChannelConfig {
     MessageChannel registerChannel(@Qualifier(TASK_EXECUTOR) TaskExecutor taskExecutor) {
         return new PublishSubscribeChannel(taskExecutor);
     }
+
+    @Bean
+    MessageChannel historyChannel(@Qualifier(TASK_EXECUTOR) TaskExecutor taskExecutor){
+        return new PublishSubscribeChannel(taskExecutor);
+    }
 }
