@@ -53,6 +53,10 @@ public class User implements UserDetails, Serializable {
 
     private String coverUrl;
 
+    private String facebookId;
+
+    private String googleId;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.roles;
