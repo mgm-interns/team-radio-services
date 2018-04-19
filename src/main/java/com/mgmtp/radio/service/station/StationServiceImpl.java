@@ -90,17 +90,7 @@ public class StationServiceImpl implements StationService {
 
     @Override
     public Mono<StationDTO> findById(String id) {
-        Mono<Station> stationMono = stationRepository.findById(id);
-        Station station = stationMono.block();
-        StationDTO stationDTO = stationMono.map(stationMapper::stationToStationDTO).block();
-        List<String> playlistIdList = station.getPlaylist();
-        if (playlistIdList == null || playlistIdList.isEmpty()){
-            return Mono.just(stationDTO);
-        }
-        return songService.getAllSongById(playlistIdList).collectList().map(songs -> {
-            stationDTO.setPlaylist(songs);
-            return stationDTO;
-        });
+        return stationRepository.findById(id).map(stationMapper::stationToStationDTO);
     }
 
     @Override
@@ -153,4 +143,20 @@ public class StationServiceImpl implements StationService {
 			})
 			.map(stationMapper::stationConfigurationToStationConfigurationDto);
 	}
+
+    @Override
+    public Mono<StationDTO> findByFriendlyId(String friendlyId) {
+        return stationRepository.findByFriendlyId(friendlyId).map(stationMapper::stationToStationDTO);
+    }
+
+    @Override
+    public Mono<StationDTO> updateByFriendlyId(String id, StationDTO stationDTO) {
+        return stationRepository.findByFriendlyId(id)
+                .switchIfEmpty(Mono.error(new RadioNotFoundException("Station friendly id is not found.")))
+                .flatMap(station -> {
+                    station.setName(stationDTO.getName());
+                    return stationRepository.save(station);
+                })
+                .map(stationMapper::stationToStationDTO);
+    }
 }
