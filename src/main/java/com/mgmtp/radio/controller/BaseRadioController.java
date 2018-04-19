@@ -9,7 +9,7 @@ import java.util.Optional;
 @Log4j2
 public abstract class BaseRadioController {
 
-    protected Optional<User>  getCurrentUser(){
+    protected Optional<User> getCurrentUser(){
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<User> user = Optional.empty();
         if(!principal.equals("anonymousUser")) {
