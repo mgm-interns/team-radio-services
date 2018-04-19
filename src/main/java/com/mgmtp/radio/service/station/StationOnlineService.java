@@ -11,4 +11,5 @@ public interface StationOnlineService {
     void addOnlineUser(UserDTO userDTO, String stationId);
     void removeOnlineUser(UserDTO userDTO, String stationId);
     Map<String,StationDTO> getAllStation();
+    StationDTO getStationById(String stationId);
 }
