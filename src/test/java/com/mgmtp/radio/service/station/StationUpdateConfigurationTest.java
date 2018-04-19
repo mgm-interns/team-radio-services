@@ -58,7 +58,7 @@ public class StationUpdateConfigurationTest {
 		final String id= "123456";
 		Station station = new Station();
 
-		when(stationRepository.findByIdOrFriendlyId(id)).thenReturn(Mono.just(station));
+		when(stationRepository.retriveByIdOrFriendlyId(id)).thenReturn(Mono.just(station));
 		when(stationRepository.save(station)).thenReturn(Mono.just(station));
 
 		//Fake input StationConfigurationDto
