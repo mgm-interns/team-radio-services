@@ -31,7 +31,7 @@ public class UserServiceImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         passwordEncoder = new BCryptPasswordEncoder();
-        userService = new UserServiceImpl(userMapper, userRepository, passwordEncoder);
+        userService = new UserServiceImpl(userMapper, userRepository, passwordEncoder,null,null);
     }
 
     @Test

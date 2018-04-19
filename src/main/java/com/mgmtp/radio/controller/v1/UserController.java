@@ -3,6 +3,7 @@ package com.mgmtp.radio.controller.v1;
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
 import com.mgmtp.radio.domain.user.User;
+import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
@@ -23,6 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.util.Map;
@@ -74,6 +76,27 @@ public class UserController extends BaseRadioController {
             throw new RadioNotFoundException("unauthorized");
         }
     }
+
+    @ApiOperation(
+            value = "Get all stations of current user",
+            notes = "Returns all stations of current user"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
+    })
+    @GetMapping("/me/stations")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<StationDTO> getAllStationOfUser() throws RadioNotFoundException {
+        log.info("GET /api/v1/users/me/stations");
+
+        if(getCurrentUser().isPresent()) {
+            return userService.getAllStationOfUserById(getCurrentUser().get().getId());
+        } else {
+            throw new RadioNotFoundException("unauthorized");
+        }
+    }
+
 
     @ApiOperation(
             value = "Register an user",

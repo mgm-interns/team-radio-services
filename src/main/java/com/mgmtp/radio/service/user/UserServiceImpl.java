@@ -2,15 +2,19 @@ package com.mgmtp.radio.service.user;
 
 import com.mgmtp.radio.domain.user.Role;
 import com.mgmtp.radio.domain.user.User;
+import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioNotFoundException;
+import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.mapper.user.UserMapper;
+import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.social.facebook.model.FacebookAvatar;
 import com.mgmtp.radio.social.facebook.model.FacebookUser;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -24,13 +28,15 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final StationRepository stationRepository;
+    private final StationMapper stationMapper;
 
-    public UserServiceImpl(UserMapper userMapper,
-                           UserRepository userRepository,
-                           PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserMapper userMapper, UserRepository userRepository, PasswordEncoder passwordEncoder, StationRepository stationRepository, StationMapper stationMapper) {
         this.userMapper = userMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.stationRepository= stationRepository;
+        this.stationMapper = stationMapper;
     }
 
     @Override
@@ -142,5 +148,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDTO> findUserByUpdatedAt(LocalDate date) {
         return userRepository.findByUpdatedAtEquals(date).stream().map(userMapper::userToUserDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    public Flux<StationDTO> getAllStationOfUserById(String id) {
+        return stationRepository.findByOwnerId(id).map(station -> stationMapper.stationToStationDTO(station));
     }
 }
