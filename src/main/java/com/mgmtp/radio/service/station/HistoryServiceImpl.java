@@ -41,8 +41,7 @@ public class HistoryServiceImpl implements HistoryService{
                 result.setCreator(creator.isPresent() ? userMapper.userToUserDTO(creator.get()) : null);
                 return result;
             })
-            .filter(distinctUrl(HistoryDTO::getUrl))
-            .switchIfEmpty(Mono.error(new RadioNotFoundException("No song in history!")));
+            .filter(distinctUrl(HistoryDTO::getUrl));
     }
 
     private Predicate<HistoryDTO> distinctUrl(Function<HistoryDTO, String> getUrl) {
