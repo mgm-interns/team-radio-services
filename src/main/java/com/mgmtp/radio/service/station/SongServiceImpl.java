@@ -393,7 +393,7 @@ public class SongServiceImpl implements SongService {
      */
     private Mono<Station> findStation(String stationId) {
         return stationRepository
-                .findById(stationId)
+                .retriveByIdOrFriendlyId(stationId)
                 .switchIfEmpty(Mono.error(new StationNotFoundException(stationId)));
     }
 

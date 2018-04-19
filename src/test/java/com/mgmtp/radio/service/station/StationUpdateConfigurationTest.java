@@ -76,7 +76,7 @@ public class StationUpdateConfigurationTest {
 		stationConfiguration.setSkipRule(skipRule);
 		station.setStationConfiguration(stationConfiguration);
 
-		Mono<StationConfigurationDTO> monoStationConfig = stationRepository.findById(id).map(originalStation -> {
+		Mono<StationConfigurationDTO> monoStationConfig = stationRepository.retriveByIdOrFriendlyId(id).map(originalStation -> {
 			StationConfiguration originalStationConfig = new StationConfiguration();
 			when(stationMapper.stationConfigurationDtoToStationConfiguration(inputStationConfigurationDTO)).thenReturn(
 				originalStationConfig
