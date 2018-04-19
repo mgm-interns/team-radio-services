@@ -31,7 +31,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
+import reactor.util.function.Tuple2;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -93,9 +96,24 @@ public class SongServiceImpl implements SongService {
                 Optional<User> creator = userRepository.findById(song.getCreatorId());
                 if (creator.isPresent()) {
                     result.setCreator(userMapper.userToUserDTO(creator.get()));
-                    sink.next(result);
                 }
             }
+
+            if (!song.getUpVoteUserIdList().isEmpty()) {
+                result.setUpvoteUserList(userRepository.findByIdIn(song.getUpVoteUserIdList())
+                        .stream()
+                        .map(userMapper::userToUserDTO)
+                        .collect(Collectors.toList()));
+            }
+
+            if (!song.getDownVoteUserIdList().isEmpty()) {
+                result.setDownvoteUserList(userRepository.findByIdIn(song.getDownVoteUserIdList())
+                        .stream()
+                        .map(userMapper::userToUserDTO)
+                        .collect(Collectors.toList()));
+            }
+
+            sink.next(result);
         });
     }
 
@@ -132,8 +150,12 @@ public class SongServiceImpl implements SongService {
     private PlayList createPlayListFromListSong(List<SongDTO> listSong, String stationId) {
         PlayList playList = new PlayList();
         Optional<NowPlaying> nowPlaying = stationPlayerHelper.getStationNowPlaying(stationId);
+        Optional<NowPlaying> previousPlay = stationPlayerHelper.getPreviousPlay(stationId);
+        final String previousSongId = previousPlay.isPresent() ? previousPlay.get().getSongId() : BLANK;
         listSong = listSong.stream()
-                           .filter(songDTO -> songDTO.getStatus() != SongStatus.played)
+                           .filter(songDTO -> songDTO.getStatus() != SongStatus.played
+                                   && (songDTO.getStatus() != SongStatus.playing || !songDTO.getId().equals(previousSongId)))
+                           .sorted(sortByVote)
                            .collect(Collectors.toList());
         Optional<SongDTO> nowPlayingSong = listSong.stream()
                                                    .filter(songDTO -> songDTO.getStatus() == SongStatus.playing)
@@ -154,6 +176,19 @@ public class SongServiceImpl implements SongService {
 
         return playList;
     }
+
+    private Comparator<SongDTO> sortByVote = (SongDTO song1, SongDTO song2) -> {
+        int song1Vote = song1.getUpVoteCount() - song1.getDownVoteCount();
+        int song2Vote = song2.getUpVoteCount() - song2.getDownVoteCount();
+
+        if (song1Vote > song2Vote){
+            return -1;
+        } else if (song1Vote < song2Vote){
+            return 1;
+        } else{
+            return 0;
+        }
+    };
 
     private Optional<NowPlaying> handleNowPlaying(Optional<SongDTO> nowPlayingSong, Optional<NowPlaying> nowPlaying, String stationId, List<SongDTO> listSong) {
         if (nowPlayingSong.isPresent() && !nowPlaying.get().getSongId().equals(nowPlayingSong.get().getId())){
@@ -232,6 +267,7 @@ public class SongServiceImpl implements SongService {
         Optional<SongDTO> removeSong = listSong.stream().filter(songDTO -> songDTO.getId().equals(currentPlaySongId)).findFirst();
         if (removeSong.isPresent()) {
             listSong.remove(removeSong.get());
+            updateSongPlayingStatusAndMessage(currentPlaySongId, SongStatus.played, removeSong.get().getMessage());
             updateSongPlayingStatusAndMessage(removeSong.get().getId(), SongStatus.played, removeSong.get().getMessage());
             moveToHistory(stationId, currentPlaySongId);
         }
@@ -275,6 +311,7 @@ public class SongServiceImpl implements SongService {
             song.setCreatorId(creatorId);
             song.setSource(video.getKind().split("#")[0]);
             song.setDuration(transferHelper.transferVideoDuration(video.getContentDetails().getDuration()));
+            song.setStatus(SongStatus.not_play_yet);
         }
 
         return songRepository.save(song).flatMap(newSong ->
