@@ -120,7 +120,7 @@ public class UpVoteAndDownVoteSongServiceImplTest {
         station.setOwnerId(user.getId());
 
         when(stationRepository.save(any(Station.class))).thenReturn(Mono.just(station));
-        when(stationRepository.findById(any(String.class))).thenReturn(Mono.just(station));
+        when(stationRepository.findByIdOrFriendlyId(any(String.class))).thenReturn(Mono.just(station));
 
         // Init new song
         song = new Song();

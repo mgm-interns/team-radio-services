@@ -29,7 +29,6 @@ import java.util.regex.Pattern;
 public class StationController extends BaseRadioController {
 
     public static final String BASE_URL = "/api/v1/stations";
-    private static final Pattern objectIdPattern = Pattern.compile("\\p{XDigit}+");
 
     private final StationService stationService;
     private final UserMapper userMapper;
@@ -66,11 +65,7 @@ public class StationController extends BaseRadioController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
-        if (objectIdPattern.matcher(stationId).matches()) {
-            return this.stationService.findById(stationId);
-        } else {
-            return stationService.findByFriendlyId(stationId);
-        }
+        return this.stationService.findById(stationId);
     }
 
     @ApiOperation(
@@ -101,11 +96,7 @@ public class StationController extends BaseRadioController {
     @PutMapping("/{id}")
     public Mono<StationDTO> updateStation(@PathVariable(value = "id") final String id,
                                           @Valid @RequestBody final StationDTO stationDTO) {
-        if (objectIdPattern.matcher(id).matches()) {
-            return stationService.update(id, stationDTO);
-        } else {
-            return stationService.updateByFriendlyId(id, stationDTO);
-        }
+        return stationService.update(id, stationDTO);
     }
 
     @PutMapping("/update-config/{id}")

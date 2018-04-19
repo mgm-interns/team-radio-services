@@ -108,7 +108,7 @@ public class SongServiceImplTest {
         station.setPlaylist(playListCreatorId);
 
         //when station repository call
-        when(stationRepository.findById(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationRepository.findByIdOrFriendlyId(STATION_ID)).thenReturn(Mono.just(station));
 
         //given these song
         Song song1  = new Song();
@@ -171,7 +171,7 @@ public class SongServiceImplTest {
         station.setPlaylist(playListCreatorId);
 
         //when station repository call
-        when(stationRepository.findById(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationRepository.findByIdOrFriendlyId(STATION_ID)).thenReturn(Mono.just(station));
 
         //given these song
         Song song1 = new Song();
@@ -268,7 +268,7 @@ public class SongServiceImplTest {
         station.setPlaylist(playListCreatorId);
 
         //when station repository call
-        when(stationRepository.findById(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationRepository.findByIdOrFriendlyId(STATION_ID)).thenReturn(Mono.just(station));
 
         //given these song
         Song song1 = new Song();
@@ -379,7 +379,7 @@ public class SongServiceImplTest {
         station.setPlaylist(playListCreatorId);
 
         //when station repository call
-        when(stationRepository.findById(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationRepository.findByIdOrFriendlyId(STATION_ID)).thenReturn(Mono.just(station));
 
         //given these song
         Song song3 = new Song();
@@ -479,7 +479,7 @@ public class SongServiceImplTest {
         station.setPlaylist(playListCreatorId);
 
         //when station repository call
-        when(stationRepository.findById(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationRepository.findByIdOrFriendlyId(STATION_ID)).thenReturn(Mono.just(station));
 
         //given these song
         Song song4 = new Song();
