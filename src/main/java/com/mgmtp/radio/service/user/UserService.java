@@ -1,8 +1,10 @@
 package com.mgmtp.radio.service.user;
 
+import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioNotFoundException;
+import reactor.core.publisher.Flux;
 import com.mgmtp.radio.social.facebook.model.FacebookAvatar;
 import com.mgmtp.radio.social.facebook.model.FacebookUser;
 
@@ -21,4 +23,5 @@ public interface UserService {
     User registerByFacebook(FacebookUser facebookUser, FacebookAvatar facebookAvatar);
     Optional<User> getUserByFacebookId(String facebookId);
     List<UserDTO> findUserByUpdatedAt(LocalDate date);
+    Flux<StationDTO> getAllStationOfUserById(String id);
 }
