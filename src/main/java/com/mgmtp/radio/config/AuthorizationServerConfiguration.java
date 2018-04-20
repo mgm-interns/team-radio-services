@@ -51,7 +51,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
         clients.inMemory()
                 .withClient(clientId)
-                .authorizedGrantTypes("password")
+                .authorizedGrantTypes("client_credentials", "password", "refresh_token")
                 .authorities("USER")
                 .scopes("read", "write")
                 .resourceIds(RESOURCE_ID)
@@ -70,6 +70,7 @@ public class AuthorizationServerConfiguration extends AuthorizationServerConfigu
     public DefaultTokenServices tokenServices() {
         DefaultTokenServices tokenServices = new DefaultTokenServices();
         tokenServices.setSupportRefreshToken(true);
+        tokenServices.setRefreshTokenValiditySeconds(timeOut);
         tokenServices.setTokenStore(radioTokenStore);
         return tokenServices;
     }

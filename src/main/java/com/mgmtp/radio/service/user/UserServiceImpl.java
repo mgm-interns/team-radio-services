@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
             user.setEmail(facebookUser.email);
             String userAvatarUrl = StringUtils.isEmpty(user.getAvatarUrl()) ? facebookAvatar.data.url : user.getAvatarUrl();
             user.setAvatarUrl(userAvatarUrl);
-            return user;
+            return userRepository.save(user);
         }
     }
 
@@ -140,7 +140,7 @@ public class UserServiceImpl implements UserService {
             user.setEmail(googleUser.email);
             String userAvatarUrl = StringUtils.isEmpty(user.getAvatarUrl()) ? googleUser.picture : user.getAvatarUrl();
             user.setAvatarUrl(userAvatarUrl);
-            return user;
+            return userRepository.save(user);
         }
     }
 

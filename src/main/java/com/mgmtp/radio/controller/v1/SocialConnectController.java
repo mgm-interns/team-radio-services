@@ -89,7 +89,7 @@ public class SocialConnectController {
         boolean approved = true;
 
         Set<String> scope = new HashSet<String>() {{
-            add("openId");
+            add("password");
         }};
 
         Set<String> resourceIds = new HashSet<>();
