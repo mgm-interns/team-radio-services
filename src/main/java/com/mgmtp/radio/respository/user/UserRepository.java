@@ -13,5 +13,6 @@ public interface UserRepository extends MongoRepository<User, String> {
     User findByUsernameAndPassword(String username, String password);
     List<User> findByIdIn(List<String> userIds);
     Optional<User> findFirstByFacebookId(String facebookId);
+    Optional<User> findFirstByGoogleId(String googleId);
     List<User> findByUpdatedAtEquals(LocalDate date);
 }

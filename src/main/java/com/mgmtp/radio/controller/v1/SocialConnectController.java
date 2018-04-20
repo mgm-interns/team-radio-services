@@ -7,6 +7,9 @@ import com.mgmtp.radio.social.facebook.FacebookServiceGenerator;
 import com.mgmtp.radio.social.facebook.model.FacebookAvatar;
 import com.mgmtp.radio.social.facebook.model.FacebookUser;
 import com.mgmtp.radio.social.facebook.service.FacebookService;
+import com.mgmtp.radio.social.google.GoogleServiceGenerator;
+import com.mgmtp.radio.social.google.model.GoogleUser;
+import com.mgmtp.radio.social.google.service.GoogleService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -65,10 +68,17 @@ public class SocialConnectController {
     }
 
     @PostMapping("/google")
-    public OAuth2AccessToken googleConnect() {
-        //TODO: implement google login
-        User user = new User();
-        return authorize(user);
+    public OAuth2AccessToken googleConnect(@RequestHeader("Authorization") String googleAccessToken) throws IOException, RadioServiceException {
+        GoogleService googleService = GoogleServiceGenerator.createService(GoogleService.class);
+        Call<GoogleUser> callGoogleService = googleService.getUsers(googleAccessToken);
+        GoogleUser googleUser = callGoogleService.execute().body();
+
+        if(googleUser == null) {
+            throw new RadioServiceException("invalid access token.");
+        }
+
+        User newUser = userService.registerByGoogle(googleUser);
+        return authorize(newUser);
     }
 
     private OAuth2AccessToken authorize(User user) {

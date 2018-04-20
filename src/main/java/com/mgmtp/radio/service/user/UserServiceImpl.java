@@ -11,6 +11,7 @@ import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.social.facebook.model.FacebookAvatar;
 import com.mgmtp.radio.social.facebook.model.FacebookUser;
+import com.mgmtp.radio.social.google.model.GoogleUser;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -100,6 +101,52 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> getUserByFacebookId(String facebookId) {
         return userRepository.findFirstByFacebookId(facebookId);
+    }
+
+    @Override
+    public User registerByGoogle(GoogleUser googleUser) {
+        Optional<User> existUser = Optional.empty();
+        if (Optional.ofNullable(googleUser).isPresent()) {
+            existUser = userRepository.findByEmail(googleUser.email);
+        }
+
+        if (existUser.isPresent()) {
+            User user = existUser.get();
+
+            user.setGoogleId(googleUser.id);
+
+            String name = StringUtils.isEmpty(user.getName()) ? googleUser.name : user.getName();
+            user.setName(name);
+
+            String firstName = StringUtils.isEmpty(user.getFirstName()) ? googleUser.firstName : user.getName();
+            user.setFirstName(firstName);
+
+            String lastName = StringUtils.isEmpty(user.getLastName()) ? googleUser.lastName : user.getLastName();
+            user.setLastName(lastName);
+
+            String userAvatarUrl = StringUtils.isEmpty(user.getAvatarUrl()) ? googleUser.picture : user.getAvatarUrl();
+            user.setAvatarUrl(userAvatarUrl);
+
+            return userRepository.save(existUser.get());
+
+        } else {
+
+            User user = new User();
+            user.setFacebookId(googleUser.id);
+            user.setPassword(UUID.randomUUID().toString());
+            user.setName(googleUser.name);
+            user.setFirstName(googleUser.firstName);
+            user.setLastName(googleUser.lastName);
+            user.setEmail(googleUser.email);
+            String userAvatarUrl = StringUtils.isEmpty(user.getAvatarUrl()) ? googleUser.picture : user.getAvatarUrl();
+            user.setAvatarUrl(userAvatarUrl);
+            return user;
+        }
+    }
+
+    @Override
+    public Optional<User> getUserByGoogleId(String googleId) {
+        return userRepository.findFirstByGoogleId(googleId);
     }
 
     private Set<Role> getDefaultRole() {
