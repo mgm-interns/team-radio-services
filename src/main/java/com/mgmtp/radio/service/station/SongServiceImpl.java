@@ -196,7 +196,6 @@ public class SongServiceImpl implements SongService {
         }
         if (nowPlaying.get().isEnded()) {
             String endedSongId = nowPlaying.get().getSongId();
-            moveToHistory(stationId, endedSongId);
             nowPlaying = getNextSongFromList(stationId, endedSongId, listSong);
         } else {
             Set<String> listSkippedSongId = listSong.stream()
@@ -217,7 +216,6 @@ public class SongServiceImpl implements SongService {
 
     private void moveToHistory(String stationId, String songId) {
         Map<String, Object> historyParam = new HashMap<>();
-        historyParam.put(EventDataKeys.user_id.name(), "123");
         historyParam.put(EventDataKeys.event_id.name(), SubscriptionEvents.song_history.name());
         historyParam.put(EventDataKeys.stationId.name(), stationId);
         historyParam.put(EventDataKeys.songId.name(), songId);
