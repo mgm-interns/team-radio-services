@@ -142,20 +142,4 @@ public class StationServiceImpl implements StationService {
 			})
 			.map(stationMapper::stationConfigurationToStationConfigurationDto);
 	}
-
-    @Override
-    public Mono<StationDTO> findByFriendlyId(String friendlyId) {
-        return stationRepository.retriveByIdOrFriendlyId(friendlyId).map(stationMapper::stationToStationDTO);
-    }
-
-    @Override
-    public Mono<StationDTO> updateByFriendlyId(String id, StationDTO stationDTO) {
-        return stationRepository.retriveByIdOrFriendlyId(id)
-                .switchIfEmpty(Mono.error(new RadioNotFoundException("Station friendly id is not found.")))
-                .flatMap(station -> {
-                    station.setName(stationDTO.getName());
-                    return stationRepository.save(station);
-                })
-                .map(stationMapper::stationToStationDTO);
-    }
 }

@@ -14,6 +14,4 @@ public interface StationService {
     int getOnlineUsersNumber(StationDTO stationDTO);
     Mono<Station> findStationByIdAndDeletedFalse(String stationId);
     Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO);
-    Mono<StationDTO> findByFriendlyId(String friendlyId);
-    Mono<StationDTO> updateByFriendlyId(String id, StationDTO stationDTO);
 }
