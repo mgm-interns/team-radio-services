@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 
 @Log4j2
 @RestController
@@ -74,6 +75,27 @@ public class UserController extends BaseRadioController {
             return userService.getUserById(getCurrentUser().get().getId());
         } else {
             throw new RadioNotFoundException("unauthorized");
+        }
+    }
+
+    @ApiOperation(
+            value = "Get user info",
+            notes = "Returns user info"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
+    })
+    @GetMapping("/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    public UserDTO getUserById(@PathVariable(value = "userId") String userId) throws RadioNotFoundException {
+        log.info("GET /api/v1/users/" + userId);
+
+        Optional<UserDTO> user = Optional.ofNullable(userService.getUserById(userId));
+        if(user.isPresent()) {
+            return user.get();
+        } else {
+            throw new RadioNotFoundException("user is not found");
         }
     }
 
