@@ -27,14 +27,10 @@ import com.mgmtp.radio.support.TransferHelper;
 import com.mgmtp.radio.support.YouTubeHelper;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.GenericMessage;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
-import reactor.util.function.Tuple2;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -155,7 +151,7 @@ public class SongServiceImpl implements SongService {
         listSong = listSong.stream()
                            .filter(songDTO -> songDTO.getStatus() != SongStatus.played
                                    && (songDTO.getStatus() != SongStatus.playing || !songDTO.getId().equals(previousSongId)))
-                           .sorted(sortByVote)
+                           .sorted(sortByVoteAndStatus)
                            .collect(Collectors.toList());
         Optional<SongDTO> nowPlayingSong = listSong.stream()
                                                    .filter(songDTO -> songDTO.getStatus() == SongStatus.playing)
@@ -177,7 +173,7 @@ public class SongServiceImpl implements SongService {
         return playList;
     }
 
-    private Comparator<SongDTO> sortByVote = (SongDTO song1, SongDTO song2) -> {
+    private Comparator<SongDTO> sortByVoteAndStatus = (SongDTO song1, SongDTO song2) -> {
         if (song1.getStatus() == SongStatus.playing){
             return -1;
         }
