@@ -14,8 +14,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.text.Normalizer;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -48,7 +48,7 @@ public class StationServiceImpl implements StationService {
 	@AfterReturning(value = "execution(* com.mgmtp.radio.service.station.SongService.downVoteSongInStationPlaylist(..))", returning = "monoSongDTO")
 	public Mono<SongDTO> checkAndSkipSongIfNeeded(Mono<SongDTO> monoSongDTO) {
 			Mono<SongDTO> monoSongDtoReturn = monoSongDTO.map(songDTO -> {
-				stationRepository.findById(songDTO.getStationId()).map(tempStation ->{
+				stationRepository.retriveByIdOrFriendlyId(songDTO.getStationId()).map(tempStation ->{
 					final StationConfiguration stationConfiguration = tempStation.getStationConfiguration();
 					boolean isSkipped = false;
 
@@ -79,7 +79,7 @@ public class StationServiceImpl implements StationService {
 
     @Override
     public Mono<Station> findStationByIdAndDeletedFalse(String stationId) {
-        return stationRepository.findById(stationId);
+        return stationRepository.retriveByIdOrFriendlyId(stationId);
     }
 
 	public Flux<StationDTO> getAll() {
@@ -89,17 +89,7 @@ public class StationServiceImpl implements StationService {
 
     @Override
     public Mono<StationDTO> findById(String id) {
-        Mono<Station> stationMono = stationRepository.findById(id);
-        Station station = stationMono.block();
-        StationDTO stationDTO = stationMono.map(stationMapper::stationToStationDTO).block();
-        List<String> playlistIdList = station.getPlaylist();
-        if (playlistIdList == null || playlistIdList.isEmpty()){
-            return Mono.just(stationDTO);
-        }
-        return songService.getAllSongById(playlistIdList).collectList().map(songs -> {
-            stationDTO.setPlaylist(songs);
-            return stationDTO;
-        });
+        return stationRepository.retriveByIdOrFriendlyId(id).map(stationMapper::stationToStationDTO);
     }
 
     @Override
@@ -116,8 +106,10 @@ public class StationServiceImpl implements StationService {
     }
 
     private String createFriendlyIdFromStationName(String stationName) {
-        String friendlyId = stationName.replaceAll("\\s+", "-");
-        Optional<Station> station = stationRepository.findByFriendlyId(friendlyId).blockOptional();
+	    String friendlyId = Normalizer.normalize(stationName, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+	    friendlyId = friendlyId.replaceAll("đ", "d").replaceAll("Đ", "D");
+        friendlyId = friendlyId.replaceAll("\\s+", "-");
+        Optional<Station> station = stationRepository.retriveByIdOrFriendlyId(friendlyId).blockOptional();
         if(station.isPresent()) {
             Long now = LocalDate.now().toEpochDay();
             friendlyId += "-" + now.toString();
@@ -127,7 +119,7 @@ public class StationServiceImpl implements StationService {
 
     @Override
     public Mono<StationDTO> update(String stationId, StationDTO stationDTO){
-        return stationRepository.findById(stationId)
+        return stationRepository.retriveByIdOrFriendlyId(stationId)
                 .switchIfEmpty(Mono.error(new RadioNotFoundException("Station id is not found.")))
                 .flatMap(station -> {
                     station.setName(stationDTO.getName());
@@ -138,7 +130,7 @@ public class StationServiceImpl implements StationService {
 
     @Override
 	public Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO) {
-		return stationRepository.findById(id)
+		return stationRepository.retriveByIdOrFriendlyId(id)
 			.map(station -> {
 				final StationConfiguration stationConfiguration =
 					stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO);

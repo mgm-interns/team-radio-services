@@ -64,7 +64,6 @@ public class GetStationByIdImplTest {
         stationDTO.setName("001");
         stationDTO.setPrivacy(StationPrivacy.station_public);
         stationDTO.setOwnerId("user1");
-        stationDTO.setPlaylist(listSongDTO);
 
         Station station = new Station();
         station.setId(stationDTO.getId());
@@ -73,7 +72,7 @@ public class GetStationByIdImplTest {
         station.setOwnerId(stationDTO.getOwnerId());
         station.setPlaylist(listSongString);
 
-        when(stationRepository.findById(anyString())).thenReturn(Mono.just(station));
+        when(stationRepository.retriveByIdOrFriendlyId(anyString())).thenReturn(Mono.just(station));
         when(songService.getAllSongById(anyList())).thenReturn(Flux.just(songDTO));
 
         // when
