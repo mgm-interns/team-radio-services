@@ -6,6 +6,8 @@ import com.mgmtp.radio.dto.station.StationDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 public interface StationService {
     Flux<StationDTO> getAll();
     Mono<StationDTO> findById(String id);
@@ -15,4 +17,5 @@ public interface StationService {
     Mono<Station> findStationByIdAndDeletedFalse(String stationId);
     Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO);
     boolean existsByName(String stationName);
+    Flux<StationDTO> getListStationByListStationId(List<String> listStationId);
 }
