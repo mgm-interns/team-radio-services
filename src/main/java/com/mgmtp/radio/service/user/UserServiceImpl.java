@@ -13,13 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
 import java.util.*;
+import java.time.LocalDate;
+import java.util.stream.Collectors;
 
 @Log4j2
 @Service
@@ -57,7 +53,7 @@ public class UserServiceImpl implements UserService {
     public User registerByFacebook(FacebookUser facebookUser, FacebookAvatar facebookAvatar) {
 
         Optional<User> existUser = Optional.empty();
-        if (Optional.of(facebookUser).isPresent()) {
+        if (Optional.ofNullable(facebookUser).isPresent()) {
             existUser = userRepository.findByEmail(facebookUser.email);
         }
 

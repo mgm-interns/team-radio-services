@@ -1,7 +1,6 @@
 package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.domain.user.User;
-import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioServiceException;
 import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.social.facebook.FacebookServiceGenerator;
@@ -19,7 +18,6 @@ import org.springframework.security.oauth2.provider.OAuth2Request;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
 import org.springframework.web.bind.annotation.*;
 import retrofit2.Call;
-import okhttp3.ResponseBody;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -30,7 +28,7 @@ import java.util.*;
 @RequestMapping(SocialConnectController.BASE_URL)
 public class SocialConnectController {
 
-    public static final String BASE_URL = "/connect";
+    public static final String BASE_URL = "/login";
 
     @Value("${radio.client.id}")
     String clientId;
@@ -49,7 +47,7 @@ public class SocialConnectController {
     }
 
     @PostMapping("/facebook")
-    public OAuth2AccessToken facebookConnect(@RequestHeader("FB-Authorization") String facebookAccessToken) throws IOException, RadioServiceException {
+    public OAuth2AccessToken facebookConnect(@RequestHeader("Authorization") String facebookAccessToken) throws IOException, RadioServiceException {
         FacebookService facebookService = FacebookServiceGenerator.createService(FacebookService.class);
         Call<FacebookUser> callFacebookUser = facebookService.getUsers(facebookAccessToken);
         FacebookUser facebookUser = callFacebookUser.execute().body();
@@ -66,9 +64,9 @@ public class SocialConnectController {
         return authorize(newUser);
     }
 
-    @PostMapping("/connect/google")
+    @PostMapping("/google")
     public OAuth2AccessToken googleConnect() {
-
+        //TODO: implement google login
         User user = new User();
         return authorize(user);
     }
