@@ -178,8 +178,12 @@ public class SongServiceImpl implements SongService {
     }
 
     private Comparator<SongDTO> sortByVote = (SongDTO song1, SongDTO song2) -> {
-        if (song1.getStatus() == SongStatus.playing || song2.getStatus() == SongStatus.playing){
+        if (song1.getStatus() == SongStatus.playing){
             return -1;
+        }
+
+        if (song2.getStatus() == SongStatus.playing){
+            return 1;
         }
 
         int song1Vote = song1.getUpVoteCount() - song1.getDownVoteCount();
