@@ -29,7 +29,7 @@ public class Station {
 
 	private String ownerId;
 
-	private List<String> playlist = Collections.emptyList();
+	private List<String> playlist;
 
 	@JsonDeserialize(using = LocalDateDeserializer.class)
 	@JsonSerialize(using = LocalDateSerializer.class)
