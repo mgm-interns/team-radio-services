@@ -3,6 +3,7 @@ package com.mgmtp.radio.dto.station;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mgmtp.radio.dto.skipRule.SkipRuleDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
+import com.mgmtp.radio.sdo.Days_subtracted;
 import com.mgmtp.radio.sdo.SkipRuleType;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import lombok.Data;
@@ -68,10 +69,12 @@ public class StationDTO implements  Comparable<StationDTO> {
 			return SMALLER;
 		if(this.getNumberOnline() > otherStationDto.getNumberOnline())
 			return LARGER;
+		if(this.getNumberOnline() < otherStationDto.getNumberOnline())
+			return SMALLER;
 		return EQUAL;
 	}
 
 	public boolean isNewStation() {
-		return getCreatedAt().isAfter(LocalDate.now().minusDays(1));
+		return getCreatedAt().isAfter(LocalDate.now().minusDays(Days_subtracted.DAYS_SUBTRACTED.getDays_limited()));
 	}
 }
