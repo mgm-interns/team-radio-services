@@ -95,6 +95,10 @@ public class SocialConnectController {
     }
 
     private OAuth2AccessToken authorize(User user) {
+        if(user.getUsername() == null) {
+            user.setUsername(user.getFacebookId());
+        }
+
         Set<GrantedAuthority> authorities = getDefaultUserGrantedAuthority();
 
         Map<String, String> requestParameters = new HashMap<>();
