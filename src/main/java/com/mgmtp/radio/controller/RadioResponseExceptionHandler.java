@@ -79,10 +79,10 @@ public class RadioResponseExceptionHandler extends ResponseEntityExceptionHandle
         return new ResponseEntity<>(new RadioErrorResponse(message), new HttpHeaders(), HttpStatus.NOT_FOUND);
     }
 
-    // return 400 NOT_FOUND
+    // return 400 BAD_REQUEST
     @ExceptionHandler(RadioDuplicateNameException.class)
     protected ResponseEntity<Object> handleRadioDuplicateNameException(RadioDuplicateNameException exception, WebRequest webRequest) {
         log.error("Exception processing request", exception);
-        return new ResponseEntity<>(new RadioErrorResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST);
+        return  ResponseEntity.badRequest().body(new RadioErrorResponse(exception.getMessage()));
     }
 }
