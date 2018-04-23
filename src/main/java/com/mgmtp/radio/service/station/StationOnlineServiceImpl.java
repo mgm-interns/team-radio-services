@@ -29,12 +29,12 @@ public class StationOnlineServiceImpl implements StationOnlineService {
         stationDTO.getUserList().remove(userDTO.getId());
     }
 
-    public Map<String,StationDTO> getAllStation() {
-        return sortByStation(allStations);
-    }
-
     public StationDTO getStationById(String stationId){
         return allStations.get(stationId);
+    }
+
+    public Map<String,StationDTO> getAllStation() {
+        return sortByStation(allStations);
     }
 
     private Map<String,StationDTO> sortByStation(Map<String,StationDTO> unsortMap){
@@ -43,9 +43,9 @@ public class StationOnlineServiceImpl implements StationOnlineService {
                 new LinkedList<Map.Entry<String, StationDTO>>(unsortMap.entrySet());
 
         Collections.sort(list,new Comparator<Map.Entry<String, StationDTO>>() {
-            public int compare(Map.Entry<String, StationDTO> o1,
-                               Map.Entry<String, StationDTO> o2) {
-                return (o1.getValue()).compareTo(o2.getValue());
+            public int compare(Map.Entry<String, StationDTO> stationDTO1,
+                               Map.Entry<String, StationDTO> stationDTO2) {
+                return (stationDTO1.getValue()).compareTo(stationDTO2.getValue());
             }
         });
 
