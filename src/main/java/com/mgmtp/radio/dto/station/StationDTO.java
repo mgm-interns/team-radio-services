@@ -29,10 +29,8 @@ public class StationDTO {
 
 	LocalDate createdAt;
 
-	StationConfigurationDTO stationConfigurationDTO;
+	StationConfigurationDTO stationConfiguration;
 
 	public StationDTO() {
-		stationConfigurationDTO = new StationConfigurationDTO();
-		stationConfigurationDTO.setSkipRule(new SkipRuleDTO(SkipRuleType.BASIC));
 	}
 }
