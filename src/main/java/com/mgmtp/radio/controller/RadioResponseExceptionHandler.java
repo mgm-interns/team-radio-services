@@ -4,6 +4,7 @@ import com.mgmtp.radio.controller.response.RadioErrorResponse;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.exception.RadioServiceException;
+import com.mgmtp.radio.exception.RadioDuplicateNameException;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.support.UserHelper;
 import lombok.extern.log4j.Log4j2;
@@ -76,5 +77,12 @@ public class RadioResponseExceptionHandler extends ResponseEntityExceptionHandle
             message = exception.getMessage();
         }
         return new ResponseEntity<>(new RadioErrorResponse(message), new HttpHeaders(), HttpStatus.NOT_FOUND);
+    }
+
+    // return 400 NOT_FOUND
+    @ExceptionHandler(RadioDuplicateNameException.class)
+    protected ResponseEntity<Object> handleRadioDuplicateNameException(RadioDuplicateNameException exception, WebRequest webRequest) {
+        log.error("Exception processing request", exception);
+        return new ResponseEntity<>(new RadioErrorResponse(exception.getMessage()), new HttpHeaders(), HttpStatus.BAD_REQUEST);
     }
 }

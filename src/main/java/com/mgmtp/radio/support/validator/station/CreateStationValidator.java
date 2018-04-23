@@ -28,20 +28,8 @@ public class CreateStationValidator implements Validator {
 	@Override
 	public void validate(Object target, Errors errors) {
 		StationDTO stationDTO = (StationDTO) target;
-		if (!userHelper.getCurrentUser().isPresent()) {
-			errors.reject("userId", messageSourceAccessor.getMessage("exception.must_login"));
-			return;
-		}
 
-		this.validateExists(stationDTO, errors);
 		this.validateUnique(stationDTO, errors);
-	}
-
-	private void validateExists(StationDTO stationDTO, Errors errors) {
-		if (isStationExisted(stationDTO.getName())) {
-			errors.rejectValue("Station name", "", messageSourceAccessor.getMessage("validation.error.exist",
-				new String[]{"Station name: " + stationDTO.getName()}));
-		}
 	}
 
 	private void validateUnique(StationDTO stationDTO, Errors errors) {

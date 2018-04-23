@@ -8,7 +8,7 @@ import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
-import com.mgmtp.radio.exception.StationDuplicateNameException;
+import com.mgmtp.radio.exception.RadioDuplicateNameException;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.service.station.StationService;
 import com.mgmtp.radio.support.validator.station.CreateStationValidator;
@@ -93,7 +93,7 @@ public class StationController extends BaseRadioController {
     public Mono<StationDTO> createStation(@Validated @RequestBody StationDTO stationDTO, BindingResult bindingResult) throws RadioException {
         String userId = getCurrentUser().isPresent() ? getCurrentUser().get().getId() : null;
         if(bindingResult.hasErrors()) {
-            return Mono.error(new StationDuplicateNameException(stationDTO.getName()));
+            return Mono.error(new RadioDuplicateNameException(stationDTO.getName()));
         }
         return stationService.create(userId, stationDTO);
     }
