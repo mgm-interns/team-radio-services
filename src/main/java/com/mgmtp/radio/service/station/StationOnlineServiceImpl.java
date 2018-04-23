@@ -9,51 +9,46 @@ import java.util.*;
 @Service("stationOnlineService")
 public class StationOnlineServiceImpl implements StationOnlineService {
 
-    private static Map<String, StationDTO> allStations = new HashMap<>();
+    private static List<StationDTO> allStations = new LinkedList<>();
 
     public void addStationToList(StationDTO stationDTO) {
-        allStations.put(stationDTO.getId(), stationDTO);
+        allStations.add(stationDTO);
     }
 
     public void removeStationFromList(String stationId) {
-        allStations.remove(stationId);
+        for(int i = 0; i< allStations.size(); i++) {
+            final StationDTO dto = allStations.get(i);
+            if(dto.getId().equals(stationId)) {
+                allStations.remove(dto);
+                break;
+            }
+        }
     }
 
     public void addOnlineUser(UserDTO userDTO, String stationId) {
-        StationDTO stationDTO = allStations.get(stationId);
+        StationDTO stationDTO = allStations.stream().filter(s->s.getId().equals(stationId)).findFirst().orElse(null);
         stationDTO.getUserList().put(userDTO.getId(),userDTO);
     }
 
     public void removeOnlineUser(UserDTO userDTO, String stationId){
-        StationDTO stationDTO = allStations.get(stationId);
+        StationDTO stationDTO = allStations.stream().filter(station -> station.getId().equals(stationId)).findFirst().orElse(null);
         stationDTO.getUserList().remove(userDTO.getId());
     }
 
     public StationDTO getStationById(String stationId){
-        return allStations.get(stationId);
+        return allStations.stream().filter(station->station.getId().equals(stationId)).findFirst().orElse(null);
     }
 
-    public Map<String,StationDTO> getAllStation() {
+    public List<StationDTO> getAllStation() {
         return sortByStation(allStations);
     }
 
-    private Map<String,StationDTO> sortByStation(Map<String,StationDTO> unsortMap){
-
-        List<Map.Entry<String, StationDTO>> list =
-                new LinkedList<Map.Entry<String, StationDTO>>(unsortMap.entrySet());
-
-        Collections.sort(list,new Comparator<Map.Entry<String, StationDTO>>() {
-            public int compare(Map.Entry<String, StationDTO> stationDTO1,
-                               Map.Entry<String, StationDTO> stationDTO2) {
-                return (stationDTO1.getValue()).compareTo(stationDTO2.getValue());
+    private List<StationDTO> sortByStation(List<StationDTO> allStations){
+        Collections.sort(allStations,new Comparator< StationDTO>() {
+            public int compare( StationDTO stationDTO1, StationDTO stationDTO2) {
+                return (stationDTO1.compareTo(stationDTO2));
             }
         });
-
-        Map<String, StationDTO> sortedMap = new LinkedHashMap<String, StationDTO>();
-        for (Map.Entry<String, StationDTO> entry : list) {
-            sortedMap.put(entry.getKey(), entry.getValue());
-        }
-
-        return sortedMap;
+        return allStations;
     }
 }
