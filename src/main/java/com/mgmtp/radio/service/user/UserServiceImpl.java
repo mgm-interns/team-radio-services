@@ -60,7 +60,8 @@ public class UserServiceImpl implements UserService {
     public User registerByFacebook(FacebookUser facebookUser, FacebookAvatar facebookAvatar) {
 
         Optional<User> existUser = Optional.empty();
-        if (Optional.ofNullable(facebookUser).isPresent()) {
+
+        if (Optional.ofNullable(facebookUser).isPresent() && facebookUser.email != null) {
             existUser = userRepository.findByEmail(facebookUser.email);
         }
 
@@ -200,5 +201,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public Flux<StationDTO> getAllStationOfUserById(String id) {
         return stationRepository.findByOwnerId(id).map(station -> stationMapper.stationToStationDTO(station));
+    }
+
+    @Override
+    public boolean changePassword(String userId, String oldPassword, String newPassword) {
+        Optional<User> user = userRepository.findById(userId);
+        if(user.isPresent()) {
+            User currentUser = user.get();
+            if(passwordEncoder.matches(oldPassword, currentUser.getPassword())) {
+                currentUser.setPassword(passwordEncoder.encode(newPassword));
+
+                userRepository.save(currentUser);
+                return true;
+            }
+
+            return false;
+        }
+        return false;
     }
 }

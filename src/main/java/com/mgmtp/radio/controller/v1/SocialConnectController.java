@@ -52,6 +52,7 @@ public class SocialConnectController {
     @PostMapping("/facebook")
     public OAuth2AccessToken facebookConnect(@RequestHeader("Authorization") String facebookAccessToken) throws IOException, RadioServiceException {
         FacebookService facebookService = FacebookServiceGenerator.createService(FacebookService.class);
+
         Call<FacebookUser> callFacebookUser = facebookService.getUsers(facebookAccessToken);
         FacebookUser facebookUser = callFacebookUser.execute().body();
 
@@ -62,6 +63,12 @@ public class SocialConnectController {
         Call<FacebookAvatar> callFacebookAvatar = facebookService.getUserAvatar(facebookAccessToken);
         FacebookAvatar facebookAvatar = callFacebookAvatar.execute().body();
 
+
+        Optional<User> user = userService.getUserByFacebookId(facebookUser.id);
+
+        if(user.isPresent()) {
+            return authorize(user.get());
+        }
 
         User newUser = userService.registerByFacebook(facebookUser, facebookAvatar);
         return authorize(newUser);
@@ -75,6 +82,12 @@ public class SocialConnectController {
 
         if(googleUser == null) {
             throw new RadioServiceException("invalid access token.");
+        }
+
+        Optional<User> user = userService.getUserByGoogleId(googleUser.id);
+
+        if(user.isPresent()) {
+            return authorize(user.get());
         }
 
         User newUser = userService.registerByGoogle(googleUser);

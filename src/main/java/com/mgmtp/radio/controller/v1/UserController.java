@@ -18,7 +18,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.oauth2.common.OAuth2AccessToken;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -143,6 +144,34 @@ public class UserController extends BaseRadioController {
         return userService.register(userDTO);
     }
 
+    @PatchMapping("/me/password")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, Object> patchUserPassword(@RequestBody Map<String, Object> body) throws RadioException {
+        log.info("PATCH /api/v1/users/me/password - data: " + body.toString());
+
+        String currentPassword = body.get("old_password").toString();
+        String newPassword = body.get("new_password").toString();
+
+        if(getCurrentUser().isPresent()) {
+            boolean isChanged = false;
+
+            if(!StringUtils.isEmpty(currentPassword) && !StringUtils.isEmpty(newPassword)) {
+                isChanged = userService.changePassword(getCurrentUser().get().getId(), currentPassword, newPassword);
+            }
+
+            if(isChanged) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("is_changed", isChanged);
+                result.put("description", "Password is changed successfully.");
+                return result;
+            }
+
+            throw new RadioBadRequestException("password is invalid");
+        } else {
+            throw new RadioNotFoundException("unauthorized");
+        }
+    }
+
     @ApiOperation(
             value = "Patch the current user",
             notes = "Returns the updated user"
@@ -163,6 +192,8 @@ public class UserController extends BaseRadioController {
             throw new RadioNotFoundException("unauthorized");
         }
     }
+
+
 
     @ApiOperation(
             value = "Upload and patch current user avatar",

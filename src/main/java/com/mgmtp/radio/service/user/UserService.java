@@ -27,4 +27,5 @@ public interface UserService {
     Optional<User> getUserByGoogleId(String googleId);
     List<UserDTO> findUserByUpdatedAt(LocalDate date);
     Flux<StationDTO> getAllStationOfUserById(String id);
+    boolean changePassword(String userId, String oldPassword, String newPassword);
 }
