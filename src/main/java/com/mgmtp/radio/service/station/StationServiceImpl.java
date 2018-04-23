@@ -100,8 +100,8 @@ public class StationServiceImpl implements StationService {
         stationDTO.setFriendlyId(friendlyId);
         Station station = stationMapper.stationDTOToStation(stationDTO);
 
-        station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationDTO.getStationConfigurationDTO()));
-	    station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationDTO.getStationConfigurationDTO().getSkipRule()));
+        station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationDTO.getStationConfiguration()));
+	    station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationDTO.getStationConfiguration().getSkipRule()));
         return stationRepository.save(station).map(stationMapper::stationToStationDTO);
     }
 
@@ -136,7 +136,6 @@ public class StationServiceImpl implements StationService {
 					stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO);
 					station.setStationConfiguration(stationConfiguration);
 				station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO));
-				//station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationConfigurationDTO.getSkipRule()));
 					stationRepository.save(station).subscribe();
 					return stationConfiguration;
 			})
