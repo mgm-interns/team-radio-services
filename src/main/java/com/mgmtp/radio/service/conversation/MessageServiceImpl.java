@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 public class MessageServiceImpl implements MessageService {
@@ -34,7 +34,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public Mono<MessageDTO> create(String stationId, User user, MessageDTO messageDTO) {
         messageDTO.setStationId(stationId);
-        messageDTO.setCreatedAt(LocalDate.now());
+        messageDTO.setCreatedAt(LocalDateTime.now());
 
         Message message = messageMapper.messageDtoToMessage(messageDTO);
         message.setSender(setSender(user));
