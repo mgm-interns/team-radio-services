@@ -14,4 +14,5 @@ public interface StationService {
     int getOnlineUsersNumber(StationDTO stationDTO);
     Mono<Station> findStationByIdAndDeletedFalse(String stationId);
     Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO);
+    boolean existsByName(String stationName);
 }
