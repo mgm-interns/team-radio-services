@@ -28,6 +28,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.Map;
 
 @Log4j2
@@ -66,7 +67,7 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Map<String, StationDTO> getAllStation() {
+    public List<StationDTO> getAllStation() {
             return this.stationService.getAllStationWithArrangement();
     }
 
@@ -82,12 +83,12 @@ public class StationController extends BaseRadioController {
     @ResponseStatus(HttpStatus.OK)
     public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
         return this.stationService.findById(stationId).switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
-        if(getCurrentUser().isPresent()) {
-            return this.stationService.joinStation(stationId,userMapper.userToUserDTO(getCurrentUser().get()));
-        }else{
-            UserDTO anonymousUserDto = new UserDTO();
-            return this.stationService.joinStation(stationId,anonymousUserDto);
-        }
+//        if(getCurrentUser().isPresent()) {
+//            return this.stationService.joinStation(stationId,userMapper.userToUserDTO(getCurrentUser().get()));
+//        }else{
+//            UserDTO anonymousUserDto = new UserDTO();
+//            return this.stationService.joinStation(stationId,anonymousUserDto);
+//        }
     }
 
     @ApiOperation(

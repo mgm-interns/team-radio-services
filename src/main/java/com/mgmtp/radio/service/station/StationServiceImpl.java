@@ -54,8 +54,8 @@ public class StationServiceImpl implements StationService {
 
 
 
-    public Map<String, StationDTO> getAllStationWithArrangement(){
-	    Map<String, StationDTO> result = stationOnlineService.getAllStation();
+    public List<StationDTO> getAllStationWithArrangement(){
+	    List<StationDTO> result = stationOnlineService.getAllStation();
 	    if (result.isEmpty()) {
             getAll().map(stationDTO -> {
                 stationOnlineService.addStationToList(stationDTO);
@@ -85,7 +85,10 @@ public class StationServiceImpl implements StationService {
 
         station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationDTO.getStationConfiguration()));
 	    station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationDTO.getStationConfiguration().getSkipRule()));
-        return stationRepository.save(station).map(stationMapper::stationToStationDTO).doOnSuccess(stationSaveSuccess -> stationOnlineService.addStationToList(stationSaveSuccess));;
+        return stationRepository
+				.save(station)
+				.map(stationMapper::stationToStationDTO)
+				.doOnSuccess(stationSaveSuccess -> stationOnlineService.addStationToList(stationSaveSuccess));
     }
 
     private String createFriendlyIdFromStationName(String stationName) {
@@ -148,9 +151,6 @@ public class StationServiceImpl implements StationService {
     @Override
     public Mono<StationDTO> joinStation(String stationId, UserDTO userDto) {
         final Mono<StationDTO> monoStationDto = findById(stationId);
-        addUserToStationOnlineList(monoStationDto,userDto);
-        return monoStationDto;
-        final Mono<StationDTO> monoStationDto = findById(stationId);
         return monoStationDto
                 .doOnNext(stationDTO -> addUserToStationOnlineList(stationDTO,userDto));
     }
@@ -161,13 +161,13 @@ public class StationServiceImpl implements StationService {
     }
 
 
-    public UserDTO leaveStation (String stationId, String userId){
-        //TODO Call this method after user left station
-        stationOnlineService.addOnlineUser(userDto,stationDTO.getId());
-    }
+	public void leaveStation (String stationId, UserDTO userDTO){
+		//TODO Call this method after user left station
+		stationOnlineService.removeOnlineUser(userDTO,stationId);
+	}
 
     public StationDTO removeUserFromStationOnlineList(String stationId, UserDTO userDTO) {
-        stationOnlineService.removeOnlineUser(userDTO,stationId);
-        return stationOnlineService.getStationById(stationId);
+		stationOnlineService.removeOnlineUser(userDTO,stationId);
+		return stationOnlineService.getStationById(stationId);
     }
 }

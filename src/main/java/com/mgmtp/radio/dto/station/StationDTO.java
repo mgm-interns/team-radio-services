@@ -7,13 +7,11 @@ import com.mgmtp.radio.sdo.Days_subtracted;
 import com.mgmtp.radio.sdo.SkipRuleType;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
