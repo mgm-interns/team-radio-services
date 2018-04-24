@@ -62,6 +62,12 @@ public class User implements UserDetails, Serializable {
 
     private String googleId;
 
+    private String resetPasswordToken;
+
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    @JsonSerialize(using = LocalDateSerializer.class)
+    private LocalDate resetPasswordTokenExpiryDate;
+
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate updatedAt;

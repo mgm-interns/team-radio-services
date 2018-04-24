@@ -9,11 +9,12 @@ import java.util.Optional;
 
 public interface UserRepository extends MongoRepository<User, String> {
     Optional<User> findByUsername(String username);
-    Optional<User> findByEmail(String email);
+    Optional<User> findFirstByEmail(String email);
     User findByUsernameAndPassword(String username, String password);
     List<User> findByIdIn(List<String> userIds);
     Optional<User> findFirstByFacebookId(String facebookId);
     Optional<User> findFirstByGoogleId(String googleId);
     List<User> findByUpdatedAtEquals(LocalDate date);
     Optional<User> findByIdAndPassword(String userId, String password);
+    Optional<User> findByResetPasswordTokenAndResetPasswordTokenExpiryDateAfter(String resetPasswordToken, LocalDate resetPasswordDate);
 }

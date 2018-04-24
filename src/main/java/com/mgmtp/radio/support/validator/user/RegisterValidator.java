@@ -72,7 +72,7 @@ public class RegisterValidator implements Validator {
     }
 
     private boolean isEmailExisted(String email) {
-        Optional<User> user = userRepository.findByEmail(email);
+        Optional<User> user = userRepository.findFirstByEmail(email);
         return user.isPresent();
     }
 

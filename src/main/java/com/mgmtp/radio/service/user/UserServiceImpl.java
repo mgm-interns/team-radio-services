@@ -4,6 +4,7 @@ import com.mgmtp.radio.domain.user.Role;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
+import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.mapper.user.UserMapper;
@@ -48,6 +49,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDTO getUserByEmail(String email) throws RadioNotFoundException {
+        return userRepository.findFirstByEmail(email)
+                .map(userMapper::userToUserDTO)
+                .orElseThrow(RadioNotFoundException::new);
+    }
+
+    @Override
     public UserDTO register(UserDTO userDTO) {
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         User user = userMapper.userDtoToUser(userDTO);
@@ -62,7 +70,7 @@ public class UserServiceImpl implements UserService {
         Optional<User> existUser = Optional.empty();
 
         if (Optional.ofNullable(facebookUser).isPresent() && facebookUser.email != null) {
-            existUser = userRepository.findByEmail(facebookUser.email);
+            existUser = userRepository.findFirstByEmail(facebookUser.email);
         }
 
         if (existUser.isPresent()) {
@@ -108,7 +116,7 @@ public class UserServiceImpl implements UserService {
     public User registerByGoogle(GoogleUser googleUser) {
         Optional<User> existUser = Optional.empty();
         if (Optional.ofNullable(googleUser).isPresent()) {
-            existUser = userRepository.findByEmail(googleUser.email);
+            existUser = userRepository.findFirstByEmail(googleUser.email);
         }
 
         if (existUser.isPresent()) {
@@ -218,5 +226,35 @@ public class UserServiceImpl implements UserService {
             return false;
         }
         return false;
+    }
+
+    @Override
+    public UserDTO forgotPassword(String email) {
+        Optional<User> existedUser = userRepository.findFirstByEmail(email);
+
+        if(existedUser.isPresent()) {
+            User user = existedUser.get();
+            String token = UUID.randomUUID().toString();
+            LocalDate tokenExpiryDate = LocalDate.now().plusDays(1);
+            user.setResetPasswordToken(token);
+            user.setResetPasswordTokenExpiryDate(tokenExpiryDate);
+            return userMapper.userToUserDTO(userRepository.save(user));
+        } else {
+            throw new RadioNotFoundException();
+        }
+    }
+
+    @Override
+    public UserDTO resetPassword(String resetPasswordToken, String newPassword) {
+        Optional<User> user = userRepository.findByResetPasswordTokenAndResetPasswordTokenExpiryDateAfter(resetPasswordToken, LocalDate.now());
+        if(user.isPresent()) {
+            User resettingPasswordUser = user.get();
+            resettingPasswordUser.setResetPasswordTokenExpiryDate(null);
+            resettingPasswordUser.setResetPasswordToken(null);
+            user.get().setPassword(passwordEncoder.encode(newPassword));
+            return userMapper.userToUserDTO(userRepository.save(resettingPasswordUser));
+        } else {
+            throw new RadioBadRequestException("reset password fail.");
+        }
     }
 }

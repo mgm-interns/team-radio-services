@@ -24,7 +24,7 @@ public class RadioUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
         Optional<User> user = userRepository.findByUsername(usernameOrEmail);
         if(!user.isPresent()) {
-            user = userRepository.findByEmail(usernameOrEmail);
+            user = userRepository.findFirstByEmail(usernameOrEmail);
         }
 
         if (!user.isPresent()) {

@@ -12,7 +12,6 @@ import com.mgmtp.radio.sdo.CloudinaryDataKeys;
 import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.support.CloudinaryHelper;
 import com.mgmtp.radio.support.ContentTypeValidator;
-import com.mgmtp.radio.support.validator.user.RegisterValidator;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -21,7 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
@@ -161,6 +159,36 @@ public class UserController extends BaseRadioController {
         } else {
             throw new RadioNotFoundException("unauthorized");
         }
+    }
+
+    @PostMapping("/forgot-password")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, Object> forgotPassword(@RequestBody Map<String, Object> body) throws RadioException {
+        log.info("POST /api/v1/users/forgot-password - data: " + body.toString());
+
+        String email = body.get("email").toString();
+        userService.forgotPassword(email);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("request_reset_password", true);
+        response.put("description", "system has already sent reset password token.");
+        return response;
+    }
+
+    @PostMapping("/reset-password/{resetPasswordToken}")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, Object> resetPassword(@PathVariable(value = "resetPasswordToken") String resetPasswordToken,
+                                             @RequestBody Map<String, Object> body)
+            throws RadioException {
+        log.info("POST /api/v1/users/reset-password/" + resetPasswordToken);
+
+        String password = body.get("password").toString();
+        userService.resetPassword(resetPasswordToken, password);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("description", "your password reset.");
+        return response;
     }
 
     @ApiOperation(

@@ -16,6 +16,7 @@ import java.util.List;
 
 public interface UserService {
     UserDTO getUserByUsername(String username) throws RadioNotFoundException;
+    UserDTO getUserByEmail(String email) throws RadioNotFoundException;
     UserDTO register(UserDTO userDTO);
     UserDTO patchUser(String userId, UserDTO userDTO) throws RadioNotFoundException;
     UserDTO patchUserAvatar(String userId, String avatarUrl) throws RadioNotFoundException;
@@ -28,4 +29,6 @@ public interface UserService {
     List<UserDTO> findUserByUpdatedAt(LocalDate date);
     Flux<StationDTO> getAllStationOfUserById(String id);
     boolean changePassword(String userId, String oldPassword, String newPassword);
+    UserDTO forgotPassword(String email);
+    UserDTO resetPassword(String resetPasswordToken, String newPassword);
 }

@@ -12,7 +12,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 public class MessageChannelConfig {
 
     private static final String TASK_EXECUTOR = "task-executor";
-    public static final String REGISTER_CHANNEL = "registerChannel";
 
     @Bean(name = TASK_EXECUTOR)
     public TaskExecutor getTaskExecutor() {
@@ -24,6 +23,16 @@ public class MessageChannelConfig {
 
     @Bean
     MessageChannel registerChannel(@Qualifier(TASK_EXECUTOR) TaskExecutor taskExecutor) {
+        return new PublishSubscribeChannel(taskExecutor);
+    }
+
+    @Bean
+    MessageChannel forgotPasswordChannel() {
+        return new PublishSubscribeChannel();
+    }
+
+    @Bean
+    MessageChannel resetPasswordChannel(@Qualifier(TASK_EXECUTOR) TaskExecutor taskExecutor) {
         return new PublishSubscribeChannel(taskExecutor);
     }
 

@@ -17,9 +17,12 @@ import java.util.Map;
 public class UserAspect {
 
     MessageChannel registerChannel;
+    MessageChannel forgotPasswordChannel;
 
-    public UserAspect(MessageChannel registerChannel) {
+    public UserAspect(MessageChannel registerChannel,
+                      MessageChannel forgotPasswordChannel) {
         this.registerChannel = registerChannel;
+        this.forgotPasswordChannel = forgotPasswordChannel;
     }
 
     @AfterReturning(value = "execution(* com.mgmtp.radio.service.user.UserServiceImpl.register(..))", returning = "userInfo")
@@ -29,5 +32,23 @@ public class UserAspect {
         mailParam.put(EventDataKeys.event_id.name(), SubscriptionEvents.register.name());
 
         registerChannel.send(new GenericMessage<>(mailParam));
+    }
+
+    @AfterReturning(value = "execution(* com.mgmtp.radio.service.user.UserServiceImpl.forgotPassword(..))", returning = "userInfo")
+    public void sendEmailForgotPassword(UserDTO userInfo) {
+        Map<String, Object> mailParam = new HashMap<>();
+        mailParam.put(EventDataKeys.user_id.name(), userInfo.getId());
+        mailParam.put(EventDataKeys.event_id.name(), SubscriptionEvents.forgot_password.name());
+
+        forgotPasswordChannel.send(new GenericMessage<>(mailParam));
+    }
+
+    @AfterReturning(value = "execution(* com.mgmtp.radio.service.user.UserServiceImpl.resetPassword(..))", returning = "userInfo")
+    public void sendEmailAfterResetPassword(UserDTO userInfo) {
+        Map<String, Object> mailParam = new HashMap<>();
+        mailParam.put(EventDataKeys.user_id.name(), userInfo.getId());
+        mailParam.put(EventDataKeys.event_id.name(), SubscriptionEvents.reset_password.name());
+
+        forgotPasswordChannel.send(new GenericMessage<>(mailParam));
     }
 }
