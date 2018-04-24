@@ -1,5 +1,6 @@
 package com.mgmtp.radio.support.validator.station;
 
+import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.service.station.StationService;
 import com.mgmtp.radio.support.UserHelper;
@@ -22,7 +23,7 @@ public class CreateStationValidator implements Validator {
 
 	@Override
 	public boolean supports(Class<?> aClass) {
-		return StationDTO.class.isAssignableFrom(aClass);
+		return StationDTO.class.isAssignableFrom(aClass) || StationConfigurationDTO.class.isAssignableFrom(aClass);
 	}
 
 	@Override
