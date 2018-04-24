@@ -37,7 +37,7 @@ public class RecentStationServiceImpl implements RecentStationService {
 
         //Sort list StationDTO
         List<StationDTO> stationDTOListSorted = new ArrayList<>();
-        recentStationIdList.stream().forEach(recentStationId -> {
+        recentStationIdList.forEach(recentStationId -> {
             Optional<StationDTO> stationDTOOptional = stationDTOFlux.toStream().filter(stationDTO ->
                     stationDTO.getId().equals(recentStationId)
             ).findFirst();
