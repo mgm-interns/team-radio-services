@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,14 +36,16 @@ public class RecentStationServiceImpl implements RecentStationService {
         Flux<StationDTO> stationDTOFlux = stationService.getListStationByListStationId(recentStationIdList);
 
         //Sort list StationDTO
-        List<StationDTO> StationDTOListSorted = new ArrayList<>();
+        List<StationDTO> stationDTOListSorted = new ArrayList<>();
         recentStationIdList.stream().forEach(recentStationId -> {
-            StationDTO stationDTOSorted = stationDTOFlux.toStream().filter(stationDTO ->
+            Optional<StationDTO> stationDTOOptional = stationDTOFlux.toStream().filter(stationDTO ->
                     stationDTO.getId().equals(recentStationId)
-            ).findFirst().get();
-            StationDTOListSorted.add(stationDTOSorted);
+            ).findFirst();
+            if(stationDTOOptional.isPresent()) {
+                stationDTOListSorted.add(stationDTOOptional.get());
+            }
         });
-        return Flux.fromIterable(StationDTOListSorted);
+        return Flux.fromIterable(stationDTOListSorted);
     }
 
     @Override
