@@ -1,6 +1,7 @@
 package com.mgmtp.radio.respository.station;
 
 import com.mgmtp.radio.domain.station.Station;
+import com.mgmtp.radio.sdo.StationPrivacy;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Flux;
@@ -11,4 +12,5 @@ public interface StationRepository extends ReactiveMongoRepository<Station, Stri
     Mono<Station> retriveByIdOrFriendlyId(String friendlyId);
     Flux<Station> findByOwnerId(String Id);
 	Mono<Station> findFirstByName(String stationId);
+	Flux<Station> findByOwnerIdAndPrivacy(String ownerId, StationPrivacy privacy);
 }

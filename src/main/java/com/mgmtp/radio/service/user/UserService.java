@@ -4,6 +4,7 @@ import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioNotFoundException;
+import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.social.google.model.GoogleUser;
 import reactor.core.publisher.Flux;
 import com.mgmtp.radio.social.facebook.model.FacebookAvatar;
@@ -31,4 +32,5 @@ public interface UserService {
     boolean changePassword(String userId, String oldPassword, String newPassword);
     UserDTO forgotPassword(String email);
     UserDTO resetPassword(String resetPasswordToken, String newPassword);
+    Flux<StationDTO> getAllStationOfSpecificUserById(String userId, StationPrivacy privacy);
 }

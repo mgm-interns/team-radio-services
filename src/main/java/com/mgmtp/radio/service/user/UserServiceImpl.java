@@ -10,6 +10,7 @@ import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
+import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.social.facebook.model.FacebookAvatar;
 import com.mgmtp.radio.social.facebook.model.FacebookUser;
 import com.mgmtp.radio.social.google.model.GoogleUser;
@@ -207,7 +208,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Flux<StationDTO> getAllStationOfUserById(String id) {
+    public Flux<StationDTO> getAllMyStationById(String id) {
         return stationRepository.findByOwnerId(id).map(station -> stationMapper.stationToStationDTO(station));
     }
 
@@ -256,5 +257,11 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new RadioBadRequestException("reset password fail.");
         }
+    }
+
+    @Override
+    public Flux<StationDTO> getAllStationOfSpecificUserById(String userId, StationPrivacy privacy) {
+        return stationRepository.findByOwnerIdAndPrivacy(userId, privacy)
+                .map(station -> stationMapper.stationToStationDTO(station));
     }
 }
