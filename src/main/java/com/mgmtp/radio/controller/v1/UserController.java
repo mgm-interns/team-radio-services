@@ -41,22 +41,13 @@ public class UserController extends BaseRadioController {
     private final UserService userService;
     private final CloudinaryHelper cloudinaryHelper;
     private final ContentTypeValidator contentTypeValidator;
-    private final RegisterValidator registerValidator;
-
 
     public UserController(UserService userService,
-                          RegisterValidator registerValidator,
                           CloudinaryHelper cloudinaryHelper,
                           ContentTypeValidator contentTypeValidator) {
         this.userService = userService;
         this.cloudinaryHelper = cloudinaryHelper;
         this.contentTypeValidator = contentTypeValidator;
-        this.registerValidator = registerValidator;
-    }
-
-    @InitBinder
-    protected void initBinder(WebDataBinder binder) {
-        binder.addValidators(this.registerValidator);
     }
 
     @ApiOperation(
