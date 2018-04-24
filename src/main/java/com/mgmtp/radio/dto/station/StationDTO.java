@@ -15,7 +15,7 @@ import java.util.Map;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class StationDTO implements  Comparable<StationDTO> {
+public class StationDTO {
 
 	String id;
 
@@ -47,29 +47,8 @@ public class StationDTO implements  Comparable<StationDTO> {
 		return userList.size();
 	}
 
-	private boolean hasUser() {
+	public boolean hasUser() {
 		return userList.size() > 0;
-	}
-
-	@Override
-	public int compareTo(StationDTO otherStationDto) {
-		int LARGER = -1;
-		int SMALLER = 1;
-		int EQUAL = 0;
-
-		if(this.hasUser() && !otherStationDto.hasUser())
-			return LARGER;
-		if(!this.hasUser() && otherStationDto.hasUser() )
-			return SMALLER;
-		if(this.isNewStation() && !otherStationDto.isNewStation())
-			return LARGER;
-		if(!this.isNewStation() && otherStationDto.isNewStation())
-			return SMALLER;
-		if(this.getNumberOnline() > otherStationDto.getNumberOnline())
-			return LARGER;
-		if(this.getNumberOnline() < otherStationDto.getNumberOnline())
-			return SMALLER;
-		return EQUAL;
 	}
 
 	public boolean isNewStation() {
