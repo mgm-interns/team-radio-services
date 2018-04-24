@@ -54,8 +54,8 @@ public class StationServiceImpl implements StationService {
 
 
 
-    public List<StationDTO> getAllStationWithArrangement(){
-	    List<StationDTO> result = stationOnlineService.getAllStation();
+    public Map<String,StationDTO> getOrderedStations(){
+		Map<String,StationDTO> result = stationOnlineService.getAllStation();
 	    if (result.isEmpty()) {
             getAll().map(stationDTO -> {
                 stationOnlineService.addStationToList(stationDTO);

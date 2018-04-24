@@ -8,13 +8,12 @@ import reactor.core.publisher.Mono;
 import com.mgmtp.radio.dto.station.StationDTO;
 import reactor.core.publisher.Flux;
 
-import java.util.List;
 import java.util.Map;
 import java.util.List;
 
 public interface StationService {
     Flux<StationDTO> getAll();
-    Map<String, StationDTO> getAllStationWithArrangement();
+    Map<String,StationDTO> getOrderedStations();
     Mono<StationDTO> findById(String id);
     Mono<StationDTO> create(String userId, StationDTO stationDTO);
     Mono<StationDTO> update(String id, StationDTO stationDTO);
