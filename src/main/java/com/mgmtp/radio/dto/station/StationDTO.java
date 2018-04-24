@@ -11,7 +11,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class StationDTO {
 
@@ -31,4 +30,9 @@ public class StationDTO {
 	LocalDate createdAt;
 
 	StationConfigurationDTO stationConfiguration;
+
+    public StationDTO() {
+        stationConfiguration = new StationConfigurationDTO();
+        stationConfiguration.setSkipRule(new SkipRuleDTO(SkipRuleType.BASIC));
+    }
 }

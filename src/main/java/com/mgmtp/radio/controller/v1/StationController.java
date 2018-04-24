@@ -109,13 +109,13 @@ public class StationController extends BaseRadioController {
     })
     @PutMapping("/{id}")
     public Mono<StationDTO> updateStation(@PathVariable(value = "id") final String id,
-                                          @Valid @RequestBody final StationDTO stationDTO) {
+                                          @Validated @RequestBody final StationDTO stationDTO) {
         return stationService.update(id, stationDTO);
     }
 
     @PutMapping("/update-config/{id}")
     public Mono<StationConfigurationDTO> updateConfigurationStation(@PathVariable(value = "id") final String id,
-                                                                                    @Valid @RequestBody final StationConfigurationDTO stationConfigurationDTO) {
+                                                                    @RequestBody final StationConfigurationDTO stationConfigurationDTO) {
         return stationService.updateConfiguration(id, stationConfigurationDTO);
     }
 }
