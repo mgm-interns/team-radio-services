@@ -27,6 +27,7 @@ import com.mgmtp.radio.support.TransferHelper;
 import com.mgmtp.radio.support.YouTubeHelper;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.GenericMessage;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -93,23 +94,23 @@ public class SongServiceImpl implements SongService {
                 if (creator.isPresent()) {
                     result.setCreator(userMapper.userToUserDTO(creator.get()));
                 }
-            }
 
-            if (!song.getUpVoteUserIdList().isEmpty()) {
-                result.setUpvoteUserList(userRepository.findByIdIn(song.getUpVoteUserIdList())
-                        .stream()
-                        .map(userMapper::userToUserDTO)
-                        .collect(Collectors.toList()));
-            }
+                if (!song.getUpVoteUserIdList().isEmpty()) {
+                    result.setUpvoteUserList(userRepository.findByIdIn(song.getUpVoteUserIdList())
+                            .stream()
+                            .map(userMapper::userToUserDTO)
+                            .collect(Collectors.toList()));
+                }
 
-            if (!song.getDownVoteUserIdList().isEmpty()) {
-                result.setDownvoteUserList(userRepository.findByIdIn(song.getDownVoteUserIdList())
-                        .stream()
-                        .map(userMapper::userToUserDTO)
-                        .collect(Collectors.toList()));
-            }
+                if (!song.getDownVoteUserIdList().isEmpty()) {
+                    result.setDownvoteUserList(userRepository.findByIdIn(song.getDownVoteUserIdList())
+                            .stream()
+                            .map(userMapper::userToUserDTO)
+                            .collect(Collectors.toList()));
+                }
 
-            sink.next(result);
+                sink.next(result);
+            }
         });
     }
 
@@ -224,7 +225,7 @@ public class SongServiceImpl implements SongService {
         historyParam.put(EventDataKeys.stationId.name(), stationId);
         historyParam.put(EventDataKeys.songId.name(), songId);
 
-        historyChannel.send(new GenericMessage<>(historyParam));
+        historyChannel.send(MessageBuilder.withPayload(historyParam).build());
     }
 
     private void addMessageToWillBeSkipSongInList(List<SongDTO> listSong){
