@@ -31,11 +31,9 @@ public class RecentStationServiceImpl implements RecentStationService {
         Flux<RecentStationDTO> recentStationDTOFlux =
                 recentStationRepository.findByUserIdOrderByJoinedTimeDesc(userId).map(recentStationMapper::recentStationToRecentStationDTO);
 
-        //Get StationDTO by list recent station id
         List<String> recentStationIdList = recentStationDTOFlux.map(RecentStationDTO::getStationId).toStream().collect(Collectors.toList());
         Flux<StationDTO> stationDTOFlux = stationService.getListStationByListStationId(recentStationIdList);
 
-        //Sort list StationDTO
         List<StationDTO> stationDTOListSorted = new ArrayList<>();
         recentStationIdList.forEach(recentStationId -> {
             Optional<StationDTO> stationDTOOptional = stationDTOFlux.toStream().filter(stationDTO ->
