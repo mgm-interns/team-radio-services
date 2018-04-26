@@ -5,6 +5,7 @@ import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
+import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.StationNotFoundException;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
@@ -13,13 +14,11 @@ import com.mgmtp.radio.respository.station.StationRepository;
 import org.aspectj.lang.annotation.Aspect;
 import com.mgmtp.radio.sdo.SkipRuleType;
 import com.mgmtp.radio.sdo.StationPrivacy;
-import lombok.Data;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Schedulers;
 
 import java.text.Normalizer;
 import java.time.Duration;
@@ -38,7 +37,6 @@ public class StationServiceImpl implements StationService {
 
     @Override
 	public int getOnlineUsersNumber(StationDTO stationDTO) {
-		//TODO Get number of online users id here
 		return stationDTO.getNumberOnline();
 	}
 
@@ -54,19 +52,17 @@ public class StationServiceImpl implements StationService {
     }
 
 
-
-    public Map<String,StationDTO> getOrderedStations(){
-		Map<String,StationDTO> result = stationOnlineService.getAllStation();
-	    if (result.isEmpty()) {
-            getAll().map(stationDTO -> {
-                if (stationDTO.getPrivacy() == StationPrivacy.station_public){
-                	stationOnlineService.addStationToList(stationDTO);
-				}
-                return stationDTO;
-            }).subscribe();
+    public Map<String, StationDTO> getOrderedStations() {
+        Map<String, StationDTO> result = stationOnlineService.getAllStation();
+        if (result.isEmpty()) {
+            getAll().subscribe(stationDTO -> {
+                if (stationDTO.getPrivacy() == StationPrivacy.station_public) {
+                    stationOnlineService.addStationToList(stationDTO);
+                }
+            });
         }
         return stationOnlineService.getAllStation();
-	}
+    }
 
 	public Flux<StationDTO> getAll() {
         return stationRepository.findAll()
@@ -89,9 +85,9 @@ public class StationServiceImpl implements StationService {
         station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationDTO.getStationConfiguration()));
 	    station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationDTO.getStationConfiguration().getSkipRule()));
         return stationRepository
-				.save(station)
-				.map(stationMapper::stationToStationDTO)
-				.doOnSuccess(stationSaveSuccess -> stationOnlineService.addStationToList(stationSaveSuccess));
+                .save(station)
+                .map(stationMapper::stationToStationDTO)
+                .doOnSuccess(stationSaveSuccess -> stationOnlineService.addStationToList(stationSaveSuccess));
     }
 
     private String createFriendlyIdFromStationName(String stationName) {
@@ -155,22 +151,20 @@ public class StationServiceImpl implements StationService {
     public Mono<StationDTO> joinStation(String stationId, UserDTO userDto) {
         final Mono<StationDTO> monoStationDto = findById(stationId);
         return monoStationDto
-                .doOnNext(stationDTO -> addUserToStationOnlineList(stationDTO,userDto));
+                .doOnNext(stationDTO -> addUserToStationOnlineList(stationDTO, userDto));
     }
 
     public void addUserToStationOnlineList(StationDTO stationDTO, UserDTO userDto) {
-        //TODO Call this method after user join station
-        stationOnlineService.addOnlineUser(userDto,stationDTO.getId());
+        stationOnlineService.addOnlineUser(userDto, stationDTO.getId());
     }
 
 
-	public void leaveStation (String stationId, UserDTO userDTO){
-		//TODO Call this method after user left station
-		stationOnlineService.removeOnlineUser(userDTO,stationId);
-	}
+    public void leaveStation(String stationId, UserDTO userDTO) {
+        stationOnlineService.removeOnlineUser(userDTO, stationId);
+    }
 
     public StationDTO removeUserFromStationOnlineList(String stationId, UserDTO userDTO) {
-		stationOnlineService.removeOnlineUser(userDTO,stationId);
-		return stationOnlineService.getStationById(stationId);
+        stationOnlineService.removeOnlineUser(userDTO, stationId);
+        return stationOnlineService.getStationById(stationId);
     }
 }

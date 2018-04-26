@@ -52,8 +52,8 @@
 //        stationOnlineService.addStationToList(stationDTO);
 //
 //        //then
-//        assertEquals(allStationsTest.size(),stationOnlineService.getAllStation().size());
-//        assertThat(allStationsTest.get(0)).isEqualToComparingFieldByField(stationOnlineService.getAllStation().get(0));
+//        assertEquals(allStationsTest.size(),stationOnlineService.getAllStations().size());
+//        assertThat(allStationsTest.get(0)).isEqualToComparingFieldByField(stationOnlineService.getAllStations().get(0));
 //
 //        //test getStationById
 //        //when
@@ -68,9 +68,9 @@
 //        stationOnlineService.removeStationFromList(stationDTO.getId());
 //
 //        //then
-//        assertEquals(allStationsTest.size(),stationOnlineService.getAllStation().size());
-//        if (allStationsTest.size()!=0 && stationOnlineService.getAllStation().size()!=0){
-//            assertThat(allStationsTest.get(0)).isEqualToComparingFieldByField(stationOnlineService.getAllStation().get(0));
+//        assertEquals(allStationsTest.size(),stationOnlineService.getAllStations().size());
+//        if (allStationsTest.size()!=0 && stationOnlineService.getAllStations().size()!=0){
+//            assertThat(allStationsTest.get(0)).isEqualToComparingFieldByField(stationOnlineService.getAllStations().get(0));
 //        }
 //    }
 //
@@ -105,9 +105,9 @@
 //        stationOnlineService.addOnlineUser(userDTO,stationId);
 //
 //        //then
-//        assertEquals(allStationsTest.size(),stationOnlineService.getAllStation().size());
-//        assertEquals(allStationsTest.get(0).getOnlineUsers().size(),stationOnlineService.getAllStation().get(0).getOnlineUsers().size());
-//        assertThat(allStationsTest.get(0).getOnlineUsers().get(userIdOnline)).isEqualToComparingFieldByField(stationOnlineService.getAllStation().get(0).getOnlineUsers().get(userIdOnline));
+//        assertEquals(allStationsTest.size(),stationOnlineService.getAllStations().size());
+//        assertEquals(allStationsTest.get(0).getOnlineUsers().size(),stationOnlineService.getAllStations().get(0).getOnlineUsers().size());
+//        assertThat(allStationsTest.get(0).getOnlineUsers().get(userIdOnline)).isEqualToComparingFieldByField(stationOnlineService.getAllStations().get(0).getOnlineUsers().get(userIdOnline));
 //
 //        //Test removeOnlineUser
 //        //when
@@ -117,10 +117,10 @@
 //        stationOnlineService.removeOnlineUser(userDTO,stationId);
 //
 //        //then
-//        assertEquals(allStationsTest.size(),stationOnlineService.getAllStation().size());
-//        assertEquals(allStationsTest.get(0).getOnlineUsers().size(),stationOnlineService.getAllStation().get(0).getOnlineUsers().size());
-//        if (allStationsTest.get(0).getOnlineUsers().size()!=0 && stationOnlineService.getAllStation().get(0).getOnlineUsers().size() !=0){
-//            assertThat(allStationsTest.get(0).getOnlineUsers().get(userIdOnline)).isEqualToComparingFieldByField(stationOnlineService.getAllStation().get(0).getOnlineUsers().get(userIdOnline));
+//        assertEquals(allStationsTest.size(),stationOnlineService.getAllStations().size());
+//        assertEquals(allStationsTest.get(0).getOnlineUsers().size(),stationOnlineService.getAllStations().get(0).getOnlineUsers().size());
+//        if (allStationsTest.get(0).getOnlineUsers().size()!=0 && stationOnlineService.getAllStations().get(0).getOnlineUsers().size() !=0){
+//            assertThat(allStationsTest.get(0).getOnlineUsers().get(userIdOnline)).isEqualToComparingFieldByField(stationOnlineService.getAllStations().get(0).getOnlineUsers().get(userIdOnline));
 //        }
 //    }
 //
@@ -165,7 +165,7 @@
 //        expectedStation.add(stationDTO02);
 //        expectedStation.add(stationDTO01);
 //
-//        List<StationDTO> resultStation = stationOnlineService.getAllStation();
+//        List<StationDTO> resultStation = stationOnlineService.getAllStations();
 //
 //        //then
 //        assertEquals(resultStation.size(),expectedStation.size());
@@ -208,7 +208,7 @@
 //        expectedStation.add(stationDTO01);
 //        expectedStation.add(stationDTO03);
 //
-//        List<StationDTO> resultStation = stationOnlineService.getAllStation();
+//        List<StationDTO> resultStation = stationOnlineService.getAllStations();
 //
 //        //then
 //        assertEquals(resultStation.size(),expectedStation.size());
@@ -267,7 +267,7 @@
 //        expectedStation.add(stationDTO01);
 //        expectedStation.add(stationDTO03);
 //
-//        List<StationDTO> resultStation = stationOnlineService.getAllStation();
+//        List<StationDTO> resultStation = stationOnlineService.getAllStations();
 //
 //        //then
 //        assertEquals(resultStation.size(),expectedStation.size());
@@ -373,7 +373,7 @@
 //        expectedStation.add(stationDTO06);
 //        expectedStation.add(stationDTO03);
 //
-//        List<StationDTO> resultStation = stationOnlineService.getAllStation();
+//        List<StationDTO> resultStation = stationOnlineService.getAllStations();
 //
 //        //then
 //        assertEquals(resultStation.size(),expectedStation.size());

@@ -3,7 +3,7 @@ package com.mgmtp.radio.dto.station;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.mgmtp.radio.dto.skipRule.SkipRuleDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
-import com.mgmtp.radio.sdo.Days_subtracted;
+import com.mgmtp.radio.sdo.DaySubtracted;
 import com.mgmtp.radio.sdo.SkipRuleType;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import lombok.Data;
@@ -36,10 +36,9 @@ public class StationDTO {
 
 	Map<String, UserDTO> onlineUsers;
 
-
 	public StationDTO() {
-        stationConfiguration = new StationConfigurationDTO();
-        stationConfiguration.setSkipRule(new SkipRuleDTO(SkipRuleType.BASIC));
+		stationConfiguration = new StationConfigurationDTO();
+		stationConfiguration.setSkipRule(new SkipRuleDTO(SkipRuleType.BASIC));
 		onlineUsers = new HashMap<>();
 	}
 
@@ -52,6 +51,6 @@ public class StationDTO {
 	}
 
 	public boolean isNewStation() {
-		return getCreatedAt().isAfter(LocalDate.now().minusDays(Days_subtracted.DAYS_SUBTRACTED.getDays_limited()));
+		return getCreatedAt().isAfter(LocalDate.now().minusDays(DaySubtracted.DAYS_SUBTRACTED.getDAYS_LIMITED()));
 	}
 }
