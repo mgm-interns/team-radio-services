@@ -34,21 +34,21 @@ public class StationDTO {
 
 	StationConfigurationDTO stationConfiguration;
 
-	Map<String, UserDTO> userList;
+	Map<String, UserDTO> onlineUsers;
 
 
 	public StationDTO() {
         stationConfiguration = new StationConfigurationDTO();
         stationConfiguration.setSkipRule(new SkipRuleDTO(SkipRuleType.BASIC));
-		userList = new HashMap<>();
+		onlineUsers = new HashMap<>();
 	}
 
 	public int getNumberOnline() {
-		return userList.size();
+		return onlineUsers.size();
 	}
 
 	public boolean hasUser() {
-		return userList.size() > 0;
+		return onlineUsers.size() > 0;
 	}
 
 	public boolean isNewStation() {

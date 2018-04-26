@@ -41,10 +41,10 @@
 //
 //        UserDTO userDTO = new UserDTO();
 //        userDTO.setName("ThuyTien");
-//        Map<String, UserDTO> userList = new HashMap<>();
-//        userList.put("123",userDTO);
+//        Map<String, UserDTO> onlineUsers = new HashMap<>();
+//        onlineUsers.put("123",userDTO);
 //
-//        stationDTO.setUserList(userList);
+//        stationDTO.setOnlineUsers(onlineUsers);
 //
 //        //test addStationToList
 //        //when
@@ -93,34 +93,34 @@
 //        String userIdOnline ="userOnline";
 //        userDTO.setId(userIdOnline);
 //        userDTO.setName("ThuyTien");
-//        Map<String, UserDTO> userList = new HashMap<>();
+//        Map<String, UserDTO> onlineUsers = new HashMap<>();
 //
 //        //Test addOnlineUser
 //        //when
 //        allStationsTest.add(stationDTO);
 //        StationDTO stationDTOTestAdd = allStationsTest.get(0);
-//        stationDTOTestAdd.getUserList().put(userDTO.getId(),userDTO);
+//        stationDTOTestAdd.getOnlineUsers().put(userDTO.getId(),userDTO);
 //
 //        stationOnlineService.addStationToList(stationDTO);
 //        stationOnlineService.addOnlineUser(userDTO,stationId);
 //
 //        //then
 //        assertEquals(allStationsTest.size(),stationOnlineService.getAllStation().size());
-//        assertEquals(allStationsTest.get(0).getUserList().size(),stationOnlineService.getAllStation().get(0).getUserList().size());
-//        assertThat(allStationsTest.get(0).getUserList().get(userIdOnline)).isEqualToComparingFieldByField(stationOnlineService.getAllStation().get(0).getUserList().get(userIdOnline));
+//        assertEquals(allStationsTest.get(0).getOnlineUsers().size(),stationOnlineService.getAllStation().get(0).getOnlineUsers().size());
+//        assertThat(allStationsTest.get(0).getOnlineUsers().get(userIdOnline)).isEqualToComparingFieldByField(stationOnlineService.getAllStation().get(0).getOnlineUsers().get(userIdOnline));
 //
 //        //Test removeOnlineUser
 //        //when
 //        StationDTO stationDTOTestRemove = allStationsTest.get(0);
-//        stationDTOTestRemove.getUserList().remove(userDTO.getId());
+//        stationDTOTestRemove.getOnlineUsers().remove(userDTO.getId());
 //
 //        stationOnlineService.removeOnlineUser(userDTO,stationId);
 //
 //        //then
 //        assertEquals(allStationsTest.size(),stationOnlineService.getAllStation().size());
-//        assertEquals(allStationsTest.get(0).getUserList().size(),stationOnlineService.getAllStation().get(0).getUserList().size());
-//        if (allStationsTest.get(0).getUserList().size()!=0 && stationOnlineService.getAllStation().get(0).getUserList().size() !=0){
-//            assertThat(allStationsTest.get(0).getUserList().get(userIdOnline)).isEqualToComparingFieldByField(stationOnlineService.getAllStation().get(0).getUserList().get(userIdOnline));
+//        assertEquals(allStationsTest.get(0).getOnlineUsers().size(),stationOnlineService.getAllStation().get(0).getOnlineUsers().size());
+//        if (allStationsTest.get(0).getOnlineUsers().size()!=0 && stationOnlineService.getAllStation().get(0).getOnlineUsers().size() !=0){
+//            assertThat(allStationsTest.get(0).getOnlineUsers().get(userIdOnline)).isEqualToComparingFieldByField(stationOnlineService.getAllStation().get(0).getOnlineUsers().get(userIdOnline));
 //        }
 //    }
 //
@@ -153,7 +153,7 @@
 //        userDTO1.setName("ThuyTien");
 //        Map<String, UserDTO> userList1 = new HashMap<>();
 //        userList1.put(userDTO1.getId(),userDTO1);
-//        stationDTO03.setUserList(userList1);
+//        stationDTO03.setOnlineUsers(userList1);
 //
 //        stationOnlineService.addStationToList(stationDTO01);
 //        stationOnlineService.addStationToList(stationDTO02);
@@ -234,7 +234,7 @@
 //        userDTO1.setName("ThuyTien");
 //        Map<String, UserDTO> userList1 = new HashMap<>();
 //        userList1.put(userDTO1.getId(),userDTO1);
-//        stationDTO01.setUserList(userList1);
+//        stationDTO01.setOnlineUsers(userList1);
 //
 //        StationDTO stationDTO02 = new StationDTO();
 //        String stationId02 ="station2";
@@ -249,7 +249,7 @@
 //        Map<String, UserDTO> userList2 = new HashMap<>();
 //        userList2.put(userDTO1.getId(),userDTO1);
 //        userList2.put(userDTO2.getId(),userDTO2);
-//        stationDTO02.setUserList(userList2);
+//        stationDTO02.setOnlineUsers(userList2);
 //
 //        StationDTO stationDTO03 = new StationDTO();
 //        String stationId03 ="station3";
@@ -293,7 +293,7 @@
 //        userDTO1.setName("ThuyTien");
 //        Map<String, UserDTO> userList1 = new HashMap<>();
 //        userList1.put(userDTO1.getId(),userDTO1);
-//        stationDTO01.setUserList(userList1);
+//        stationDTO01.setOnlineUsers(userList1);
 //
 //        // old station - 2 number of user
 //        StationDTO stationDTO02 = new StationDTO();
@@ -309,7 +309,7 @@
 //        Map<String, UserDTO> userList2 = new HashMap<>();
 //        userList2.put(userDTO1.getId(),userDTO1);
 //        userList2.put(userDTO2.getId(),userDTO2);
-//        stationDTO02.setUserList(userList2);
+//        stationDTO02.setOnlineUsers(userList2);
 //
 //        // old station - 0 number of user
 //        StationDTO stationDTO03 = new StationDTO();
@@ -331,7 +331,7 @@
 //        userDTO4.setName("ThuyTien4");
 //        Map<String, UserDTO> userList4 = new HashMap<>();
 //        userList4.put(userDTO4.getId(),userDTO4);
-//        stationDTO04.setUserList(userList1);
+//        stationDTO04.setOnlineUsers(userList1);
 //
 //        // new station - 2 number of user
 //        StationDTO stationDTO05 = new StationDTO();
@@ -347,7 +347,7 @@
 //        Map<String, UserDTO> userList5 = new HashMap<>();
 //        userList5.put(userDTO1.getId(),userDTO1);
 //        userList5.put(userDTO5.getId(),userDTO5);
-//        stationDTO05.setUserList(userList5);
+//        stationDTO05.setOnlineUsers(userList5);
 //
 //        // new station - 0 number of user
 //        StationDTO stationDTO06 = new StationDTO();
