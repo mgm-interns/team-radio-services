@@ -16,6 +16,7 @@ import reactor.core.publisher.Mono;
 
 import java.text.Normalizer;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -147,4 +148,9 @@ public class StationServiceImpl implements StationService {
 		return stationRepository.findFirstByName(name)
 			.blockOptional().isPresent();
 	}
+
+    @Override
+    public Flux<StationDTO> getListStationByListStationId(List<String> listStationId) {
+        return stationRepository.findByIdIn(listStationId).map(stationMapper::stationToStationDTO);
+    }
 }
