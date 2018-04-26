@@ -104,7 +104,7 @@ public class UserController extends BaseRadioController {
         log.info("GET /api/v1/users/me/stations");
 
         if(getCurrentUser().isPresent()) {
-            return userService.getAllMyStationById(getCurrentUser().get().getId());
+            return userService.getStationByUserId(getCurrentUser().get().getId());
         } else {
             throw new RadioNotFoundException("unauthorized");
         }
@@ -287,11 +287,11 @@ public class UserController extends BaseRadioController {
     @GetMapping("/{userId}/stations")
     @ResponseStatus(HttpStatus.OK)
     public Flux<StationDTO> getListStationOfUser(@PathVariable(value = "userId") String userId) throws RadioNotFoundException {
-        log.info("GET /api/v1/users/" + userId);
+        log.info("GET /api/v1/users/" + userId + "/stations");
 
         Optional<UserDTO> user = Optional.ofNullable(userService.getUserById(userId));
         if(user.isPresent()) {
-            return userService.getAllStationOfSpecificUserById(userId, StationPrivacy.station_public);
+            return userService.getStationsByUserIdAndPrivacy(userId, StationPrivacy.station_public);
         } else {
             throw new RadioNotFoundException("user is not found");
         }

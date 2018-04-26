@@ -208,8 +208,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Flux<StationDTO> getAllMyStationById(String id) {
-        return stationRepository.findByOwnerId(id).map(station -> stationMapper.stationToStationDTO(station));
+    public Flux<StationDTO> getStationByUserId(String userId) {
+        return stationRepository.findByOwnerId(userId).map(station -> stationMapper.stationToStationDTO(station));
     }
 
     @Override
@@ -260,7 +260,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Flux<StationDTO> getAllStationOfSpecificUserById(String userId, StationPrivacy privacy) {
+    public Flux<StationDTO> getStationsByUserIdAndPrivacy(String userId, StationPrivacy privacy) {
         return stationRepository.findByOwnerIdAndPrivacy(userId, privacy)
                 .map(station -> stationMapper.stationToStationDTO(station));
     }

@@ -62,7 +62,7 @@ public class GetAllStationOfSpecificUserById {
 
         when(stationRepository.findByOwnerIdAndPrivacy("User001", StationPrivacy.station_public)).thenReturn(Flux.just(station_1));
         when(stationMapper.stationToStationDTO(station_1)).thenReturn(stationDto_1);
-        StepVerifier.create(userService.getAllStationOfSpecificUserById("User001",StationPrivacy.station_public))
+        StepVerifier.create(userService.getStationsByUserIdAndPrivacy("User001",StationPrivacy.station_public))
                 .expectNext(stationDto_1)
                 .verifyComplete();
     }

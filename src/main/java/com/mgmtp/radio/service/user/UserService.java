@@ -28,9 +28,9 @@ public interface UserService {
     User registerByGoogle(GoogleUser googleUser);
     Optional<User> getUserByGoogleId(String googleId);
     List<UserDTO> findUserByUpdatedAt(LocalDate date);
-    Flux<StationDTO> getAllStationOfUserById(String id);
+    Flux<StationDTO> getStationByUserId(String userId);
     boolean changePassword(String userId, String oldPassword, String newPassword);
     UserDTO forgotPassword(String email);
     UserDTO resetPassword(String resetPasswordToken, String newPassword);
-    Flux<StationDTO> getAllStationOfSpecificUserById(String userId, StationPrivacy privacy);
+    Flux<StationDTO> getStationsByUserIdAndPrivacy(String userId, StationPrivacy privacy);
 }

@@ -81,7 +81,7 @@ public class GetAllMyStationOfUserTest {
         when(stationRepository.findByOwnerId("User001")).thenReturn(Flux.just(station_1,station_2));
         when(stationMapper.stationToStationDTO(station_1)).thenReturn(stationDto_1);
         when(stationMapper.stationToStationDTO(station_2)).thenReturn(stationDto_2);
-        StepVerifier.create(userService.getAllMyStationById("User001"))
+        StepVerifier.create(userService.getStationByUserId("User001"))
                 .expectNext(stationDto_1)
                 .expectNext(stationDto_2)
                 .verifyComplete();
