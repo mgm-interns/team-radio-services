@@ -9,6 +9,7 @@ import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.sdo.CloudinaryDataKeys;
+import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.support.CloudinaryHelper;
 import com.mgmtp.radio.support.ContentTypeValidator;
@@ -103,12 +104,11 @@ public class UserController extends BaseRadioController {
         log.info("GET /api/v1/users/me/stations");
 
         if(getCurrentUser().isPresent()) {
-            return userService.getAllStationOfUserById(getCurrentUser().get().getId());
+            return userService.getStationByUserId(getCurrentUser().get().getId());
         } else {
             throw new RadioNotFoundException("unauthorized");
         }
     }
-
 
     @ApiOperation(
             value = "Register an user",
@@ -222,8 +222,6 @@ public class UserController extends BaseRadioController {
         }
     }
 
-
-
     @ApiOperation(
             value = "Upload and patch current user avatar",
             notes = "Returns the updated user"
@@ -282,6 +280,30 @@ public class UserController extends BaseRadioController {
             return userService.patchUserCover(currentUser.getId(), coverUrl);
         } else {
             throw new RadioException("Can not upload");
+        }
+    }
+
+    @ApiOperation(
+            value = "Get public station of a specific user",
+            notes = "Returns the updated user"
+    )
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 400, message = "Error in user is not found", response = RadioNotFoundException.class),
+            @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
+    })
+
+    @GetMapping("/{userId}/stations")
+    @ResponseStatus(HttpStatus.OK)
+    public Flux<StationDTO> getListStationOfUser(@PathVariable(value = "userId") String userId) throws RadioNotFoundException {
+        log.info("GET /api/v1/users/" + userId + "/stations");
+
+        Optional<UserDTO> user = Optional.ofNullable(userService.getUserById(userId));
+        if(user.isPresent()) {
+            return userService.getStationsByUserIdAndPrivacy(userId, StationPrivacy.station_public);
+        } else {
+            throw new RadioNotFoundException("user is not found");
         }
     }
 
