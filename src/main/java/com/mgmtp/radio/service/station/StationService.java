@@ -13,7 +13,6 @@ public interface StationService {
     Mono<StationDTO> findById(String id);
     Mono<StationDTO> create(String userId, StationDTO stationDTO);
     Mono<StationDTO> update(String id, StationDTO stationDTO);
-    int getOnlineUsersNumber(StationDTO stationDTO);
     Mono<Station> findStationByIdAndDeletedFalse(String stationId);
     Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO);
     boolean existsByName(String stationName);

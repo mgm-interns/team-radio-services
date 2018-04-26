@@ -71,6 +71,6 @@ public class SongAspect {
 
     private int getOnlineUsersNumber(StationDTO stationDTO) {
         //TODO Get number of online users id here
-        return 0;
+        return 1;
     }
 }
