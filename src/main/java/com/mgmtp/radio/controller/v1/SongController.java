@@ -118,8 +118,12 @@ public class SongController extends BaseRadioController {
     ) {
         log.info("POST /api/v1/song  - data: " + youTubeVideoId.toString());
 
-        String userId = getCurrentUser().isPresent() ? getCurrentUser().get().getId() : null;
-        return songService.addSongToStationPlaylist(stationId, youTubeVideoId, message, userId);
+        if (getCurrentUser().isPresent()) {
+            String userId = getCurrentUser().get().getId();
+            return songService.addSongToStationPlaylist(stationId, youTubeVideoId, message, userId);
+        } else {
+            throw new RadioNotFoundException("Please login to use this feature!!!");
+        }
     }
 
     @ApiOperation(
