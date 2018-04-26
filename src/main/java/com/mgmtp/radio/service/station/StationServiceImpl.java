@@ -12,6 +12,7 @@ import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.respository.station.StationRepository;
 import org.aspectj.lang.annotation.Aspect;
 import com.mgmtp.radio.sdo.SkipRuleType;
+import com.mgmtp.radio.sdo.StationPrivacy;
 import lombok.Data;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -38,7 +39,7 @@ public class StationServiceImpl implements StationService {
     @Override
 	public int getOnlineUsersNumber(StationDTO stationDTO) {
 		//TODO Get number of online users id here
-		return 0;
+		return stationDTO.getNumberOnline();
 	}
 
     public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, StationOnlineServiceImpl stationOnlineService) {
@@ -58,7 +59,9 @@ public class StationServiceImpl implements StationService {
 		Map<String,StationDTO> result = stationOnlineService.getAllStation();
 	    if (result.isEmpty()) {
             getAll().map(stationDTO -> {
-                stationOnlineService.addStationToList(stationDTO);
+                if (stationDTO.getPrivacy() == StationPrivacy.station_public){
+                	stationOnlineService.addStationToList(stationDTO);
+				}
                 return stationDTO;
             }).subscribe();
         }

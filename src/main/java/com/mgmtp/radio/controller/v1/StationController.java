@@ -79,16 +79,11 @@ public class StationController extends BaseRadioController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
-//        if(getCurrentUser().isPresent()) {
-//            return this.stationService
-//                    .joinStation(stationId,userMapper.userToUserDTO(getCurrentUser().get()))
-//                    .switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
-//        }else{
-//            UserDTO anonymousUserDto = new UserDTO();
-//            return this.stationService
-//                    .joinStation(stationId,anonymousUserDto)
-//                    .switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
-//        }
+        if(getCurrentUser().isPresent()) {
+            return this.stationService
+                    .joinStation(stationId, userMapper.userToUserDTO(getCurrentUser().get()))
+                    .switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
+        }
         return this.stationService.findById(stationId).switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
     }
 
