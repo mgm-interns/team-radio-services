@@ -8,8 +8,6 @@ import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.respository.station.StationRepository;
-import com.mgmtp.radio.sdo.SkipRuleType;
-import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -26,12 +24,6 @@ public class StationServiceImpl implements StationService {
 
 	private final StationRepository stationRepository;
 	private final StationMapper stationMapper;
-
-	@Override
-	public int getOnlineUsersNumber(StationDTO stationDTO) {
-		//TODO Get number of online users id here
-		return 0;
-	}
 
     public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository) {
         this.stationMapper = stationMapper;

@@ -29,7 +29,7 @@ public class GetAllStationImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        stationService = new StationServiceImpl(stationMapper,  stationRepository);
+        stationService = new StationServiceImpl(stationMapper, stationRepository);
     }
 
     @Test
