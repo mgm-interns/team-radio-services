@@ -167,6 +167,11 @@ public class UserController extends BaseRadioController {
         log.info("POST /api/v1/users/forgot-password - data: " + body.toString());
 
         String email = body.get("email").toString();
+
+        if(StringUtils.isEmpty(email)) {
+            throw new RadioBadRequestException("email is invalid.");
+        }
+
         userService.forgotPassword(email);
 
         Map<String, Object> response = new HashMap<>();
@@ -183,6 +188,11 @@ public class UserController extends BaseRadioController {
         log.info("POST /api/v1/users/reset-password/" + resetPasswordToken);
 
         String password = body.get("password").toString();
+
+        if(StringUtils.isEmpty(password)) {
+            throw new RadioBadRequestException("password is invalid.");
+        }
+
         userService.resetPassword(resetPasswordToken, password);
 
         Map<String, Object> response = new HashMap<>();
