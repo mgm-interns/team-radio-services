@@ -5,7 +5,6 @@ import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
-import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
@@ -24,8 +23,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
-import java.util.List;
 import java.util.Map;
 
 @Log4j2
@@ -64,8 +61,8 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Map<String,StationDTO> getAllStation() {
-            return this.stationService.getOrderedStations();
+    public Map<String, StationDTO> getAllStations() {
+        return this.stationService.getOrderedStations();
     }
 
     @ApiOperation(
@@ -79,7 +76,7 @@ public class StationController extends BaseRadioController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
-        if(getCurrentUser().isPresent()) {
+        if (getCurrentUser().isPresent()) {
             return this.stationService
                     .joinStation(stationId, userMapper.userToUserDTO(getCurrentUser().get()))
                     .switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
