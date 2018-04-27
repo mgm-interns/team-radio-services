@@ -32,7 +32,7 @@ public class UpdateConversationAvatarJob {
         userService.findUserByUpdatedAt(today).forEach(userDTO -> {
             SenderDTO senderDTO = new SenderDTO();
             senderDTO.setUserId(userDTO.getId());
-            senderDTO.setUsername(String.format(userNameFormat, userDTO.getUsername()));
+            senderDTO.setUsername(String.format(userNameFormat, userDTO.getName()));
             senderDTO.setAvatarUrl(String.format(avatarUrlFormat, userDTO.getAvatarUrl()));
             messageService.findBySenderUserId(userDTO.getId()).flatMap(messageDTO -> {
                 messageDTO.setSender(senderDTO);

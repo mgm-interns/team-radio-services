@@ -177,6 +177,7 @@ public class UserServiceImpl implements UserService {
             user.setBio(userDTO.getBio());
             user.setAvatarUrl(userDTO.getAvatarUrl());
             user.setCoverUrl(userDTO.getCoverUrl());
+            user.setUpdatedAt(LocalDate.now());
             return userMapper.userToUserDTO(userRepository.save(user));
         }).orElseThrow(RadioNotFoundException::new);
     }
@@ -185,6 +186,7 @@ public class UserServiceImpl implements UserService {
     public UserDTO patchUserAvatar(String userId, String avatarUrl) throws RadioNotFoundException {
         return userRepository.findById(userId).map(user -> {
             user.setAvatarUrl(avatarUrl);
+            user.setUpdatedAt(LocalDate.now());
             return userMapper.userToUserDTO(userRepository.save(user));
         }).orElseThrow(RadioNotFoundException::new);
     }
