@@ -4,15 +4,14 @@ import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.domain.station.PlayList;
 import com.mgmtp.radio.dto.station.HistoryDTO;
 import com.mgmtp.radio.dto.station.SongDTO;
-import com.mgmtp.radio.sdo.HistoryLimitation;
-import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
-import com.mgmtp.radio.sdo.SongStatus;
+import com.mgmtp.radio.mapper.user.UserMapper;
+import com.mgmtp.radio.sdo.HistoryLimitation;
 import com.mgmtp.radio.service.station.HistoryService;
-import com.mgmtp.radio.service.station.HistoryServiceImpl;
 import com.mgmtp.radio.service.station.SongService;
+import com.mgmtp.radio.service.station.StationService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -22,16 +21,12 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
-import javax.validation.Valid;
+import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
-import java.util.*;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @Log4j2
 @RestController
@@ -43,10 +38,14 @@ public class SongController extends BaseRadioController {
 
     private final SongService songService;
     private final HistoryService historyService;
+    private final StationService stationService;
+    private final UserMapper userMapper;
 
-    public SongController(SongService songService, HistoryService historyService) {
+    public SongController(SongService songService, HistoryService historyService, StationService stationService, UserMapper userMapper) {
         this.songService = songService;
         this.historyService = historyService;
+        this.stationService = stationService;
+        this.userMapper = userMapper;
     }
 
     @ApiOperation(
@@ -73,7 +72,7 @@ public class SongController extends BaseRadioController {
     })
     @GetMapping("/{stationId}/playList")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId) {
+    public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId, HttpServletRequest request) {
         Flux<ServerSentEvent<PlayList>> stationPlayListStream = stationStream.get(stationId);
         if (stationPlayListStream == null) {
             stationPlayListStream =
@@ -96,7 +95,17 @@ public class SongController extends BaseRadioController {
 
             stationStream.put(stationId, stationPlayListStream);
         }
-        return stationPlayListStream;
+        return stationPlayListStream.doFinally(signalType -> leaveStation(request));
+    }
+
+
+    private void leaveStation(HttpServletRequest request) {
+        String requestURI = request.getRequestURI();
+        String[] words = requestURI.split("/");
+        String stationId = words[words.length - 2];
+        if (getCurrentUser().isPresent()) {
+            stationService.leaveStation(stationId, userMapper.userToUserDTO(getCurrentUser().get()));
+        }
     }
 
     @ApiOperation(
