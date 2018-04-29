@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.integration.channel.PublishSubscribeChannel;
+import org.springframework.integration.dsl.channel.MessageChannels;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -39,5 +40,10 @@ public class MessageChannelConfig {
     @Bean
     MessageChannel historyChannel(@Qualifier(TASK_EXECUTOR) TaskExecutor taskExecutor){
         return new PublishSubscribeChannel(taskExecutor);
+    }
+
+    @Bean
+    MessageChannel skipRuleChannel(@Qualifier(TASK_EXECUTOR) TaskExecutor taskExecutor){
+        return MessageChannels.publishSubscribe(taskExecutor).get();
     }
 }
