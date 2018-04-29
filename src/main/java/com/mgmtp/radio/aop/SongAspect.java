@@ -4,7 +4,6 @@ import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
-import com.mgmtp.radio.mapper.station.SongMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.sdo.SkipRuleType;
@@ -45,10 +44,9 @@ public class SongAspect {
                 }
                 songDTO.setSkipped(isSkipped);
                 songRepository.findById(songDTO.getId())
-                        .map(song -> {
+                        .flatMap(song -> {
                             song.setSkipped(songDTO.isSkipped());
-                            songRepository.save(song).subscribe();
-                            return song;
+                            return songRepository.save(song);
                         }).subscribe();
                 return tempStation;
             }).subscribe();
