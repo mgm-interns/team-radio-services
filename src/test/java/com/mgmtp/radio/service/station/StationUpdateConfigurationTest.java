@@ -1,7 +1,6 @@
 package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.RadioApplicationTests;
-import com.mgmtp.radio.controller.v1.StationController;
 import com.mgmtp.radio.domain.station.SkipRule;
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.station.StationConfiguration;
@@ -17,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import static org.junit.Assert.assertEquals;
@@ -26,15 +24,7 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = RadioApplicationTests.class)
 public class StationUpdateConfigurationTest {
-
-	WebTestClient webTestClient;
-
-	StationController stationController;
-
 	StationService stationService;
-
-	@Mock
-	SongService songService;
 
 	@Mock
 	StationRepository stationRepository;
@@ -45,7 +35,7 @@ public class StationUpdateConfigurationTest {
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(stationRepository);
-		stationService = new StationServiceImpl(stationMapper, stationRepository, songService);
+		stationService = new StationServiceImpl(stationMapper, stationRepository);
 	}
 
 	/**

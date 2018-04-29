@@ -359,7 +359,7 @@ public class SongServiceImpl implements SongService {
 
             return songRepository
                     .save(song)
-                    .flatMap(this::mapSongToSongDTO);
+                    .flatMap(songResult -> mapSongToSongDTO(songResult, stationId));
         });
     }
 
@@ -386,7 +386,7 @@ public class SongServiceImpl implements SongService {
 
             return songRepository
                     .save(song)
-                    .flatMap(this::mapSongToSongDTO);
+                    .flatMap(songResult -> mapSongToSongDTO(songResult, stationId));
         });
     }
 
@@ -419,7 +419,7 @@ public class SongServiceImpl implements SongService {
         });
     }
 
-    private Mono<SongDTO> mapSongToSongDTO(Song song) {
+    private Mono<SongDTO> mapSongToSongDTO(Song song, String stationId) {
         SongDTO songDTO = songMapper.songToSongDTO(song);
 
         songDTO.setUpvoteUserList(new ArrayList<>());
@@ -435,6 +435,8 @@ public class SongServiceImpl implements SongService {
             UserDTO userDTO = userMapper.userToUserDTO(user);
             songDTO.getDownvoteUserList().add(userDTO);
         }
+
+        songDTO.setStationId(stationId);
 
         return Mono.just(songDTO);
     }
