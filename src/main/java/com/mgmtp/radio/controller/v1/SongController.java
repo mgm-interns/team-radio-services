@@ -22,7 +22,6 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 import reactor.util.function.Tuple4;
 import reactor.util.function.Tuples;
 
@@ -40,7 +39,7 @@ import java.util.stream.Collectors;
 public class SongController extends BaseRadioController {
     public static final String BASE_URL = "/api/v1/station";
     private static ConcurrentHashMap<String, Flux<ServerSentEvent<PlayList>>> stationStream = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, Tuple2<Integer, Long>> compareHash = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Integer> compareHash = new ConcurrentHashMap<>();
 
     private final SongService songService;
     private final HistoryService historyService;
@@ -81,9 +80,9 @@ public class SongController extends BaseRadioController {
                     Flux.interval(Duration.ofMillis(1100)).map(tick -> Tuples.of(tick, songService.getPlayListByStationId(stationId)))
                             .map(data -> data.getT2().map(playList -> {
                                         int currentHash = playList.hashCode();
-                                        Optional<Tuple2<Integer, Long>> previousInfo = Optional.ofNullable(compareHash.get(stationId));
-                                        if (!previousInfo.isPresent() || (previousInfo.get().getT1() != currentHash && previousInfo.get().getT2().compareTo(data.getT1()) == -1)) {
-                                            compareHash.put(stationId, Tuples.of(currentHash, data.getT1()));
+                                        Optional<Integer> previousHash = Optional.ofNullable(compareHash.get(stationId));
+                                        if (!previousHash.isPresent() || previousHash.get() != currentHash) {
+                                            compareHash.put(stationId, currentHash);
                                             return ServerSentEvent.<PlayList>builder().id(Long.toString(data.getT1())).event("fetch").data(playList).build();
                                         } else {
                                             return ServerSentEvent.<PlayList>builder().build();

@@ -5,6 +5,5 @@ public enum EventDataKeys {
     event_id,
     data,
     stationId,
-    songId,
-    songDto
+    songId
 }
