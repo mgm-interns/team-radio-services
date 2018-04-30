@@ -288,7 +288,7 @@ public class SongServiceImpl implements SongService {
             song.setStatus(playingStatus);
             song.setMessage(message);
             return songRepository.save(song);
-        }).subscribe().dispose();
+        }).subscribe();
     }
 
     @Override
