@@ -15,10 +15,7 @@ import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.sdo.SongStatus;
-import com.mgmtp.radio.support.StationPlayerHelper;
-import com.mgmtp.radio.support.DateHelper;
-import com.mgmtp.radio.support.TransferHelper;
-import com.mgmtp.radio.support.YouTubeHelper;
+import com.mgmtp.radio.support.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,6 +79,9 @@ public class SongServiceImplTest {
 
     MessageChannel historyChannel;
 
+    @Mock
+    StationSongSkipHelper stationSongSkipHelper;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -96,7 +96,8 @@ public class SongServiceImplTest {
                 dateHelper,
                 youTubeConfig,
                 stationPlayerHelper,
-                historyChannel);
+                historyChannel,
+                stationSongSkipHelper);
     }
 
     @Test

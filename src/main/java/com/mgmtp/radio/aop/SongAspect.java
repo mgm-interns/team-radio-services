@@ -7,6 +7,7 @@ import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.sdo.SkipRuleType;
+import com.mgmtp.radio.support.StationSongSkipHelper;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
@@ -19,10 +20,12 @@ public class SongAspect {
 
     private final StationRepository stationRepository;
     private final SongRepository songRepository;
+    private final StationSongSkipHelper stationSongSkipHelper;
 
-    public SongAspect(StationRepository stationRepository, SongRepository songRepository) {
+    public SongAspect(StationRepository stationRepository, SongRepository songRepository, StationSongSkipHelper stationSongSkipHelper) {
         this.stationRepository = stationRepository;
         this.songRepository = songRepository;
+        this.stationSongSkipHelper = stationSongSkipHelper;
     }
 
     @AfterReturning(value = "execution(* com.mgmtp.radio.service.station.SongServiceImpl.downVoteSongInStationPlaylist(..))", returning = "monoSongDTO")
@@ -42,12 +45,12 @@ public class SongAspect {
                         isSkipped = true;
                     }
                 }
-                songDTO.setSkipped(isSkipped);
-                songRepository.findById(songDTO.getId())
-                        .flatMap(song -> {
-                            song.setSkipped(songDTO.isSkipped());
-                            return songRepository.save(song);
-                        }).subscribe();
+                if (isSkipped){
+                    stationSongSkipHelper.addSkipSong(songDTO.getStationId(), songDTO);
+                } else {
+                    stationSongSkipHelper.removeSkipSong(songDTO.getStationId(), songDTO);
+                }
+
                 return tempStation;
             }).subscribe();
             return songDTO;

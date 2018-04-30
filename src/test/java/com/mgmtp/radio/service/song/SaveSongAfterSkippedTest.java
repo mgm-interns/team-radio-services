@@ -13,10 +13,7 @@ import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.service.station.SongService;
 import com.mgmtp.radio.service.station.SongServiceImpl;
-import com.mgmtp.radio.support.DateHelper;
-import com.mgmtp.radio.support.StationPlayerHelper;
-import com.mgmtp.radio.support.TransferHelper;
-import com.mgmtp.radio.support.YouTubeHelper;
+import com.mgmtp.radio.support.*;
 import lombok.extern.log4j.Log4j2;
 import org.junit.Before;
 import org.junit.Test;
@@ -80,6 +77,9 @@ public class SaveSongAfterSkippedTest {
 
 	MessageChannel historyChannel;
 
+	@Mock
+	StationSongSkipHelper stationSongSkipHelper;
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -98,7 +98,9 @@ public class SaveSongAfterSkippedTest {
 			transferHelper,
 			dateHelper,
 			youTubeConfig,
-			stationPlayerHelper, historyChannel);
+			stationPlayerHelper,
+            historyChannel,
+            stationSongSkipHelper);
 
 		// Init new user
 		user = new User();

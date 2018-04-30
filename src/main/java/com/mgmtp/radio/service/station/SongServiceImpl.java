@@ -21,12 +21,8 @@ import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.sdo.EventDataKeys;
 import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.sdo.SubscriptionEvents;
-import com.mgmtp.radio.support.DateHelper;
-import com.mgmtp.radio.support.StationPlayerHelper;
-import com.mgmtp.radio.support.TransferHelper;
-import com.mgmtp.radio.support.YouTubeHelper;
+import com.mgmtp.radio.support.*;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -52,6 +48,7 @@ public class SongServiceImpl implements SongService {
     private final UserMapper userMapper;
     private final StationPlayerHelper stationPlayerHelper;
     private final MessageChannel historyChannel;
+    private final StationSongSkipHelper stationSongSkipHelper;
 
     public SongServiceImpl(
             SongMapper songMapper,
@@ -64,7 +61,8 @@ public class SongServiceImpl implements SongService {
             DateHelper dateHelper,
             YouTubeConfig youTubeConfig,
             StationPlayerHelper stationPlayerHelper,
-            MessageChannel historyChannel) {
+            MessageChannel historyChannel,
+            StationSongSkipHelper stationSongSkipHelper) {
         this.songRepository = songRepository;
         this.stationRepository = stationRepository;
         this.userRepository = userRepository;
@@ -76,6 +74,7 @@ public class SongServiceImpl implements SongService {
         this.youTubeConfig = youTubeConfig;
         this.stationPlayerHelper = stationPlayerHelper;
         this.historyChannel = historyChannel;
+        this.stationSongSkipHelper = stationSongSkipHelper;
     }
 
     @Override
@@ -203,16 +202,17 @@ public class SongServiceImpl implements SongService {
             String endedSongId = nowPlaying.get().getSongId();
             nowPlaying = getNextSongFromList(stationId, endedSongId, listSong);
         } else {
-            Set<String> listSkippedSongId = listSong.stream()
-                    .filter(SongDTO::isSkipped)
-                    .map(SongDTO::getId)
-                    .collect(Collectors.toSet());
+            Optional<Set<SongDTO>> stationSkipSong = stationSongSkipHelper.getListSkipSong(stationId);
+            Set<String> listSkippedSongId = Collections.EMPTY_SET;
+            if (stationSkipSong.isPresent()){
+                listSkippedSongId = stationSkipSong.get().stream().map(SongDTO::getId).collect(Collectors.toSet());
+            }
             if (!listSkippedSongId.isEmpty()) {
                 if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
                     String skippedSongId = nowPlaying.get().getSongId();
                     nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong);
                 }
-                addMessageToWillBeSkipSongInList(listSong);
+                addMessageToWillBeSkipSongInList(listSong, listSkippedSongId);
             }
             clearMessageOfNotSkipSongAnyMore(listSong, listSkippedSongId);
         }
@@ -228,21 +228,25 @@ public class SongServiceImpl implements SongService {
         historyChannel.send(MessageBuilder.withPayload(historyParam).build());
     }
 
-    private void addMessageToWillBeSkipSongInList(List<SongDTO> listSong){
+    private void addMessageToWillBeSkipSongInList(List<SongDTO> listSong, Set<String> listSkipSongId){
         listSong.forEach(songDTO -> {
-            if (songDTO.isSkipped()) {
+            if (listSkipSongId.contains(songDTO.getId())) {
                 songDTO.setMessage(SKIP_SONG_MESSAGE);
-                updateSongPlayingStatusAndMessage(songDTO.getId(), SongStatus.not_play_yet, songDTO.getMessage());
             }
         });
     }
 
     private void clearMessageOfNotSkipSongAnyMore(List<SongDTO> listSong, Set<String> notChangeSongId) {
-        List<SongDTO> updateList = listSong.stream()
+        Set<String> updateList = listSong.stream()
                 .filter(getSongNotSkipAnyMore(notChangeSongId))
-                .collect(Collectors.toList());
+                .map(SongDTO::getId)
+                .collect(Collectors.toSet());
         if (!updateList.isEmpty()) {
-            updateList.forEach(songDTO -> updateSongPlayingStatusAndMessage(songDTO.getId(), SongStatus.not_play_yet, BLANK));
+            listSong.forEach(currentSong -> {
+                if (updateList.contains(currentSong.getId())){
+                    currentSong.setMessage(BLANK);
+                }
+            });
         }
     }
 
