@@ -25,7 +25,7 @@ public class SongAspect {
         this.songRepository = songRepository;
     }
 
-    @AfterReturning(value = "execution(* com.mgmtp.radio.controller.v1.SongController.downVoteSong(..))", returning = "monoSongDTO")
+    @AfterReturning(value = "execution(* com.mgmtp.radio.service.station.SongServiceImpl.downVoteSongInStationPlaylist(..))", returning = "monoSongDTO")
     public void checkAndSkipSongIfNeeded(Mono<SongDTO> monoSongDTO) {
         monoSongDTO.map(songDTO -> {
             stationRepository.retriveByIdOrFriendlyId(songDTO.getStationId()).map(tempStation ->{
