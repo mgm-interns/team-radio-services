@@ -388,6 +388,8 @@ public class SongServiceImpl implements SongService {
                 downVoteUserIdList.add(userId);
             }
 
+            System.out.println(song.getDownVoteUserIdList().contains(userId));
+
             return songRepository
                     .save(song)
                     .flatMap(songResult -> mapSongToSongDTO(songResult, stationId));
@@ -431,6 +433,8 @@ public class SongServiceImpl implements SongService {
             UserDTO userDTO = userMapper.userToUserDTO(user);
             songDTO.getUpvoteUserList().add(userDTO);
         }
+
+        System.out.println("Size down vote: " + song.getDownVoteUserIdList().size());
 
         List<User> downVoteUserList = userRepository.findByIdIn(song.getDownVoteUserIdList());
         for (User user : downVoteUserList) {
