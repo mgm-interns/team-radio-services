@@ -426,14 +426,12 @@ public class SongServiceImpl implements SongService {
     private Mono<SongDTO> mapSongToSongDTO(Song song, String stationId) {
         SongDTO songDTO = songMapper.songToSongDTO(song);
 
-        songDTO.setUpvoteUserList(new ArrayList<>());
         List<User> upVoteUserList = userRepository.findByIdIn(song.getUpVoteUserIdList());
         for (User user : upVoteUserList) {
             UserDTO userDTO = userMapper.userToUserDTO(user);
             songDTO.getUpvoteUserList().add(userDTO);
         }
 
-        songDTO.setDownvoteUserList(new ArrayList<>());
         List<User> downVoteUserList = userRepository.findByIdIn(song.getDownVoteUserIdList());
         for (User user : downVoteUserList) {
             UserDTO userDTO = userMapper.userToUserDTO(user);
