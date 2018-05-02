@@ -1,5 +1,6 @@
 package com.mgmtp.radio.service.station;
 
+import com.mgmtp.radio.domain.station.History;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.HistoryDTO;
 import com.mgmtp.radio.mapper.station.HistoryMapper;
@@ -32,6 +33,9 @@ public class HistoryServiceImpl implements HistoryService{
     @Override
     public Flux<HistoryDTO> getHistoryByStationId(String stationId) {
         return historyRepository.findByStationId(stationId)
+            .sort((History entry1, History entry2) -> {
+                return entry1.getCreatedAt().compareTo(entry2.getCreatedAt())*(-1);
+            })
             .map(history -> {
                 HistoryDTO result =  historyMapper.historyToHistoryDto(history);
                 if (history.getCreatorId() != null) {
