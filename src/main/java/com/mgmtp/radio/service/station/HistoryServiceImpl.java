@@ -10,6 +10,7 @@ import com.mgmtp.radio.respository.user.UserRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -33,9 +34,7 @@ public class HistoryServiceImpl implements HistoryService{
     @Override
     public Flux<HistoryDTO> getHistoryByStationId(String stationId) {
         return historyRepository.findByStationId(stationId)
-            .sort((History entry1, History entry2) -> {
-                return entry1.getCreatedAt().compareTo(entry2.getCreatedAt())*(-1);
-            })
+            .sort(Comparator.comparing(History::getCreatedAt).reversed())
             .map(history -> {
                 HistoryDTO result =  historyMapper.historyToHistoryDto(history);
                 if (history.getCreatorId() != null) {
