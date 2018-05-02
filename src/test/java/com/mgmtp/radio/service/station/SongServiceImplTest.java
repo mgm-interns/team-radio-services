@@ -82,6 +82,8 @@ public class SongServiceImplTest {
     @Mock
     StationSongSkipHelper stationSongSkipHelper;
 
+    StationService stationService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -97,7 +99,8 @@ public class SongServiceImplTest {
                 youTubeConfig,
                 stationPlayerHelper,
                 historyChannel,
-                stationSongSkipHelper);
+                stationSongSkipHelper,
+                stationService);
     }
 
     @Test

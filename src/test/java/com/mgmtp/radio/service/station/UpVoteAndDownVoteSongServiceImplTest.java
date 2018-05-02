@@ -78,6 +78,8 @@ public class UpVoteAndDownVoteSongServiceImplTest {
     @Mock
     StationSongSkipHelper stationSongSkipHelper;
 
+    StationService stationService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -100,7 +102,8 @@ public class UpVoteAndDownVoteSongServiceImplTest {
                 youTubeConfig,
                 stationPlayerHelper,
                 historyChannel,
-                stationSongSkipHelper);
+                stationSongSkipHelper,
+                stationService);
 
         //given
         user = new User();

@@ -5,6 +5,7 @@ import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
+import com.mgmtp.radio.exception.StationNotFoundException;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.respository.station.StationRepository;
@@ -14,6 +15,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.text.Normalizer;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -104,5 +106,15 @@ public class StationServiceImpl implements StationService {
     @Override
     public Flux<StationDTO> getListStationByListStationId(List<String> listStationId) {
         return stationRepository.findByIdIn(listStationId).map(stationMapper::stationToStationDTO);
+    }
+
+    @Override
+    public Mono<Station> retriveByIdOrFriendlyId(String friendlyId) {
+        int[] count  = {0};
+        return stationRepository.retriveByIdOrFriendlyId(friendlyId)
+                .delayElement(Duration.ofMillis(100))
+                .doOnNext(station -> count[0]++)
+                .filter(station -> count[0] == 1)
+                .switchIfEmpty(Mono.error(new StationNotFoundException(friendlyId)));
     }
 }

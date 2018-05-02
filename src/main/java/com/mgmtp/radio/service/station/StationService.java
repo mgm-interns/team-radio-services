@@ -17,4 +17,5 @@ public interface StationService {
     Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO);
     boolean existsByName(String stationName);
     Flux<StationDTO> getListStationByListStationId(List<String> listStationId);
+    Mono<Station> retriveByIdOrFriendlyId(String friendlyId);
 }
