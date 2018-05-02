@@ -388,8 +388,6 @@ public class SongServiceImpl implements SongService {
                 downVoteUserIdList.add(userId);
             }
 
-            System.out.println(song.getDownVoteUserIdList().contains(userId));
-
             return songRepository
                     .save(song)
                     .flatMap(songResult -> mapSongToSongDTO(songResult, stationId));
@@ -403,7 +401,6 @@ public class SongServiceImpl implements SongService {
      * @return station mono
      */
     private Mono<Station> findStation(String stationId) {
-        System.out.println("HIT findStation");
         return stationRepository
                 .retriveByIdOrFriendlyId(stationId)
                 .switchIfEmpty(Mono.error(new StationNotFoundException(stationId)));
@@ -417,17 +414,15 @@ public class SongServiceImpl implements SongService {
      * @return station mono
      */
     private Mono<Song> findSong(String stationId, String songId) {
-        System.out.println("HIT findSong");
         int[] count = {0};
         return findStation(stationId)
             .doOnNext(station -> count[0]++)
             .filter(station -> count[0] == 1)
             .flatMap(station -> {
-            System.out.println(station.getId());
-            if (station.getPlaylist().contains(songId)) {
-                return songRepository
-                        .findById(songId);
-            }
+                if (station.getPlaylist().contains(songId)) {
+                    return songRepository
+                            .findById(songId);
+                }
             return Mono.error(new SongNotFoundException(songId));
         });
     }
@@ -440,8 +435,6 @@ public class SongServiceImpl implements SongService {
             UserDTO userDTO = userMapper.userToUserDTO(user);
             songDTO.getUpvoteUserList().add(userDTO);
         }
-
-        System.out.println("Size down vote: " + song.getDownVoteUserIdList().size());
 
         List<User> downVoteUserList = userRepository.findByIdIn(song.getDownVoteUserIdList());
         for (User user : downVoteUserList) {
