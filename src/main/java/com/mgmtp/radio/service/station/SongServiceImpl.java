@@ -403,6 +403,7 @@ public class SongServiceImpl implements SongService {
      * @return station mono
      */
     private Mono<Station> findStation(String stationId) {
+        System.out.println("HIT findStation");
         return stationRepository
                 .retriveByIdOrFriendlyId(stationId)
                 .switchIfEmpty(Mono.error(new StationNotFoundException(stationId)));
@@ -416,7 +417,13 @@ public class SongServiceImpl implements SongService {
      * @return station mono
      */
     private Mono<Song> findSong(String stationId, String songId) {
-        return findStation(stationId).flatMap(station -> {
+        System.out.println("HIT findSong");
+        int[] count = {0};
+        return findStation(stationId)
+            .doOnNext(station -> count[0]++)
+            .filter(station -> count[0] == 1)
+            .flatMap(station -> {
+            System.out.println(station.getId());
             if (station.getPlaylist().contains(songId)) {
                 return songRepository
                         .findById(songId);
