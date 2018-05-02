@@ -46,7 +46,7 @@ public class MessageServiceImpl implements MessageService {
         String userNameFormat = "%-"+constant.getUsernameLimit()+"s";
         String avatarUrlFormat = "%-"+constant.getAvatarLimit()+"s";
         sender.setUserId(user.getId());
-        sender.setUsername(String.format(userNameFormat, user.getUsername()));
+        sender.setUsername(String.format(userNameFormat, user.getName()));
         sender.setAvatarUrl(String.format(avatarUrlFormat, user.getAvatarUrl()));
         return sender;
     }

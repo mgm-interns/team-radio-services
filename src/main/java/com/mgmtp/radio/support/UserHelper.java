@@ -26,7 +26,7 @@ public class UserHelper {
     public Sender convertUserToSender(User user) {
         Sender sender = new Sender();
         sender.setUserId(user.getId());
-        sender.setUsername(user.getUsername());
+        sender.setUsername(user.getName());
         sender.setAvatarUrl(user.getAvatarUrl());
         return sender;
     }
