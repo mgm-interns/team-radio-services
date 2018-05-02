@@ -14,6 +14,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
+
+import java.time.LocalDate;
+
 import static org.mockito.Mockito.when;
 
 public class HistoryServiceImplTest {
@@ -51,6 +54,7 @@ public class HistoryServiceImplTest {
         history_1.setThumbnail("Thumbnail001");
         history_1.setDuration(1001);
         history_1.setCreatorId("userID001");
+        history_1.setCreatedAt(LocalDate.of(2018,1,1));
 
         History history_2 = new History();
         history_2.setId("Id002");
@@ -61,24 +65,16 @@ public class HistoryServiceImplTest {
         history_2.setThumbnail("Thumbnail001");
         history_2.setDuration(1001);
         history_2.setCreatorId("userID002");
+        history_2.setCreatedAt(LocalDate.of(2018,1,1));
 
         HistoryDTO historyDTO_1 = new HistoryDTO();
-        historyDTO_1.setId("Id001");
+        historyDTO_1.setId("Id002");
         historyDTO_1.setStationId("StationId001");
         historyDTO_1.setUrl("Url001");
         historyDTO_1.setSongId("SongId001");
         historyDTO_1.setTitle("Title001");
         historyDTO_1.setThumbnail("Thumbnail001");
         historyDTO_1.setDuration(1001);
-
-        HistoryDTO historyDTO_2 = new HistoryDTO();
-        historyDTO_2.setId("Id002");
-        historyDTO_2.setStationId("StationId001");
-        historyDTO_2.setUrl("Url001");
-        historyDTO_2.setSongId("SongId001");
-        historyDTO_2.setTitle("Title001");
-        historyDTO_2.setThumbnail("Thumbnail001");
-        historyDTO_2.setDuration(1001);
 
         User user = new User();
         user.setId("userId001");
@@ -90,29 +86,24 @@ public class HistoryServiceImplTest {
         userDto.setUsername("UserName001");
         userDto.setAvatarUrl("avatarUrl001");
 
-
-        HistoryDTO historyDTO_3 = new HistoryDTO();
-        historyDTO_3.setId("Id001");
-        historyDTO_3.setUrl("Url001");
-        historyDTO_3.setStationId("StationId001");
-        historyDTO_3.setSongId("SongId001");
-        historyDTO_3.setTitle("Title001");
-        historyDTO_3.setThumbnail("Thumbnail001");
-        historyDTO_3.setDuration(1001);
-        historyDTO_3.setCreator(userDto);
+        HistoryDTO historyDTO_2 = new HistoryDTO();
+        historyDTO_2.setId("Id001");
+        historyDTO_2.setUrl("Url001");
+        historyDTO_2.setStationId("StationId001");
+        historyDTO_2.setSongId("SongId001");
+        historyDTO_2.setTitle("Title001");
+        historyDTO_2.setThumbnail("Thumbnail001");
+        historyDTO_2.setDuration(1001);
+        historyDTO_2.setCreator(userDto);
 
         when(historyRepository.findByStationId("StationId001")).thenReturn(Flux.just(history_1,history_2));
-        when(historyMapper.historyToHistoryDto(history_1)).thenReturn(historyDTO_3);
-        when(historyMapper.historyToHistoryDto(history_2)).thenReturn(historyDTO_2);
+        when(historyMapper.historyToHistoryDto(history_1)).thenReturn(historyDTO_2);
+        when(historyMapper.historyToHistoryDto(history_2)).thenReturn(historyDTO_1);
         when(userRepository.findById("userId001")).thenReturn(java.util.Optional.ofNullable(user));
         when(userMapper.userToUserDTO(user)).thenReturn(userDto);
 
-
-        Flux<HistoryDTO> result = historyService.getHistoryByStationId("StationId001");
-        Flux<HistoryDTO> expect = Flux.just(historyDTO_3);
-
         StepVerifier.create(historyService.getHistoryByStationId("StationId001"))
-                .expectNext(historyDTO_3)
+                .expectNext(historyDTO_2)
                 .verifyComplete();
     }
 }
