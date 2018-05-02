@@ -37,7 +37,6 @@ public class HistoryServiceImpl implements HistoryService{
                 return entry1.getCreatedAt().compareTo(entry2.getCreatedAt())*(-1);
             })
             .map(history -> {
-                System.out.println(history);
                 HistoryDTO result =  historyMapper.historyToHistoryDto(history);
                 if (history.getCreatorId() != null) {
                     Optional<User> creator = userRepository.findById(history.getCreatorId());
