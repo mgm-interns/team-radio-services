@@ -1,5 +1,6 @@
 package com.mgmtp.radio.service.station;
 
+import com.mgmtp.radio.domain.station.History;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.HistoryDTO;
 import com.mgmtp.radio.mapper.station.HistoryMapper;
@@ -9,6 +10,7 @@ import com.mgmtp.radio.respository.user.UserRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -32,6 +34,7 @@ public class HistoryServiceImpl implements HistoryService{
     @Override
     public Flux<HistoryDTO> getHistoryByStationId(String stationId) {
         return historyRepository.findByStationId(stationId)
+            .sort(Comparator.comparing(History::getCreatedAt).reversed())
             .map(history -> {
                 HistoryDTO result =  historyMapper.historyToHistoryDto(history);
                 if (history.getCreatorId() != null) {
