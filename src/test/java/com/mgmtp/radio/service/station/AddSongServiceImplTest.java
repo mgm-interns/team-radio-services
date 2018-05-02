@@ -75,6 +75,7 @@ public class AddSongServiceImplTest {
     @Mock
     StationSongSkipHelper stationSongSkipHelper;
 
+    @Mock
     StationService stationService;
 
     @Before
@@ -166,6 +167,7 @@ public class AddSongServiceImplTest {
 
         when(songRepository.save(any(Song.class))).thenReturn(Mono.just(savedSong));
         when(youTubeHelper.getYouTubeVideoById("mNh6MCoMPis")).thenReturn(video);
+        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         SongDTO savedSongDTO = songService.addSongToStationPlaylist(
                 station.getId(), "mNh6MCoMPis", "Nhac Audition", user.getId()
