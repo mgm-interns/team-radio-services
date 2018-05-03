@@ -24,7 +24,7 @@ public class StationPlayerHelper {
         nowPlaying.setStartingTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond());
         nowPlaying.setThumbnail(song.getThumbnail());
         nowPlaying.setUrl(song.getUrl());
-        nowPlaying.setMessages(song.getMessage());
+        nowPlaying.setMessage(song.getMessage());
         nowPlaying.setEnded(false);
 
         Optional<Tuple2<NowPlaying, NowPlaying>> currentNowPlaying = Optional.ofNullable(stationPlayer.get(stationId));

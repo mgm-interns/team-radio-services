@@ -10,7 +10,6 @@ import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.exception.SongNotFoundException;
-import com.mgmtp.radio.exception.StationNotFoundException;
 import com.mgmtp.radio.mapper.station.SongMapper;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
@@ -34,7 +33,6 @@ import java.util.stream.Collectors;
 @Service("songService")
 public class SongServiceImpl implements SongService {
     private static final String BLANK = "";
-    private static final String SKIP_SONG_MESSAGE = "This song will be skip when play";
     private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
 
     private final StationRepository stationRepository;
@@ -219,9 +217,9 @@ public class SongServiceImpl implements SongService {
                     String skippedSongId = nowPlaying.get().getSongId();
                     nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong);
                 }
-                addMessageToWillBeSkipSongInList(listSong, listSkippedSongId);
+                changeFlagForWillBeSkipSongInList(listSong, listSkippedSongId);
             }
-            clearMessageOfNotSkipSongAnyMore(listSong, listSkippedSongId);
+            changeFlagForNotSkipSongAnyMore(listSong, listSkippedSongId);
         }
         return nowPlaying;
     }
@@ -235,15 +233,15 @@ public class SongServiceImpl implements SongService {
         historyChannel.send(MessageBuilder.withPayload(historyParam).build());
     }
 
-    private void addMessageToWillBeSkipSongInList(List<SongDTO> listSong, Set<String> listSkipSongId){
+    private void changeFlagForWillBeSkipSongInList(List<SongDTO> listSong, Set<String> listSkipSongId){
         listSong.forEach(songDTO -> {
             if (listSkipSongId.contains(songDTO.getId())) {
-                songDTO.setMessage(SKIP_SONG_MESSAGE);
+                songDTO.setSkipped(true);
             }
         });
     }
 
-    private void clearMessageOfNotSkipSongAnyMore(List<SongDTO> listSong, Set<String> notChangeSongId) {
+    private void changeFlagForNotSkipSongAnyMore(List<SongDTO> listSong, Set<String> notChangeSongId) {
         Set<String> updateList = listSong.stream()
                 .filter(getSongNotSkipAnyMore(notChangeSongId))
                 .map(SongDTO::getId)
@@ -251,7 +249,7 @@ public class SongServiceImpl implements SongService {
         if (!updateList.isEmpty()) {
             listSong.forEach(currentSong -> {
                 if (updateList.contains(currentSong.getId())){
-                    currentSong.setMessage(BLANK);
+                    currentSong.setSkipped(false);
                 }
             });
         }
@@ -261,10 +259,10 @@ public class SongServiceImpl implements SongService {
         if (!notChangeSongId.isEmpty()) {
             return songDTO -> !notChangeSongId.contains(songDTO.getId())
                             && songDTO.getMessage() != null
-                            && songDTO.getMessage().equals(SKIP_SONG_MESSAGE);
+                            && songDTO.isSkipped();
         } else {
             return songDTO -> songDTO.getMessage() != null
-                           && songDTO.getMessage().equals(SKIP_SONG_MESSAGE);
+                           && songDTO.isSkipped();
         }
     }
 
@@ -290,7 +288,7 @@ public class SongServiceImpl implements SongService {
     }
 
     private Optional<NowPlaying> updateStatusAndSetNowPlayingFromSong(SongDTO nowPlayingSong, String stationId) {
-        updateSongPlayingStatusAndMessage(nowPlayingSong.getId(), SongStatus.playing, BLANK);
+        updateSongPlayingStatusAndMessage(nowPlayingSong.getId(), SongStatus.playing, nowPlayingSong.getMessage());
         return stationPlayerHelper.addNowPlaying(stationId, nowPlayingSong);
     }
 
