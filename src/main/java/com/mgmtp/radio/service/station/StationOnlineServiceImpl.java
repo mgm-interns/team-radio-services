@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 @Service("stationOnlineService")
 public class StationOnlineServiceImpl implements StationOnlineService {
 
-    private static Map<String, StationDTO> allStations = new HashMap<>();
+    private static Map<String, StationDTO> allStations = new LinkedHashMap<>();
 
     private static final int LARGER = -1;
     private static final int SMALLER = 1;
