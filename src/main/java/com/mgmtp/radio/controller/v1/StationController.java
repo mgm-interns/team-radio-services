@@ -29,13 +29,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.validation.Valid;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Log4j2
 @RestController
 @RequestMapping(StationController.BASE_URL)
 public class StationController extends BaseRadioController {
-    private static int previousStationDataHash = 0;
     private static Flux<Map<String, StationDTO>> allStationStream;
     public static final String BASE_URL = "/api/v1/stations";
 
@@ -69,27 +71,24 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public Flux<Map<String,StationDTO>> getAllStation() {
-        if (allStationStream == null) {
-            allStationStream = Flux.create(sink -> {
-                MessageHandler messageHandler = message -> {
-                    Map<String, StationDTO> data = (Map<String, StationDTO>) message.getPayload();
-                    if (data.hashCode() != previousStationDataHash) {
-                        previousStationDataHash = data.hashCode();
-                        sink.next(data);
-                    }
-                };
-                sink.onCancel(() -> allStationChannel.unsubscribe(messageHandler));
-                allStationChannel.subscribe(messageHandler);
-            })
-            .map(mapper -> (Map<String, StationDTO>) mapper)
-            .publish()
-            .refCount()
-            .doOnSubscribe(subscription -> {
-                previousStationDataHash = 0;
-            });
-        }
-        return allStationStream;
+    public Flux<Map<String,StationDTO>> getAllStation(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                      @RequestParam(value = "limit", defaultValue = "50") int limit) {
+        return Flux.create(sink -> {
+            MessageHandler messageHandler = message -> {
+                Map<String, StationDTO> data = (Map<String, StationDTO>) message.getPayload();
+                data = data.entrySet()
+                        .stream()
+                        .skip(page)
+                        .limit(limit)
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+                sink.next(data);
+            };
+            sink.onCancel(() -> allStationChannel.unsubscribe(messageHandler));
+            sink.onDispose(() -> allStationChannel.unsubscribe(messageHandler));
+            allStationChannel.subscribe(messageHandler);
+        })
+        .map(mapper -> (Map<String, StationDTO>) mapper)
+        .distinct();
     }
 
 	@GetMapping("/stream")
