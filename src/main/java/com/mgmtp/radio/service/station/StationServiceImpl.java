@@ -5,77 +5,31 @@ import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
+import com.mgmtp.radio.exception.StationNotFoundException;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.respository.station.StationRepository;
-import com.mgmtp.radio.sdo.SkipRuleType;
-import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.text.Normalizer;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Aspect
 public class StationServiceImpl implements StationService {
 
 	private final StationRepository stationRepository;
-	private final SongService songService;
 	private final StationMapper stationMapper;
-	private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
 
-	@Override
-	public int getOnlineUsersNumber(StationDTO stationDTO) {
-		//TODO Get number of online users id here
-		return 0;
-	}
-
-	private double calcCurrentSongDislikePercent(SongDTO songDTO, StationDTO station) {
-		final int numberOnline = getOnlineUsersNumber(station);
-		double currentSongDislikePercent = 0;
-		if (numberOnline > 0) {
-			currentSongDislikePercent = songDTO.getDownVoteCount() / (double) numberOnline;
-		}
-		return currentSongDislikePercent;
-	}
-
-	private boolean isOwnerDownvote(Station station, SongDTO songDTO) {
-		return songDTO.getDownvoteUserList().stream().anyMatch(userDTO -> userDTO.getId().equals(station.getOwnerId()));
-	}
-
-	@AfterReturning(value = "execution(* com.mgmtp.radio.service.station.SongService.downVoteSongInStationPlaylist(..))", returning = "monoSongDTO")
-	public Mono<SongDTO> checkAndSkipSongIfNeeded(Mono<SongDTO> monoSongDTO) {
-			Mono<SongDTO> monoSongDtoReturn = monoSongDTO.map(songDTO -> {
-				stationRepository.retriveByIdOrFriendlyId(songDTO.getStationId()).map(tempStation ->{
-					final StationConfiguration stationConfiguration = tempStation.getStationConfiguration();
-					boolean isSkipped = false;
-
-					if (stationConfiguration.getSkipRule().getSkipRuleType() == SkipRuleType.ADVANCE) {
-						if (isOwnerDownvote(tempStation, songDTO)) {
-							isSkipped = true;
-						}
-					} else {
-						double downvotePercent = calcCurrentSongDislikePercent(songDTO, new StationDTO());
-						if (downvotePercent > DOWN_VOTE_THRES_PERCENT) {
-							isSkipped = true;
-						}
-					}
-					songDTO.setSkipped(isSkipped);
-					return tempStation;
-				});
-				return songDTO;
-			});
-			return monoSongDtoReturn;
-	}
-
-
-    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, SongService songService) {
+    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository) {
         this.stationMapper = stationMapper;
         this.stationRepository = stationRepository;
-        this.songService = songService;
     }
 
     @Override
@@ -152,5 +106,15 @@ public class StationServiceImpl implements StationService {
     @Override
     public Flux<StationDTO> getListStationByListStationId(List<String> listStationId) {
         return stationRepository.findByIdIn(listStationId).map(stationMapper::stationToStationDTO);
+    }
+
+    @Override
+    public Mono<Station> retriveByIdOrFriendlyId(String friendlyId) {
+        int[] count  = {0};
+        return stationRepository.retriveByIdOrFriendlyId(friendlyId)
+                .delayElement(Duration.ofMillis(100))
+                .doOnNext(station -> count[0]++)
+                .filter(station -> count[0] == 1)
+                .switchIfEmpty(Mono.error(new StationNotFoundException(friendlyId)));
     }
 }

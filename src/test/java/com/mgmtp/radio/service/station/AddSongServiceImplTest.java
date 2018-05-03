@@ -13,10 +13,7 @@ import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.sdo.SongStatus;
-import com.mgmtp.radio.support.DateHelper;
-import com.mgmtp.radio.support.StationPlayerHelper;
-import com.mgmtp.radio.support.TransferHelper;
-import com.mgmtp.radio.support.YouTubeHelper;
+import com.mgmtp.radio.support.*;
 import lombok.extern.log4j.Log4j2;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,6 +72,12 @@ public class AddSongServiceImplTest {
 
     MessageChannel historyChannel;
 
+    @Mock
+    StationSongSkipHelper stationSongSkipHelper;
+
+    @Mock
+    StationService stationService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -93,7 +96,10 @@ public class AddSongServiceImplTest {
                 transferHelper,
                 dateHelper,
                 youTubeConfig,
-                stationPlayerHelper, historyChannel);
+                stationPlayerHelper,
+                historyChannel,
+                stationSongSkipHelper,
+                stationService);
 
         // Init new user
         user = new User();
@@ -161,6 +167,7 @@ public class AddSongServiceImplTest {
 
         when(songRepository.save(any(Song.class))).thenReturn(Mono.just(savedSong));
         when(youTubeHelper.getYouTubeVideoById("mNh6MCoMPis")).thenReturn(video);
+        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         SongDTO savedSongDTO = songService.addSongToStationPlaylist(
                 station.getId(), "mNh6MCoMPis", "Nhac Audition", user.getId()

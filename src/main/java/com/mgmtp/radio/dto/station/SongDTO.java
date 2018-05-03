@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -24,8 +25,8 @@ public class SongDTO {
     UserDTO creator;
     int upVoteCount;
     int downVoteCount;
-	List<UserDTO> upvoteUserList = Collections.emptyList();
-	List<UserDTO> downvoteUserList = Collections.emptyList();
+	List<UserDTO> upvoteUserList = new ArrayList<>();
+	List<UserDTO> downvoteUserList = new ArrayList<>();
 	String message;
 	LocalDate createdAt;
 	String stationId;

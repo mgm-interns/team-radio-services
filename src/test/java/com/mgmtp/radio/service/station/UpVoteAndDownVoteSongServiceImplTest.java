@@ -13,10 +13,7 @@ import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.sdo.SongStatus;
-import com.mgmtp.radio.support.DateHelper;
-import com.mgmtp.radio.support.StationPlayerHelper;
-import com.mgmtp.radio.support.TransferHelper;
-import com.mgmtp.radio.support.YouTubeHelper;
+import com.mgmtp.radio.support.*;
 import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
@@ -78,6 +75,12 @@ public class UpVoteAndDownVoteSongServiceImplTest {
 
     MessageChannel historyChannel;
 
+    @Mock
+    StationSongSkipHelper stationSongSkipHelper;
+
+    @Mock
+    StationService stationService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -98,7 +101,10 @@ public class UpVoteAndDownVoteSongServiceImplTest {
                 transferHelper,
                 dateHelper,
                 youTubeConfig,
-                stationPlayerHelper, historyChannel);
+                stationPlayerHelper,
+                historyChannel,
+                stationSongSkipHelper,
+                stationService);
 
         //given
         user = new User();
@@ -152,6 +158,7 @@ public class UpVoteAndDownVoteSongServiceImplTest {
         savedSong.getUpVoteUserIdList().add(user.getId());
 
         when(songRepository.save(any(Song.class))).thenReturn(Mono.just(savedSong));
+        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         SongDTO savedSongDTO = songService.upVoteSongInStationPlaylist(
                 station.getId(),
@@ -163,25 +170,24 @@ public class UpVoteAndDownVoteSongServiceImplTest {
         assertEquals(savedSongDTO.getUpvoteUserList().get(0).getId(), user.getId());
     }
 
-    @Test
+    @Test(expected = RadioBadRequestException.class)
     public void testUpVoteSongInStationPlaylistWithUpVoteOwnSong() {
         Song savedSong = new Song();
         savedSong.setId(song.getId());
         savedSong.setDownVoteUserIdList(new ArrayList<>());
         savedSong.setUpVoteUserIdList(new ArrayList<>());
         savedSong.getUpVoteUserIdList().add(user.getId());
+        savedSong.setCreatorId(user.getId());
 
-        when(songRepository.save(any(Song.class))).thenReturn(Mono.just(savedSong));
+        when(songRepository.findById(song.getId())).thenReturn(Mono.just(savedSong));
+        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         // Service will thrown bad request exception
-        Assertions.assertThatExceptionOfType(Exception.class)
-                .isThrownBy(() ->
-                        songService.upVoteSongInStationPlaylist(
-                                station.getId(),
-                                song.getId(),
-                                user.getId()
-                        ).block())
-                .withCauseInstanceOf(RadioBadRequestException.class);
+        songService.upVoteSongInStationPlaylist(
+                station.getId(),
+                song.getId(),
+                user.getId()
+        ).block();
     }
 
     @Test
@@ -196,6 +202,7 @@ public class UpVoteAndDownVoteSongServiceImplTest {
         savedSong.getDownVoteUserIdList().add(user.getId());
 
         when(songRepository.save(any(Song.class))).thenReturn(Mono.just(savedSong));
+        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         SongDTO savedSongDTO = songService.downVoteSongInStationPlaylist(
                 station.getId(),

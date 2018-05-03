@@ -15,10 +15,7 @@ import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.sdo.SongStatus;
-import com.mgmtp.radio.support.StationPlayerHelper;
-import com.mgmtp.radio.support.DateHelper;
-import com.mgmtp.radio.support.TransferHelper;
-import com.mgmtp.radio.support.YouTubeHelper;
+import com.mgmtp.radio.support.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -82,6 +79,12 @@ public class SongServiceImplTest {
 
     MessageChannel historyChannel;
 
+    @Mock
+    StationSongSkipHelper stationSongSkipHelper;
+
+    @Mock
+    StationService stationService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -96,19 +99,21 @@ public class SongServiceImplTest {
                 dateHelper,
                 youTubeConfig,
                 stationPlayerHelper,
-                historyChannel);
+                historyChannel,
+                stationSongSkipHelper,
+                stationService);
     }
 
     @Test
     public void getListSong() {
         //given this station
         Station station = new Station();
+        station.setId(STATION_ID);
         station.setName("test station");
         station.setOwnerId(STATION_ID);
         station.setPlaylist(playListCreatorId);
 
-        //when station repository call
-        when(stationRepository.retriveByIdOrFriendlyId(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         //given these song
         Song song1  = new Song();
@@ -166,12 +171,12 @@ public class SongServiceImplTest {
     public void getPlayListSong() {
         //given this station
         Station station = new Station();
+        station.setId(STATION_ID);
         station.setName("test station");
         station.setOwnerId(STATION_ID);
         station.setPlaylist(playListCreatorId);
 
-        //when station repository call
-        when(stationRepository.retriveByIdOrFriendlyId(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         //given these song
         Song song1 = new Song();
@@ -263,12 +268,12 @@ public class SongServiceImplTest {
     public void getPlayListTest_changePlayingSong() throws InterruptedException {
         //given this station
         Station station = new Station();
+        station.setId(STATION_ID);
         station.setName("test station");
         station.setOwnerId(STATION_ID);
         station.setPlaylist(playListCreatorId);
 
-        //when station repository call
-        when(stationRepository.retriveByIdOrFriendlyId(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         //given these song
         Song song1 = new Song();
@@ -330,7 +335,7 @@ public class SongServiceImplTest {
         when(songRepository.save(song2)).thenReturn(Mono.just(song2));
 
         song3.setStatus(SongStatus.not_play_yet);
-        song3.setMessage("This song will be skip when play");
+        song3.setMessage("");
         when(songRepository.save(song3)).thenReturn(Mono.just(song3));
 
         //given these user
@@ -374,12 +379,12 @@ public class SongServiceImplTest {
     public void getPlayListTest_skipPlayingSong(){
         //given this station
         Station station = new Station();
+        station.setId(STATION_ID);
         station.setName("test station");
         station.setOwnerId(STATION_ID);
         station.setPlaylist(playListCreatorId);
 
-        //when station repository call
-        when(stationRepository.retriveByIdOrFriendlyId(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         //given these song
         Song song3 = new Song();
@@ -458,28 +463,28 @@ public class SongServiceImplTest {
 
         assertNotNull(playing);
         assertFalse(playing.get().isEnded());
-        assertEquals(song4.getId(), playing.get().getSongId());
+        assertEquals(song3.getId(), playing.get().getSongId());
         assertEquals(0, playing.get().getDuration());
-        assertEquals(song4.getUrl(), playing.get().getUrl());
+        assertEquals(song3.getUrl(), playing.get().getUrl());
 
-        assertEquals(1, playList.getListSong().size());
+        assertEquals(2, playList.getListSong().size());
         assertThat(playing.get()).isEqualToComparingFieldByField(playList.getNowPlaying());
 
-        song4.setStatus(SongStatus.not_play_yet);
-        song4.setMessage(null);
-        assertThat(songMapper.songToSongDTO(song4)).isEqualToIgnoringGivenFields(playList.getListSong().get(0), "creator");
+        song3.setStatus(SongStatus.not_play_yet);
+        song3.setMessage(null);
+        assertThat(songMapper.songToSongDTO(song3)).isEqualToIgnoringGivenFields(playList.getListSong().get(0), "creator");
     }
 
     @Test
     public void getPlayListTest_emptyListSong(){
         //given this station
         Station station = new Station();
+        station.setId(STATION_ID);
         station.setName("test station");
         station.setOwnerId(STATION_ID);
         station.setPlaylist(playListCreatorId);
 
-        //when station repository call
-        when(stationRepository.retriveByIdOrFriendlyId(STATION_ID)).thenReturn(Mono.just(station));
+        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         //given these song
         Song song4 = new Song();

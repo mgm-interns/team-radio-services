@@ -2,12 +2,10 @@ package com.mgmtp.radio.service.station;
 
 import com.google.api.services.youtube.model.Video;
 import com.mgmtp.radio.config.YouTubeConfig;
-import com.mgmtp.radio.domain.station.NowPlaying;
-import com.mgmtp.radio.domain.station.PlayList;
-import com.mgmtp.radio.domain.station.Song;
-import com.mgmtp.radio.domain.station.Station;
+import com.mgmtp.radio.domain.station.*;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.SongDTO;
+import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
@@ -19,14 +17,11 @@ import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.sdo.EventDataKeys;
+import com.mgmtp.radio.sdo.SkipRuleType;
 import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.sdo.SubscriptionEvents;
-import com.mgmtp.radio.support.DateHelper;
-import com.mgmtp.radio.support.StationPlayerHelper;
-import com.mgmtp.radio.support.TransferHelper;
-import com.mgmtp.radio.support.YouTubeHelper;
+import com.mgmtp.radio.support.*;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -40,6 +35,7 @@ import java.util.stream.Collectors;
 public class SongServiceImpl implements SongService {
     private static final String BLANK = "";
     private static final String SKIP_SONG_MESSAGE = "This song will be skip when play";
+    private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
 
     private final StationRepository stationRepository;
     private final SongRepository songRepository;
@@ -52,6 +48,8 @@ public class SongServiceImpl implements SongService {
     private final UserMapper userMapper;
     private final StationPlayerHelper stationPlayerHelper;
     private final MessageChannel historyChannel;
+    private final StationSongSkipHelper stationSongSkipHelper;
+    private final StationService stationService;
 
     public SongServiceImpl(
             SongMapper songMapper,
@@ -64,7 +62,9 @@ public class SongServiceImpl implements SongService {
             DateHelper dateHelper,
             YouTubeConfig youTubeConfig,
             StationPlayerHelper stationPlayerHelper,
-            MessageChannel historyChannel) {
+            MessageChannel historyChannel,
+            StationSongSkipHelper stationSongSkipHelper,
+            StationService stationService) {
         this.songRepository = songRepository;
         this.stationRepository = stationRepository;
         this.userRepository = userRepository;
@@ -76,11 +76,13 @@ public class SongServiceImpl implements SongService {
         this.youTubeConfig = youTubeConfig;
         this.stationPlayerHelper = stationPlayerHelper;
         this.historyChannel = historyChannel;
+        this.stationSongSkipHelper = stationSongSkipHelper;
+        this.stationService = stationService;
     }
 
     @Override
     public Flux<SongDTO> getListSongByStationId(String stationId) {
-        return stationRepository.retriveByIdOrFriendlyId(stationId).flatMapMany(station -> {
+        return stationService.retriveByIdOrFriendlyId(stationId).flatMapMany(station -> {
             List<String> listSongId = station.getPlaylist();
             return getListSongByListSongId(listSongId);
         }).switchIfEmpty(Mono.error(new RadioBadRequestException("Invalid station ID!")));
@@ -133,7 +135,7 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public Mono<PlayList> getPlayListByStationId(String stationId) {
-        return stationRepository.retriveByIdOrFriendlyId(stationId)
+        return stationService.retriveByIdOrFriendlyId(stationId)
             .map(station -> {
                 List<String> listSongId = station.getPlaylist();
                 return getListSongByListSongId(listSongId);
@@ -141,7 +143,10 @@ public class SongServiceImpl implements SongService {
             .flatMap(songDTOFlux -> songDTOFlux
                 .collectList()
                 .map(listSong -> createPlayListFromListSong(listSong, stationId)))
-            .onErrorResume(Exception.class, ex -> Mono.just(PlayList.EMPTY_PLAYLIST));
+            .onErrorResume(Exception.class, ex -> {
+                stationPlayerHelper.clearNowPlayingByStationId(stationId);
+                return Mono.just(PlayList.EMPTY_PLAYLIST);
+            });
     }
 
     private PlayList createPlayListFromListSong(List<SongDTO> listSong, String stationId) {
@@ -151,6 +156,7 @@ public class SongServiceImpl implements SongService {
         final String previousSongId = previousPlay.isPresent() ? previousPlay.get().getSongId() : BLANK;
         listSong = listSong.stream()
                            .filter(songDTO -> songDTO.getStatus() != SongStatus.played
+                                   && songDTO.getStatus() != SongStatus.skipped
                                    && (songDTO.getStatus() != SongStatus.playing || !songDTO.getId().equals(previousSongId)))
                            .sorted(sortByVoteAndStatus)
                            .collect(Collectors.toList());
@@ -203,16 +209,17 @@ public class SongServiceImpl implements SongService {
             String endedSongId = nowPlaying.get().getSongId();
             nowPlaying = getNextSongFromList(stationId, endedSongId, listSong);
         } else {
-            Set<String> listSkippedSongId = listSong.stream()
-                    .filter(SongDTO::isSkipped)
-                    .map(SongDTO::getId)
-                    .collect(Collectors.toSet());
+            Optional<Set<SongDTO>> stationSkipSong = stationSongSkipHelper.getListSkipSong(stationId);
+            Set<String> listSkippedSongId = Collections.EMPTY_SET;
+            if (stationSkipSong.isPresent()){
+                listSkippedSongId = stationSkipSong.get().stream().map(SongDTO::getId).collect(Collectors.toSet());
+            }
             if (!listSkippedSongId.isEmpty()) {
                 if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
                     String skippedSongId = nowPlaying.get().getSongId();
                     nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong);
                 }
-                addMessageToWillBeSkipSongInList(listSong);
+                addMessageToWillBeSkipSongInList(listSong, listSkippedSongId);
             }
             clearMessageOfNotSkipSongAnyMore(listSong, listSkippedSongId);
         }
@@ -228,21 +235,25 @@ public class SongServiceImpl implements SongService {
         historyChannel.send(MessageBuilder.withPayload(historyParam).build());
     }
 
-    private void addMessageToWillBeSkipSongInList(List<SongDTO> listSong){
+    private void addMessageToWillBeSkipSongInList(List<SongDTO> listSong, Set<String> listSkipSongId){
         listSong.forEach(songDTO -> {
-            if (songDTO.isSkipped()) {
+            if (listSkipSongId.contains(songDTO.getId())) {
                 songDTO.setMessage(SKIP_SONG_MESSAGE);
-                updateSongPlayingStatusAndMessage(songDTO.getId(), SongStatus.not_play_yet, songDTO.getMessage());
             }
         });
     }
 
     private void clearMessageOfNotSkipSongAnyMore(List<SongDTO> listSong, Set<String> notChangeSongId) {
-        List<SongDTO> updateList = listSong.stream()
+        Set<String> updateList = listSong.stream()
                 .filter(getSongNotSkipAnyMore(notChangeSongId))
-                .collect(Collectors.toList());
+                .map(SongDTO::getId)
+                .collect(Collectors.toSet());
         if (!updateList.isEmpty()) {
-            updateList.forEach(songDTO -> updateSongPlayingStatusAndMessage(songDTO.getId(), SongStatus.not_play_yet, BLANK));
+            listSong.forEach(currentSong -> {
+                if (updateList.contains(currentSong.getId())){
+                    currentSong.setMessage(BLANK);
+                }
+            });
         }
     }
 
@@ -260,7 +271,7 @@ public class SongServiceImpl implements SongService {
     private Optional<NowPlaying> skipSongAndRemoveFromListBySongId(String stationId, String skipSongId, List<SongDTO> listSong){
         SongDTO skippedSong = listSong.stream().filter(songDTO -> songDTO.getId().equals(skipSongId)).findFirst().get();
         listSong.remove(skippedSong);
-        updateSongPlayingStatusAndMessage(skipSongId, SongStatus.played, skippedSong.getMessage());
+        updateSongPlayingStatusAndMessage(skipSongId, SongStatus.skipped, skippedSong.getMessage());
 
         SongDTO nowPlayingSong = listSong.get(0);
         return updateStatusAndSetNowPlayingFromSong(nowPlayingSong, stationId);
@@ -317,7 +328,7 @@ public class SongServiceImpl implements SongService {
         }
 
         return songRepository.save(song).flatMap(newSong ->
-                stationRepository.retriveByIdOrFriendlyId(stationId)
+                stationService.retriveByIdOrFriendlyId(stationId)
                         .switchIfEmpty(Mono.error(new RadioNotFoundException()))
                         .flatMap(station -> {
                             if (station.getPlaylist() == null) {
@@ -359,7 +370,7 @@ public class SongServiceImpl implements SongService {
 
             return songRepository
                     .save(song)
-                    .flatMap(this::mapSongToSongDTO);
+                    .flatMap(songResult -> mapSongToSongDTO(songResult, stationId));
         });
     }
 
@@ -386,8 +397,52 @@ public class SongServiceImpl implements SongService {
 
             return songRepository
                     .save(song)
-                    .flatMap(this::mapSongToSongDTO);
+                    .flatMap(songResult -> mapSongToSongDTO(songResult, stationId))
+                    .flatMap(this::handleSkipRule);
         });
+    }
+
+    private Mono<SongDTO> handleSkipRule (SongDTO songDTO){
+        return stationService.retriveByIdOrFriendlyId(songDTO.getStationId()).map(tempStation ->{
+            final StationConfiguration stationConfiguration = tempStation.getStationConfiguration();
+            boolean isSkipped = false;
+
+            if (stationConfiguration.getSkipRule().getSkipRuleType() == SkipRuleType.ADVANCE) {
+                if (isOwnerDownvote(tempStation, songDTO)) {
+                    isSkipped = true;
+                }
+            } else {
+                double downVotePercent = calcCurrentSongDislikePercent(songDTO, new StationDTO());
+                if (downVotePercent > DOWN_VOTE_THRES_PERCENT) {
+                    isSkipped = true;
+                }
+            }
+            if (isSkipped){
+                stationSongSkipHelper.addSkipSong(songDTO.getStationId(), songDTO);
+            } else {
+                stationSongSkipHelper.removeSkipSong(songDTO.getStationId(), songDTO);
+            }
+
+            return songDTO;
+        });
+    }
+
+    private double calcCurrentSongDislikePercent(SongDTO songDTO, StationDTO station) {
+        final int numberOnline = getOnlineUsersNumber(station);
+        double currentSongDislikePercent = 0;
+        if (numberOnline > 0) {
+            currentSongDislikePercent = songDTO.getDownVoteCount() / (double) numberOnline;
+        }
+        return currentSongDislikePercent;
+    }
+
+    private boolean isOwnerDownvote(Station station, SongDTO songDTO) {
+        return songDTO.getDownvoteUserList().stream().anyMatch(userDTO -> userDTO.getId().equals(station.getOwnerId()));
+    }
+
+    private int getOnlineUsersNumber(StationDTO stationDTO) {
+        //TODO Get number of online users id here
+        return 1;
     }
 
     /**
@@ -397,9 +452,8 @@ public class SongServiceImpl implements SongService {
      * @return station mono
      */
     private Mono<Station> findStation(String stationId) {
-        return stationRepository
-                .retriveByIdOrFriendlyId(stationId)
-                .switchIfEmpty(Mono.error(new StationNotFoundException(stationId)));
+        return stationService
+                .retriveByIdOrFriendlyId(stationId);
     }
 
     /**
@@ -410,31 +464,32 @@ public class SongServiceImpl implements SongService {
      * @return station mono
      */
     private Mono<Song> findSong(String stationId, String songId) {
-        return findStation(stationId).flatMap(station -> {
-            if (station.getPlaylist().contains(songId)) {
-                return songRepository
-                        .findById(songId);
-            }
+        return findStation(stationId)
+            .flatMap(station -> {
+                if (station.getPlaylist().contains(songId)) {
+                    return songRepository
+                            .findById(songId);
+                }
             return Mono.error(new SongNotFoundException(songId));
         });
     }
 
-    private Mono<SongDTO> mapSongToSongDTO(Song song) {
+    private Mono<SongDTO> mapSongToSongDTO(Song song, String stationId) {
         SongDTO songDTO = songMapper.songToSongDTO(song);
 
-        songDTO.setUpvoteUserList(new ArrayList<>());
         List<User> upVoteUserList = userRepository.findByIdIn(song.getUpVoteUserIdList());
         for (User user : upVoteUserList) {
             UserDTO userDTO = userMapper.userToUserDTO(user);
             songDTO.getUpvoteUserList().add(userDTO);
         }
 
-        songDTO.setDownvoteUserList(new ArrayList<>());
         List<User> downVoteUserList = userRepository.findByIdIn(song.getDownVoteUserIdList());
         for (User user : downVoteUserList) {
             UserDTO userDTO = userMapper.userToUserDTO(user);
             songDTO.getDownvoteUserList().add(userDTO);
         }
+
+        songDTO.setStationId(stationId);
 
         return Mono.just(songDTO);
     }
