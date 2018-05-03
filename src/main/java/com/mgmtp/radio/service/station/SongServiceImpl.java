@@ -143,7 +143,10 @@ public class SongServiceImpl implements SongService {
             .flatMap(songDTOFlux -> songDTOFlux
                 .collectList()
                 .map(listSong -> createPlayListFromListSong(listSong, stationId)))
-            .onErrorResume(Exception.class, ex -> Mono.just(PlayList.EMPTY_PLAYLIST));
+            .onErrorResume(Exception.class, ex -> {
+                stationPlayerHelper.clearNowPlayingByStationId(stationId);
+                return Mono.just(PlayList.EMPTY_PLAYLIST);
+            });
     }
 
     private PlayList createPlayListFromListSong(List<SongDTO> listSong, String stationId) {
@@ -153,6 +156,7 @@ public class SongServiceImpl implements SongService {
         final String previousSongId = previousPlay.isPresent() ? previousPlay.get().getSongId() : BLANK;
         listSong = listSong.stream()
                            .filter(songDTO -> songDTO.getStatus() != SongStatus.played
+                                   && songDTO.getStatus() != SongStatus.skipped
                                    && (songDTO.getStatus() != SongStatus.playing || !songDTO.getId().equals(previousSongId)))
                            .sorted(sortByVoteAndStatus)
                            .collect(Collectors.toList());
@@ -267,7 +271,7 @@ public class SongServiceImpl implements SongService {
     private Optional<NowPlaying> skipSongAndRemoveFromListBySongId(String stationId, String skipSongId, List<SongDTO> listSong){
         SongDTO skippedSong = listSong.stream().filter(songDTO -> songDTO.getId().equals(skipSongId)).findFirst().get();
         listSong.remove(skippedSong);
-        updateSongPlayingStatusAndMessage(skipSongId, SongStatus.played, skippedSong.getMessage());
+        updateSongPlayingStatusAndMessage(skipSongId, SongStatus.skipped, skippedSong.getMessage());
 
         SongDTO nowPlayingSong = listSong.get(0);
         return updateStatusAndSetNowPlayingFromSong(nowPlayingSong, stationId);
