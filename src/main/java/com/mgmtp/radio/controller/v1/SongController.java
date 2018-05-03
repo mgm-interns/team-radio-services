@@ -23,7 +23,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -72,7 +71,7 @@ public class SongController extends BaseRadioController {
     })
     @GetMapping("/{stationId}/playList")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId, HttpServletRequest request) {
+    public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId) {
         Flux<ServerSentEvent<PlayList>> stationPlayListStream = stationStream.get(stationId);
         if (stationPlayListStream == null) {
             stationPlayListStream =
@@ -95,14 +94,10 @@ public class SongController extends BaseRadioController {
 
             stationStream.put(stationId, stationPlayListStream);
         }
-        return stationPlayListStream.doFinally(signalType -> leaveStation(request));
+        return stationPlayListStream.doFinally(signalType -> leaveStation(stationId));
     }
 
-
-    private void leaveStation(HttpServletRequest request) {
-        String requestURI = request.getRequestURI();
-        String[] words = requestURI.split("/");
-        String stationId = words[words.length - 2];
+    private void leaveStation(String stationId) {
         if (getCurrentUser().isPresent()) {
             stationService.leaveStation(stationId, userMapper.userToUserDTO(getCurrentUser().get()));
         }
