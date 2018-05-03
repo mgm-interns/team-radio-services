@@ -33,7 +33,7 @@ public class GetStationByIdImplTest {
     @Mock
     SongService songService;
 
-    StationOnlineServiceImpl stationOnlineService;
+    StationOnlineService stationOnlineService;
 
     @Before
     public void setUp() throws Exception {

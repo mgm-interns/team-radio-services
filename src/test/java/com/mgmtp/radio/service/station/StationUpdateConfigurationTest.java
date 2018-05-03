@@ -33,7 +33,7 @@ public class StationUpdateConfigurationTest {
 	StationMapper stationMapper = StationMapper.INSTANCE;
 
 	@Mock
-    StationOnlineServiceImpl stationOnlineService;
+    StationOnlineService stationOnlineService;
 
 	@Before
 	public void setUp() {

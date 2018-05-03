@@ -32,7 +32,7 @@ public class StationServiceImpl implements StationService {
 
 	private final StationRepository stationRepository;
 	private final StationMapper stationMapper;
-	private final StationOnlineServiceImpl stationOnlineService;
+	private final StationOnlineService stationOnlineService;
 
 
     @Override
@@ -40,7 +40,7 @@ public class StationServiceImpl implements StationService {
 		return stationDTO.getNumberOnline();
 	}
 
-    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, StationOnlineServiceImpl stationOnlineService) {
+    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, StationOnlineService stationOnlineService) {
         this.stationMapper = stationMapper;
         this.stationRepository = stationRepository;
         this.stationOnlineService = stationOnlineService;

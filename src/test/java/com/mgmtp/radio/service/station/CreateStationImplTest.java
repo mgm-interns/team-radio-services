@@ -24,7 +24,7 @@ public class CreateStationImplTest {
 
     StationService stationService;
 
-    StationOnlineServiceImpl stationOnlineService;
+    StationOnlineService stationOnlineService;
 
     @Before
     public void setUp() throws Exception {
