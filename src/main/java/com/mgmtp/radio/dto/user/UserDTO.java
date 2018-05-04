@@ -43,4 +43,6 @@ public class UserDTO {
 
     LocalDate updatedAt;
 
+    int reputation;
+
 }

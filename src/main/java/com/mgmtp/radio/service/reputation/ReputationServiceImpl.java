@@ -1,87 +1,120 @@
 package com.mgmtp.radio.service.reputation;
 
-import com.mgmtp.radio.domain.reputation.Reputation;
-import com.mgmtp.radio.dto.reputation.ReputationDTO;
-import com.mgmtp.radio.dto.user.UserDTO;
-import com.mgmtp.radio.exception.RadioNotFoundException;
-import com.mgmtp.radio.mapper.reputation.ReputationMapper;
-import com.mgmtp.radio.respository.reputation.ReputationRepository;
-import org.aspectj.lang.annotation.AfterReturning;
+import com.mgmtp.radio.domain.reputation.ReputationEventLog;
+import com.mgmtp.radio.domain.user.User;
+import com.mgmtp.radio.respository.reputation.ReputationEventLogRepository;
+import com.mgmtp.radio.respository.user.UserRepository;
+import com.mgmtp.radio.sdo.ReputationEventKeys;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
+import org.springframework.util.StringUtils;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Aspect
 @Service
-public class ReputationServiceImpl implements ReputationService{
+public class ReputationServiceImpl implements ReputationService {
 
-    private final ReputationRepository reputationRepository;
-    private ReputationMapper reputationMapper;
+    private final ReputationEventLogRepository reputationEventLogRepository;
+    private final UserRepository userRepository;
     private final int USER_UPDATE_AVATAR_POINT = 20;
     private final int USER_UPDATE_COVER_POINT = 2;
     private final int USER_UPDATE_INFO_POINT = 2;
 
-    public ReputationServiceImpl(ReputationRepository reputationRepository, ReputationMapper reputationMapper) {
-        this.reputationRepository = reputationRepository;
-        this.reputationMapper = reputationMapper;
+    public ReputationServiceImpl(ReputationEventLogRepository reputationEventLogRepository,
+                                 UserRepository userRepository) {
+        this.reputationEventLogRepository = reputationEventLogRepository;
+        this.userRepository = userRepository;
     }
 
-    @Override
-    public Mono<ReputationDTO> getReputation(String userId) {
-        return reputationRepository.findByUserId(userId).map(
-                reputation -> reputationMapper.reputationToReputationDTO(reputation))
-                .switchIfEmpty(Mono.error(new RadioNotFoundException()));
-    }
+    public User updateUserReputation(User user) {
 
-    @Override
-    @AfterReturning(value = "execution(* com.mgmtp.radio.service.user.UserServiceImpl.register(..))"
-            , returning = "userDTO")
-    public void createReputationForUserRegister(UserDTO userDTO) {
-        if(userDTO != null) {
-            Reputation reputation = new Reputation();
-            reputation.setUserId(userDTO.getId());
-            reputation.setScore(0);
-            reputation.setUpdateAvatarAlready(false);
-            reputationRepository.save(reputation).subscribe();
+        List<ReputationEventLog> reputationEventLogs = reputationEventLogRepository.findByUserId(user.getId())
+                .toStream()
+                .collect(Collectors.toList());
+
+        int reputationIncreasing = 0;
+
+        if (!StringUtils.isEmpty(user.getAvatarUrl())
+                && reputationEventLogs.stream().noneMatch(reputationEventLog -> reputationEventLog.getEvent() == ReputationEventKeys.user_update_avatar)) {
+
+            ReputationEventLog reputationEventLog =
+                    saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_avatar, USER_UPDATE_AVATAR_POINT);
+            reputationEventLogRepository.save(reputationEventLog);
+
+            reputationIncreasing += reputationEventLog.getScore();
         }
+
+        if (!StringUtils.isEmpty(user.getCoverUrl())
+                && reputationEventLogs.stream().noneMatch(reputationEventLog -> reputationEventLog.getEvent() == ReputationEventKeys.user_update_cover)) {
+
+            ReputationEventLog reputationEventLog =
+                    saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_cover, USER_UPDATE_COVER_POINT);
+            reputationEventLogRepository.save(reputationEventLog);
+
+            reputationIncreasing += reputationEventLog.getScore();
+        }
+
+        if (!StringUtils.isEmpty(user.getFirstName())
+                && reputationEventLogs.stream().noneMatch(reputationEventLog -> reputationEventLog.getEvent() == ReputationEventKeys.user_update_first_name)) {
+
+            ReputationEventLog reputationEventLog =
+                    saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_first_name, USER_UPDATE_INFO_POINT);
+            reputationEventLogRepository.save(reputationEventLog);
+
+            reputationIncreasing += reputationEventLog.getScore();
+        }
+
+        if (!StringUtils.isEmpty(user.getLastName())
+                && reputationEventLogs.stream().noneMatch(reputationEventLog -> reputationEventLog.getEvent() == ReputationEventKeys.user_update_last_name)) {
+
+            ReputationEventLog reputationEventLog =
+                    saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_last_name, USER_UPDATE_INFO_POINT);
+            reputationEventLogRepository.save(reputationEventLog);
+
+            reputationIncreasing += reputationEventLog.getScore();
+        }
+
+        if (!StringUtils.isEmpty(user.getCountry())
+                && reputationEventLogs.stream().noneMatch(reputationEventLog -> reputationEventLog.getEvent() == ReputationEventKeys.user_update_country)) {
+
+            ReputationEventLog reputationEventLog =
+                    saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_country, USER_UPDATE_INFO_POINT);
+            reputationEventLogRepository.save(reputationEventLog);
+
+            reputationIncreasing += reputationEventLog.getScore();
+        }
+
+        if (!StringUtils.isEmpty(user.getCity())
+                && reputationEventLogs.stream().noneMatch(reputationEventLog -> reputationEventLog.getEvent() == ReputationEventKeys.user_update_city)) {
+
+            ReputationEventLog reputationEventLog =
+                    saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_city, USER_UPDATE_INFO_POINT);
+            reputationEventLogRepository.save(reputationEventLog);
+
+            reputationIncreasing += reputationEventLog.getScore();
+        }
+
+        if (!StringUtils.isEmpty(user.getBio())
+                && reputationEventLogs.stream().noneMatch(reputationEventLog -> reputationEventLog.getEvent() == ReputationEventKeys.user_update_bio)) {
+            ReputationEventLog reputationEventLog =
+                    saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_bio, USER_UPDATE_INFO_POINT);
+            reputationIncreasing += reputationEventLog.getScore();
+        }
+
+        user.setReputation(user.getReputation() + reputationIncreasing);
+        return userRepository.save(user);
     }
 
-    @Override
-    @AfterReturning(value = "execution(* com.mgmtp.radio.service.user.UserServiceImpl.patchUserAvatar(..))"
-            , returning = "userDTO")
-    public void updateReputationForUserUpdateAvatar(UserDTO userDTO) {
-        if(userDTO != null) {
-            reputationRepository.findByUserId(userDTO.getId()).doOnNext(reputation -> {
-                if (!reputation.isUpdateAvatarAlready()) {
-                    reputation.setScore(reputation.getScore() + USER_UPDATE_AVATAR_POINT);
-                    reputation.setUpdateAvatarAlready(true);
-                    reputationRepository.save(reputation).subscribe();
-                }
-            }).subscribe();
-        }
+    private ReputationEventLog saveReputationEventLog(String userId, ReputationEventKeys reputationEventKey, int points) {
+        ReputationEventLog reputationEventLog = new ReputationEventLog();
+        reputationEventLog.setScore(points);
+        reputationEventLog.setEvent(reputationEventKey);
+        reputationEventLog.setUserId(userId);
+        reputationEventLog.setCreateAt(LocalDateTime.now());
+        return reputationEventLogRepository.save(reputationEventLog).block();
     }
 
-    @Override
-    @AfterReturning(value = "execution(* com.mgmtp.radio.service.user.UserServiceImpl.patchUserCover(..))"
-            , returning = "userDTO")
-    public void updateReputationForUserUpdateCover(UserDTO userDTO) {
-        if(userDTO != null) {
-            reputationRepository.findByUserId(userDTO.getId()).map(reputation -> {
-                reputation.setScore(reputation.getScore() + USER_UPDATE_COVER_POINT);
-                return reputationRepository.save(reputation).subscribe();
-            }).subscribe();
-        }
-    }
-
-    @Override
-    @AfterReturning(value = "execution(* com.mgmtp.radio.service.user.UserServiceImpl.patchUser(..))"
-            , returning = "userDTO")
-    public void updateReputationForUserUpdateInfo(UserDTO userDTO) {
-        if (userDTO != null) {
-            reputationRepository.findByUserId(userDTO.getId()).map(reputation -> {
-                reputation.setScore(reputation.getScore() + USER_UPDATE_INFO_POINT);
-                return reputationRepository.save(reputation).subscribe();
-            }).subscribe();
-        }
-    }
 }

@@ -6,6 +6,7 @@ import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.sdo.StationPrivacy;
+import com.mgmtp.radio.service.reputation.ReputationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -24,6 +25,9 @@ public class GetAllMyStationOfUserTest {
     UserService userService;
 
     @Mock
+    ReputationService reputationService;
+
+    @Mock
     StationRepository stationRepository;
 
     @Mock
@@ -36,6 +40,7 @@ public class GetAllMyStationOfUserTest {
                 null,
                 null,
                 stationRepository,
+                reputationService,
                 stationMapper);
     }
 

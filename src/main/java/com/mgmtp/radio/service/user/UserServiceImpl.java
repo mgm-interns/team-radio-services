@@ -11,6 +11,7 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.sdo.StationPrivacy;
+import com.mgmtp.radio.service.reputation.ReputationService;
 import com.mgmtp.radio.social.facebook.model.FacebookAvatar;
 import com.mgmtp.radio.social.facebook.model.FacebookUser;
 import com.mgmtp.radio.social.google.model.GoogleUser;
@@ -33,13 +34,20 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final StationRepository stationRepository;
     private final StationMapper stationMapper;
+    private final ReputationService reputationService;
 
-    public UserServiceImpl(UserMapper userMapper, UserRepository userRepository, PasswordEncoder passwordEncoder, StationRepository stationRepository, StationMapper stationMapper) {
+    public UserServiceImpl(UserMapper userMapper,
+                           UserRepository userRepository,
+                           PasswordEncoder passwordEncoder,
+                           StationRepository stationRepository,
+                           ReputationService reputationService,
+                           StationMapper stationMapper) {
         this.userMapper = userMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.stationRepository= stationRepository;
         this.stationMapper = stationMapper;
+        this.reputationService = reputationService;
     }
 
     @Override
@@ -61,7 +69,9 @@ public class UserServiceImpl implements UserService {
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         User user = userMapper.userDtoToUser(userDTO);
         user.setRoles(getDefaultRole());
-        return userMapper.userToUserDTO(userRepository.save(user));
+        User savedUser = userRepository.save(user);
+        savedUser = reputationService.updateUserReputation(savedUser);
+        return userMapper.userToUserDTO(savedUser);
     }
 
 
@@ -91,7 +101,9 @@ public class UserServiceImpl implements UserService {
             String userAvatarUrl = StringUtils.isEmpty(user.getAvatarUrl()) ? facebookAvatar.data.url : user.getAvatarUrl();
             user.setAvatarUrl(userAvatarUrl);
 
-            return userRepository.save(existUser.get());
+            User savedUser = userRepository.save(existUser.get());
+            savedUser = reputationService.updateUserReputation(savedUser);
+            return savedUser;
 
         } else {
 
@@ -104,7 +116,9 @@ public class UserServiceImpl implements UserService {
             user.setEmail(facebookUser.email);
             String userAvatarUrl = StringUtils.isEmpty(user.getAvatarUrl()) ? facebookAvatar.data.url : user.getAvatarUrl();
             user.setAvatarUrl(userAvatarUrl);
-            return userRepository.save(user);
+            User savedUser = userRepository.save(user);
+            savedUser = reputationService.updateUserReputation(savedUser);
+            return savedUser;
         }
     }
 
@@ -137,7 +151,9 @@ public class UserServiceImpl implements UserService {
             String userAvatarUrl = StringUtils.isEmpty(user.getAvatarUrl()) ? googleUser.picture : user.getAvatarUrl();
             user.setAvatarUrl(userAvatarUrl);
 
-            return userRepository.save(existUser.get());
+            User savedUser = userRepository.save(existUser.get());
+            savedUser = reputationService.updateUserReputation(savedUser);
+            return savedUser;
 
         } else {
 
@@ -150,7 +166,9 @@ public class UserServiceImpl implements UserService {
             user.setEmail(googleUser.email);
             String userAvatarUrl = StringUtils.isEmpty(user.getAvatarUrl()) ? googleUser.picture : user.getAvatarUrl();
             user.setAvatarUrl(userAvatarUrl);
-            return userRepository.save(user);
+            User savedUser = userRepository.save(user);
+            savedUser = reputationService.updateUserReputation(savedUser);
+            return savedUser;
         }
     }
 
@@ -178,7 +196,9 @@ public class UserServiceImpl implements UserService {
             user.setAvatarUrl(userDTO.getAvatarUrl());
             user.setCoverUrl(userDTO.getCoverUrl());
             user.setUpdatedAt(LocalDate.now());
-            return userMapper.userToUserDTO(userRepository.save(user));
+            User savedUser = userRepository.save(user);
+            savedUser = reputationService.updateUserReputation(savedUser);
+            return userMapper.userToUserDTO(savedUser);
         }).orElseThrow(RadioNotFoundException::new);
     }
 
@@ -187,7 +207,9 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(userId).map(user -> {
             user.setAvatarUrl(avatarUrl);
             user.setUpdatedAt(LocalDate.now());
-            return userMapper.userToUserDTO(userRepository.save(user));
+            User savedUser = userRepository.save(user);
+            savedUser = reputationService.updateUserReputation(savedUser);
+            return userMapper.userToUserDTO(savedUser);
         }).orElseThrow(RadioNotFoundException::new);
     }
 
@@ -195,7 +217,9 @@ public class UserServiceImpl implements UserService {
     public UserDTO patchUserCover(String userId, String coverUrl) throws RadioNotFoundException {
         return userRepository.findById(userId).map(user -> {
             user.setCoverUrl(coverUrl);
-            return userMapper.userToUserDTO(userRepository.save(user));
+            User savedUser = userRepository.save(user);
+            savedUser = reputationService.updateUserReputation(savedUser);
+            return userMapper.userToUserDTO(savedUser);
         }).orElseThrow(RadioNotFoundException::new);
     }
 
