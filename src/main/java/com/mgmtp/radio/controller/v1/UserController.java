@@ -13,6 +13,7 @@ import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.support.CloudinaryHelper;
 import com.mgmtp.radio.support.ContentTypeValidator;
+import com.mgmtp.radio.support.validator.user.RegisterValidator;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -21,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
@@ -40,13 +42,24 @@ public class UserController extends BaseRadioController {
     private final UserService userService;
     private final CloudinaryHelper cloudinaryHelper;
     private final ContentTypeValidator contentTypeValidator;
+    private final RegisterValidator registerValidator;
 
     public UserController(UserService userService,
                           CloudinaryHelper cloudinaryHelper,
+                          RegisterValidator registerValidator,
                           ContentTypeValidator contentTypeValidator) {
         this.userService = userService;
         this.cloudinaryHelper = cloudinaryHelper;
         this.contentTypeValidator = contentTypeValidator;
+        this.registerValidator = registerValidator;
+    }
+
+    @InitBinder
+    protected void initBinder(WebDataBinder binder) {
+        if (binder.getTarget() != null
+                && UserDTO.class.equals(binder.getTarget().getClass())) {
+            binder.addValidators(this.registerValidator);
+        }
     }
 
     @ApiOperation(
@@ -125,6 +138,7 @@ public class UserController extends BaseRadioController {
                                                   BindingResult bindingResult)
             throws RadioException {
         log.info("POST /api/v1/users/register  - data: " + userDTO.toString());
+
 
         if (bindingResult.hasErrors()) {
             throw new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage());
