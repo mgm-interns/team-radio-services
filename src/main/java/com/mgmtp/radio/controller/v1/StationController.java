@@ -72,7 +72,7 @@ public class StationController extends BaseRadioController {
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public Flux<Map<String,StationDTO>> getAllStation(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                      @RequestParam(value = "limit", defaultValue = "50") int limit) {
+                                                      @RequestParam(value = "limit", defaultValue = "40") int limit) {
         return Flux.create(sink -> {
             MessageHandler messageHandler = message -> {
                 Map<String, StationDTO> data = (Map<String, StationDTO>) message.getPayload();
