@@ -250,11 +250,13 @@ public class SongServiceImpl implements SongService {
         final String songId = nowPlaying.get().getSongId();
         if (nowPlayingSong.isPresent() && !songId.equals(nowPlayingSong.get().getId())){
             List<SongDTO> listSongClone = new ArrayList<>(listSong);
-            listSongClone.forEach(currentSong -> {
+            for (SongDTO currentSong : listSongClone){
                 if (!currentSong.getId().equals(songId)){
                     listSong.remove(currentSong);
+                } else {
+                    break;
                 }
-            });
+            }
         }
         if (nowPlaying.get().isEnded()) {
             String endedSongId = nowPlaying.get().getSongId();
