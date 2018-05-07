@@ -167,7 +167,6 @@ public class SongServiceImpl implements SongService {
                                                    .findFirst();
 
         if (joinTime != 0){
-            System.out.println(joinTime);
             nowPlaying = seekTime(listSong, nowPlaying, joinTime, stationId);
         }
 
@@ -189,27 +188,22 @@ public class SongServiceImpl implements SongService {
     }
 
     private Optional<NowPlaying> seekTime(List<SongDTO> listSong, Optional<NowPlaying> nowPlaying, long joinTime, String stationId) {
-        System.out.println("HIT seekTime");
-        System.out.println(nowPlaying.isPresent());
         if (nowPlaying.isPresent()) {
             long lastPlayingTime = nowPlaying.get().getStartingTime();
-            long[] differentTime = new long[]{joinTime - lastPlayingTime};
-            System.out.println("differentTime: " + differentTime[0]);
+            long[] differentTime = new long[]{joinTime - lastPlayingTime, joinTime - lastPlayingTime};
             List<SongDTO> shiftSongList = new ArrayList<>();
             for (SongDTO currentSong : listSong) {
                 long durationInSecond = currentSong.getDuration() / 1000;
                 if (durationInSecond < differentTime[0]) {
-                    System.out.println("differentTime song: " + differentTime[0]);
                     differentTime[0] -= durationInSecond;
                     shiftSongList.add(currentSong);
                 } else {
-                    stationPlayerHelper.addNowPlaying(stationId, currentSong, joinTime);
+                    nowPlaying = stationPlayerHelper.addNowPlaying(stationId, currentSong, joinTime - differentTime[1]);
                     break;
                 }
             }
             updateShiftSong(shiftSongList);
         }
-        nowPlaying = stationPlayerHelper.getStationNowPlaying(stationId);
 
         return nowPlaying;
     }
@@ -248,14 +242,12 @@ public class SongServiceImpl implements SongService {
     private Optional<NowPlaying> handleNowPlaying(Optional<SongDTO> nowPlayingSong, Optional<NowPlaying> nowPlaying, String stationId, List<SongDTO> listSong, long jointTime) {
         final String songId = nowPlaying.get().getSongId();
         if (nowPlayingSong.isPresent() && !songId.equals(nowPlayingSong.get().getId())){
-            System.out.println("list song size before: " + listSong.size());
             List<SongDTO> songClone = new ArrayList<>(listSong);
             songClone.forEach(currentSong -> {
                 if (!currentSong.getId().equals(songId)){
                     listSong.remove(currentSong);
                 }
             });
-            System.out.println("list song size after: " + listSong.size());
         }
         if (nowPlaying.get().isEnded()) {
             String endedSongId = nowPlaying.get().getSongId();
