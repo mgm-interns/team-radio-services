@@ -190,32 +190,38 @@ public class SongServiceImpl implements SongService {
     private Optional<NowPlaying> seekTime(List<SongDTO> listSong, Optional<NowPlaying> nowPlaying, long joinTime, String stationId) {
         if (nowPlaying.isPresent()) {
             long lastPlayingTime = nowPlaying.get().getStartingTime();
-            long[] differentTime = new long[]{joinTime - lastPlayingTime, joinTime - lastPlayingTime};
+            long[] differentTime = new long[]{joinTime - lastPlayingTime};
             List<SongDTO> shiftSongList = new ArrayList<>();
+            SongDTO willBePlaySong = listSong.get(0);
             for (SongDTO currentSong : listSong) {
                 long durationInSecond = currentSong.getDuration() / 1000;
                 if (durationInSecond < differentTime[0]) {
                     differentTime[0] -= durationInSecond;
                     shiftSongList.add(currentSong);
                 } else {
-                    nowPlaying = stationPlayerHelper.addNowPlaying(stationId, currentSong, joinTime - differentTime[1]);
+                    willBePlaySong = currentSong;
                     break;
                 }
             }
-            updateShiftSong(shiftSongList);
+
+            if (shiftSongList.isEmpty()) {
+                nowPlaying = stationPlayerHelper.addNowPlaying(stationId, willBePlaySong, lastPlayingTime);
+            } else {
+                nowPlaying = stationPlayerHelper.addNowPlaying(stationId, willBePlaySong, joinTime);
+                updateShiftSong(shiftSongList);
+            }
         }
 
         return nowPlaying;
     }
 
     private void updateShiftSong(List<SongDTO> listShiftSong) {
-        if (!listShiftSong.isEmpty()){
-            Map<String, Object> shiftSongParam = new HashMap<>();
-            shiftSongParam.put(EventDataKeys.event_id.name(), SubscriptionEvents.shift_song.name());
-            shiftSongParam.put(EventDataKeys.list_shift_song.name(), listShiftSong);
+        Map<String, Object> shiftSongParam = new HashMap<>();
+        shiftSongParam.put(EventDataKeys.event_id.name(), SubscriptionEvents.shift_song.name());
+        shiftSongParam.put(EventDataKeys.list_shift_song.name(), listShiftSong);
 
-            shiftSongChannel.send(MessageBuilder.withPayload(shiftSongParam).build());
-        }
+        shiftSongChannel.send(MessageBuilder.withPayload(shiftSongParam).build());
+
     }
 
     private Comparator<SongDTO> sortByVoteAndStatus = (SongDTO song1, SongDTO song2) -> {
@@ -242,8 +248,8 @@ public class SongServiceImpl implements SongService {
     private Optional<NowPlaying> handleNowPlaying(Optional<SongDTO> nowPlayingSong, Optional<NowPlaying> nowPlaying, String stationId, List<SongDTO> listSong, long jointTime) {
         final String songId = nowPlaying.get().getSongId();
         if (nowPlayingSong.isPresent() && !songId.equals(nowPlayingSong.get().getId())){
-            List<SongDTO> songClone = new ArrayList<>(listSong);
-            songClone.forEach(currentSong -> {
+            List<SongDTO> listSongClone = new ArrayList<>(listSong);
+            listSongClone.forEach(currentSong -> {
                 if (!currentSong.getId().equals(songId)){
                     listSong.remove(currentSong);
                 }
