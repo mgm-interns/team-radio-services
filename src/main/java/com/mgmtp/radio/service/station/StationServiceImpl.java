@@ -55,11 +55,9 @@ public class StationServiceImpl implements StationService {
     public Map<String, StationDTO> getOrderedStations() {
         Map<String, StationDTO> result = stationOnlineService.getAllStation();
         if (result.isEmpty()) {
-            getAll().subscribe(stationDTO -> {
-                if (stationDTO.getPrivacy() == StationPrivacy.station_public) {
-                    stationOnlineService.addStationToList(stationDTO);
-                }
-            });
+            getAll().filter(stationDTO -> stationDTO.getPrivacy() == StationPrivacy.station_public)
+                    .subscribe(stationDTO ->
+                            stationOnlineService.addStationToList(stationDTO));
         }
         return stationOnlineService.getAllStation();
     }

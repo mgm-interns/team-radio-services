@@ -21,6 +21,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
@@ -52,8 +53,8 @@ public class StationController extends BaseRadioController {
     }
 
     @ApiOperation(
-            value = "GET all station",
-            notes = "Returns all station"
+            value = "GET all stations",
+            notes = "Returns all stations"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
@@ -61,7 +62,21 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Map<String, StationDTO> getAllStations() {
+    public Flux<StationDTO> getAllStations() {
+        return this.stationService.getAll();
+    }
+
+    @ApiOperation(
+            value = "GET all stations with stream",
+            notes = "Returns all stations with stream"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
+    })
+    @GetMapping("/stream")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, StationDTO> getAllStationsStream() {
         return this.stationService.getOrderedStations();
     }
 
