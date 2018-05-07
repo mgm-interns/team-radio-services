@@ -1,12 +1,24 @@
 package com.mgmtp.radio.config;
 
+import com.mgmtp.radio.dto.station.StationDTO;
+import com.mgmtp.radio.service.station.StationOnlineService;
+import com.mgmtp.radio.service.station.StationService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.integration.channel.PublishSubscribeChannel;
+import org.springframework.integration.core.MessageSource;
+import org.springframework.integration.dsl.IntegrationFlow;
+import org.springframework.integration.dsl.IntegrationFlows;
+import org.springframework.integration.dsl.Pollers;
+import org.springframework.integration.dsl.channel.MessageChannels;
+import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+
+import java.util.Map;
 
 @Configuration
 public class MessageChannelConfig {
@@ -38,6 +50,25 @@ public class MessageChannelConfig {
 
     @Bean
     MessageChannel historyChannel(@Qualifier(TASK_EXECUTOR) TaskExecutor taskExecutor){
-        return new PublishSubscribeChannel(taskExecutor);
+        return MessageChannels.publishSubscribe(taskExecutor).get();
+    }
+
+    @Bean
+    SubscribableChannel allStationChannel(){
+        return MessageChannels.publishSubscribe().get();
+    }
+
+    @Bean
+    MessageSource<Map<String, StationDTO>> allStationMessageSource(StationService stationService){
+        return () -> MessageBuilder.withPayload(stationService.getOrderedStations()).build();
+    }
+
+    @Bean
+    IntegrationFlow allStationFlow(StationService stationService){
+        return IntegrationFlows
+                .from(allStationMessageSource(stationService),
+                    resourcePolling -> resourcePolling.poller(Pollers.fixedRate(5 * 1000).maxMessagesPerPoll(1)))
+                .channel(allStationChannel())
+                .get();
     }
 }

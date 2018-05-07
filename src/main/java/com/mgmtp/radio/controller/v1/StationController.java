@@ -17,6 +17,10 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.SubscribableChannel;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
@@ -24,27 +28,32 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Log4j2
 @RestController
 @RequestMapping(StationController.BASE_URL)
 public class StationController extends BaseRadioController {
-
+    private static Flux<Map<String, StationDTO>> allStationStream;
     public static final String BASE_URL = "/api/v1/stations";
 
     private final StationService stationService;
     private final UserMapper userMapper;
     private final Constant constant;
     private final CreateStationValidator createStationValidator;
-
+    private final SubscribableChannel allStationChannel;
 
     public StationController(StationService stationService, UserMapper userMapper, Constant constant,
-                             CreateStationValidator createStationValidator) {
+                             CreateStationValidator createStationValidator, SubscribableChannel allStationChannel) {
         this.stationService = stationService;
         this.userMapper = userMapper;
         this.constant = constant;
         this.createStationValidator = createStationValidator;
+        this.allStationChannel = allStationChannel;
     }
 
     @InitBinder
@@ -60,25 +69,33 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
-    @GetMapping
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public Flux<StationDTO> getAllStations() {
-        return this.stationService.getAll();
+    public Flux<Map<String,StationDTO>> getAllStationsStream(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                      @RequestParam(value = "limit", defaultValue = "40") int limit) {
+        return Flux.create(sink -> {
+            MessageHandler messageHandler = message -> {
+                Map<String, StationDTO> data = (Map<String, StationDTO>) message.getPayload();
+                data = data.entrySet()
+                        .stream()
+                        .skip(page)
+                        .limit(limit)
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+                sink.next(data);
+            };
+            sink.onCancel(() -> allStationChannel.unsubscribe(messageHandler));
+            sink.onDispose(() -> allStationChannel.unsubscribe(messageHandler));
+            allStationChannel.subscribe(messageHandler);
+        })
+        .map(mapper -> (Map<String, StationDTO>) mapper)
+        .distinct();
     }
 
-    @ApiOperation(
-            value = "GET all stations with stream",
-            notes = "Returns all stations with stream"
-    )
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
-            @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
-    })
-    @GetMapping("/stream")
-    @ResponseStatus(HttpStatus.OK)
-    public Map<String, StationDTO> getAllStationsStream() {
-        return this.stationService.getOrderedStations();
-    }
+	@GetMapping
+	@ResponseStatus(HttpStatus.OK)
+	public Map<String, StationDTO> getAllStation () {
+		return this.stationService.getOrderedStations();
+	}
 
     @ApiOperation(
             value = "GET station by id",

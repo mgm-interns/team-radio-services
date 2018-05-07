@@ -7,6 +7,7 @@ import com.mgmtp.radio.sdo.DaySubtracted;
 import com.mgmtp.radio.sdo.SkipRuleType;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NonNull;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.Map;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@EqualsAndHashCode
 public class StationDTO {
 
 	String id;
