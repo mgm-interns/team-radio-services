@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
+import java.util.Map;
 
 @Log4j2
 @RestController
@@ -53,8 +53,8 @@ public class StationController extends BaseRadioController {
     }
 
     @ApiOperation(
-            value = "GET all station",
-            notes = "Returns all station"
+            value = "GET all stations",
+            notes = "Returns all stations"
     )
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
@@ -62,8 +62,22 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Flux<StationDTO> getAllStation() {
+    public Flux<StationDTO> getAllStations() {
         return this.stationService.getAll();
+    }
+
+    @ApiOperation(
+            value = "GET all stations with stream",
+            notes = "Returns all stations with stream"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
+    })
+    @GetMapping("/stream")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, StationDTO> getAllStationsStream() {
+        return this.stationService.getOrderedStations();
     }
 
     @ApiOperation(
@@ -77,6 +91,11 @@ public class StationController extends BaseRadioController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
+        if (getCurrentUser().isPresent()) {
+            return this.stationService
+                    .joinStation(stationId, userMapper.userToUserDTO(getCurrentUser().get()))
+                    .switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
+        }
         return this.stationService.findById(stationId).switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
     }
 

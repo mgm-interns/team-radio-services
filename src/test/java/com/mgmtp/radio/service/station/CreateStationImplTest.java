@@ -24,10 +24,12 @@ public class CreateStationImplTest {
 
     StationService stationService;
 
+    StationOnlineService stationOnlineService;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        stationService = new StationServiceImpl(stationMapper, stationRepository);
+        stationService = new StationServiceImpl(stationMapper, stationRepository, stationOnlineService);
     }
 
     @Test

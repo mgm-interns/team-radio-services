@@ -5,10 +5,16 @@ import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
+import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.StationNotFoundException;
+import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.respository.station.StationRepository;
+import org.aspectj.lang.annotation.Aspect;
+import com.mgmtp.radio.sdo.SkipRuleType;
+import com.mgmtp.radio.sdo.StationPrivacy;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -19,22 +25,41 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.*;
 
 @Service
-@Aspect
 public class StationServiceImpl implements StationService {
 
 	private final StationRepository stationRepository;
 	private final StationMapper stationMapper;
+	private final StationOnlineService stationOnlineService;
 
-    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository) {
+
+    @Override
+	public int getOnlineUsersNumber(StationDTO stationDTO) {
+		return stationDTO.getNumberOnline();
+	}
+
+    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, StationOnlineService stationOnlineService) {
         this.stationMapper = stationMapper;
         this.stationRepository = stationRepository;
+        this.stationOnlineService = stationOnlineService;
     }
 
     @Override
     public Mono<Station> findStationByIdAndDeletedFalse(String stationId) {
         return stationRepository.retriveByIdOrFriendlyId(stationId);
+    }
+
+
+    public Map<String, StationDTO> getOrderedStations() {
+        Map<String, StationDTO> result = stationOnlineService.getAllStation();
+        if (result.isEmpty()) {
+            getAll().filter(stationDTO -> stationDTO.getPrivacy() == StationPrivacy.station_public)
+                    .subscribe(stationDTO ->
+                            stationOnlineService.addStationToList(stationDTO));
+        }
+        return stationOnlineService.getAllStation();
     }
 
 	public Flux<StationDTO> getAll() {
@@ -57,7 +82,10 @@ public class StationServiceImpl implements StationService {
 
         station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationDTO.getStationConfiguration()));
 	    station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationDTO.getStationConfiguration().getSkipRule()));
-        return stationRepository.save(station).map(stationMapper::stationToStationDTO);
+        return stationRepository
+                .save(station)
+                .map(stationMapper::stationToStationDTO)
+                .doOnSuccess(stationSaveSuccess -> stationOnlineService.addStationToList(stationSaveSuccess));
     }
 
     private String createFriendlyIdFromStationName(String stationName) {
@@ -116,5 +144,25 @@ public class StationServiceImpl implements StationService {
                 .doOnNext(station -> count[0]++)
                 .filter(station -> count[0] == 1)
                 .switchIfEmpty(Mono.error(new StationNotFoundException(friendlyId)));
+    }
+    @Override
+    public Mono<StationDTO> joinStation(String stationId, UserDTO userDto) {
+        final Mono<StationDTO> monoStationDto = findById(stationId);
+        return monoStationDto
+                .doOnNext(stationDTO -> addUserToStationOnlineList(stationDTO, userDto));
+    }
+
+    public void addUserToStationOnlineList(StationDTO stationDTO, UserDTO userDto) {
+        stationOnlineService.addOnlineUser(userDto, stationDTO.getId());
+    }
+
+
+    public void leaveStation(String stationId, UserDTO userDTO) {
+        stationOnlineService.removeOnlineUser(userDTO, stationId);
+    }
+
+    public StationDTO removeUserFromStationOnlineList(String stationId, UserDTO userDTO) {
+        stationOnlineService.removeOnlineUser(userDTO, stationId);
+        return stationOnlineService.getStationById(stationId);
     }
 }
