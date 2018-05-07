@@ -69,9 +69,9 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
-    @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public Flux<Map<String,StationDTO>> getAllStation(@RequestParam(value = "page", defaultValue = "0") int page,
+    public Flux<Map<String,StationDTO>> getAllStationsStream(@RequestParam(value = "page", defaultValue = "0") int page,
                                                       @RequestParam(value = "limit", defaultValue = "40") int limit) {
         return Flux.create(sink -> {
             MessageHandler messageHandler = message -> {
@@ -91,9 +91,9 @@ public class StationController extends BaseRadioController {
         .distinct();
     }
 
-	@GetMapping("/stream")
+	@GetMapping
 	@ResponseStatus(HttpStatus.OK)
-	public Map<String, StationDTO> getAllStationsStream() {
+	public Map<String, StationDTO> getAllStation () {
 		return this.stationService.getOrderedStations();
 	}
 
