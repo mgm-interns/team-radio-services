@@ -1,15 +1,12 @@
 package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.RadioApplicationTests;
-import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.dto.station.HistoryDTO;
-import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.mapper.station.SongMapper;
 import com.mgmtp.radio.mapper.user.UserMapper;
-import com.mgmtp.radio.respository.user.UserRepository;
-import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
+import com.mgmtp.radio.service.station.StationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,20 +15,15 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 
 import java.net.URI;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -45,9 +37,16 @@ public class SongControllerTest {
     @Mock
     SongService songService;
 
+    @Mock
+    StationService stationService;
+
     @Autowired
     @Qualifier("songMapperImpl")
     SongMapper songMapper;
+
+    @Autowired
+    @Qualifier("userMapperImpl")
+    UserMapper userMapper;
 
     @Mock
     HistoryService historyService;
@@ -55,7 +54,7 @@ public class SongControllerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        songController = new SongController(songService,historyService);
+        songController = new SongController(songService,historyService, stationService, userMapper);
         webTestClient = WebTestClient.bindToController(songController).build();
     }
 
