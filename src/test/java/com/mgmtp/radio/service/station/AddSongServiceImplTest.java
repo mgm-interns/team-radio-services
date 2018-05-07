@@ -78,6 +78,8 @@ public class AddSongServiceImplTest {
     @Mock
     StationService stationService;
 
+    MessageChannel shiftSongChannel;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -99,7 +101,8 @@ public class AddSongServiceImplTest {
                 stationPlayerHelper,
                 historyChannel,
                 stationSongSkipHelper,
-                stationService);
+                stationService,
+                shiftSongChannel);
 
         // Init new user
         user = new User();

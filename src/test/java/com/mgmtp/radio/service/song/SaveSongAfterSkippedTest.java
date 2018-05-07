@@ -83,6 +83,8 @@ public class SaveSongAfterSkippedTest {
 
 	StationService stationService;
 
+	MessageChannel shiftSongChannel;
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
@@ -104,7 +106,8 @@ public class SaveSongAfterSkippedTest {
 			stationPlayerHelper,
             historyChannel,
             stationSongSkipHelper,
-            stationService);
+            stationService,
+			shiftSongChannel);
 
 		// Init new user
 		user = new User();
