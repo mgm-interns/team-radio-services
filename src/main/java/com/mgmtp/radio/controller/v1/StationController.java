@@ -21,10 +21,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
+import java.util.Map;
 
 @Log4j2
 @RestController
@@ -62,8 +61,8 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Flux<StationDTO> getAllStation() {
-        return this.stationService.getAll();
+    public Map<String, StationDTO> getAllStations() {
+        return this.stationService.getOrderedStations();
     }
 
     @ApiOperation(
@@ -77,6 +76,11 @@ public class StationController extends BaseRadioController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
+        if (getCurrentUser().isPresent()) {
+            return this.stationService
+                    .joinStation(stationId, userMapper.userToUserDTO(getCurrentUser().get()))
+                    .switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
+        }
         return this.stationService.findById(stationId).switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
     }
 

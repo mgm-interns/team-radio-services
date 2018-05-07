@@ -32,10 +32,13 @@ public class StationUpdateConfigurationTest {
 	@Mock
 	StationMapper stationMapper = StationMapper.INSTANCE;
 
+	@Mock
+    StationOnlineService stationOnlineService;
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(stationRepository);
-		stationService = new StationServiceImpl(stationMapper, stationRepository);
+		stationService = new StationServiceImpl(stationMapper, stationRepository, stationOnlineService);
 	}
 
 	/**
