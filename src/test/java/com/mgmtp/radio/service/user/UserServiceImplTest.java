@@ -26,6 +26,7 @@ public class UserServiceImplTest {
 
     UserService userService;
 
+    @Mock
     ReputationService reputationService;
 
     PasswordEncoder passwordEncoder;
@@ -93,6 +94,7 @@ public class UserServiceImplTest {
         savedUser.setId("123456789");
 
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(reputationService.updateUserReputation(any(User.class))).thenReturn(savedUser);
 
         //when
         UserDTO savedUserDTO = userService.register(userDTO);
@@ -128,6 +130,7 @@ public class UserServiceImplTest {
         savedUser.setEmail(userDTO.getEmail());
 
         when(userRepository.findById(anyString())).thenReturn(Optional.of(savedUser));
+        when(reputationService.updateUserReputation(any(User.class))).thenReturn(savedUser);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         //when
@@ -156,6 +159,7 @@ public class UserServiceImplTest {
         savedUser.setAvatarUrl(URL);
 
         when(userRepository.findById(anyString())).thenReturn(Optional.ofNullable(savedUser));
+        when(reputationService.updateUserReputation(any(User.class))).thenReturn(savedUser);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         //when
@@ -177,6 +181,7 @@ public class UserServiceImplTest {
         savedUser.setAvatarUrl(URL);
 
         when(userRepository.findById(anyString())).thenReturn(Optional.of(savedUser));
+        when(reputationService.updateUserReputation(any(User.class))).thenReturn(savedUser);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         //when
