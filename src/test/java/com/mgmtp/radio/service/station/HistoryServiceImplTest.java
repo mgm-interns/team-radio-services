@@ -14,8 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.mockito.Mockito.when;
 
@@ -54,7 +53,7 @@ public class HistoryServiceImplTest {
         history_1.setThumbnail("Thumbnail001");
         history_1.setDuration(1001);
         history_1.setCreatorId("userID001");
-        history_1.setCreatedAt(LocalDate.of(2018,1,1));
+        history_1.setCreatedAt(LocalDateTime.of(2018,1,1, 1, 1, 1));
 
         History history_2 = new History();
         history_2.setId("Id002");
@@ -65,7 +64,7 @@ public class HistoryServiceImplTest {
         history_2.setThumbnail("Thumbnail001");
         history_2.setDuration(1001);
         history_2.setCreatorId("userID002");
-        history_2.setCreatedAt(LocalDate.of(2018,1,1));
+        history_2.setCreatedAt(LocalDateTime.of(2018,1,1,1,1,1));
 
         HistoryDTO historyDTO_1 = new HistoryDTO();
         historyDTO_1.setId("Id002");
