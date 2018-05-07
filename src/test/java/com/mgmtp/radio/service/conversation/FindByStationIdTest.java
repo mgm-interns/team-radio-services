@@ -59,7 +59,7 @@ public class FindByStationIdTest {
         // given
         User user = new User();
         user.setId("001");
-        user.setUsername("John Doe");
+        user.setName("John Doe");
         user.setAvatarUrl("http://image.com/avatar");
         Sender sender = userHelper.convertUserToSender(user);
         SenderDTO senderDTO = senderMapper.senderToSenderDTO(sender);
