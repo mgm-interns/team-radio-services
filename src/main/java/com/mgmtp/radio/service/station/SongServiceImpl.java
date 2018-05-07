@@ -192,12 +192,13 @@ public class SongServiceImpl implements SongService {
             long lastPlayingTime = nowPlaying.get().getStartingTime();
             long[] differentTime = new long[]{joinTime - lastPlayingTime};
             List<SongDTO> shiftSongList = new ArrayList<>();
-            SongDTO willBePlaySong = listSong.get(0);
+            SongDTO willBePlaySong = null;
             for (SongDTO currentSong : listSong) {
                 long durationInSecond = currentSong.getDuration() / 1000;
                 if (durationInSecond < differentTime[0]) {
                     differentTime[0] -= durationInSecond;
                     shiftSongList.add(currentSong);
+                    willBePlaySong = currentSong;
                 } else {
                     willBePlaySong = currentSong;
                     break;
