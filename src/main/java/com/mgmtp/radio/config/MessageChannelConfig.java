@@ -71,4 +71,9 @@ public class MessageChannelConfig {
                 .channel(allStationChannel())
                 .get();
     }
+
+    @Bean
+    MessageChannel shiftSongChannel(@Qualifier(TASK_EXECUTOR) TaskExecutor taskExecutor){
+        return new PublishSubscribeChannel(taskExecutor);
+    }
 }

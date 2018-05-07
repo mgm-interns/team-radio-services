@@ -4,5 +4,6 @@ public enum  SubscriptionEvents {
     register,
     forgot_password,
     reset_password,
-    song_history
+    song_history,
+    shift_song
 }
