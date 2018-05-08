@@ -24,6 +24,7 @@ public class CreateStationImplTest {
 
     StationService stationService;
 
+    @Mock
     StationOnlineService stationOnlineService;
 
     @Before
