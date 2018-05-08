@@ -17,11 +17,11 @@ public class StationPlayerHelper {
     public static final int TIME_BUFFER = 5;
     private ConcurrentHashMap<String, Tuple2<NowPlaying, NowPlaying>> stationPlayer = new ConcurrentHashMap<>();
 
-    public Optional<NowPlaying> addNowPlaying(String stationId, SongDTO song) {
+    public Optional<NowPlaying> addNowPlaying(String stationId, SongDTO song, long joinTime) {
         NowPlaying nowPlaying = new NowPlaying();
         nowPlaying.setSongId(song.getId());
         nowPlaying.setDuration(song.getDuration());
-        nowPlaying.setStartingTime(LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond());
+        nowPlaying.setStartingTime(joinTime == 0 ? LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond() : joinTime);
         nowPlaying.setThumbnail(song.getThumbnail());
         nowPlaying.setUrl(song.getUrl());
         nowPlaying.setMessage(song.getMessage());

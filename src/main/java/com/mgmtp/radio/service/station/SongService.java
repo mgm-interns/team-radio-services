@@ -13,7 +13,7 @@ public interface SongService {
 
     Flux<SongDTO> getAllSongById(List<String> idList);
 
-    Mono<PlayList> getPlayListByStationId(String stationId);
+    Mono<PlayList> getPlayListByStationId(String stationId, long joinTime);
 
     Mono<SongDTO> upVoteSongInStationPlaylist(String stationId, String songId, String userId);
 
@@ -27,8 +27,6 @@ public interface SongService {
 
     Flux<SongDTO> getListSongByListSongId(List<String> listSongId);
 
-	@AfterReturning(value = "execution(* com.mgmtp.radio.service.station.StationServiceImpl.checkAndSkipSongIfNeeded(..)"
-		, returning = "songDTO")
 	Mono<SongDTO> updateSongSkippedStatusToDb(Mono<SongDTO> songDTOMono);
 
     Flux<SongDTO> getListSongByListSongIdId(List<String> listSongId);

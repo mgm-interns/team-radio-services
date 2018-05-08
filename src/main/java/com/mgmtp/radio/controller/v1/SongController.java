@@ -25,6 +25,9 @@ import reactor.util.function.Tuples;
 
 import java.time.Duration;
 import java.util.Optional;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Log4j2
@@ -74,11 +77,13 @@ public class SongController extends BaseRadioController {
     public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId) {
         Flux<ServerSentEvent<PlayList>> stationPlayListStream = stationStream.get(stationId);
         if (stationPlayListStream == null) {
+            long[] currentTimetamp = new long[]{0};
             stationPlayListStream =
-                    Flux.interval(Duration.ofMillis(1100)).map(tick -> Tuples.of(tick, songService.getPlayListByStationId(stationId)))
+                    Flux.interval(Duration.ofMillis(1100)).map(tick -> Tuples.of(tick, songService.getPlayListByStationId(stationId, currentTimetamp[0])))
                             .map(data -> data.getT2().map(playList -> {
                                         int currentHash = playList.hashCode();
                                         Optional<Integer> previousHash = Optional.ofNullable(compareHash.get(stationId));
+                                        currentTimetamp[0] = 0;
                                         if (!previousHash.isPresent() || previousHash.get() != currentHash) {
                                             compareHash.put(stationId, currentHash);
                                             return ServerSentEvent.<PlayList>builder().id(Long.toString(data.getT1())).event("fetch").data(playList).build();
@@ -90,7 +95,10 @@ public class SongController extends BaseRadioController {
                             .flatMap(Flux::from)
                             .publish()
                             .refCount()
-                            .doOnSubscribe(subscription -> compareHash.remove(stationId));
+                            .doOnSubscribe(subscription -> {
+                                compareHash.remove(stationId);
+                                currentTimetamp[0] = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
+                            });
 
             stationStream.put(stationId, stationPlayListStream);
         }

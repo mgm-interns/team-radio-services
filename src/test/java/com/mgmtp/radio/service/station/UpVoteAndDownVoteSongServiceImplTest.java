@@ -14,7 +14,6 @@ import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.support.*;
-import org.assertj.core.api.Assertions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -81,6 +80,8 @@ public class UpVoteAndDownVoteSongServiceImplTest {
     @Mock
     StationService stationService;
 
+    MessageChannel shiftSongChannel;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -104,7 +105,8 @@ public class UpVoteAndDownVoteSongServiceImplTest {
                 stationPlayerHelper,
                 historyChannel,
                 stationSongSkipHelper,
-                stationService);
+                stationService,
+                shiftSongChannel);
 
         //given
         user = new User();

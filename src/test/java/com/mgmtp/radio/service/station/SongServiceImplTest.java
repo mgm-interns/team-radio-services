@@ -85,6 +85,8 @@ public class SongServiceImplTest {
     @Mock
     StationService stationService;
 
+    MessageChannel shiftSongChannel;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -101,7 +103,8 @@ public class SongServiceImplTest {
                 stationPlayerHelper,
                 historyChannel,
                 stationSongSkipHelper,
-                stationService);
+                stationService,
+                shiftSongChannel);
     }
 
     @Test
@@ -248,7 +251,7 @@ public class SongServiceImplTest {
         when(userRepository.findById(playListCreatorId.get(3))).thenReturn(Optional.of(user2));
 
         //then
-        Mono<PlayList> result = songService.getPlayListByStationId(STATION_ID);
+        Mono<PlayList> result = songService.getPlayListByStationId(STATION_ID, 0);
 
         PlayList playList = result.log().block();
 
@@ -351,12 +354,12 @@ public class SongServiceImplTest {
         when(userRepository.findById(playListCreatorId.get(2))).thenReturn(Optional.of(user1));
         when(userRepository.findById(playListCreatorId.get(3))).thenReturn(Optional.of(user2));
 
-        stationPlayerHelper.addNowPlaying(STATION_ID, songMapper.songToSongDTO(song1));
+        stationPlayerHelper.addNowPlaying(STATION_ID, songMapper.songToSongDTO(song1), 0);
 
         Thread.sleep((StationPlayerHelper.TIME_BUFFER + 1) *1000L);
 
         //then test
-        Mono<PlayList> result = songService.getPlayListByStationId(STATION_ID);
+        Mono<PlayList> result = songService.getPlayListByStationId(STATION_ID, 0);
 
         PlayList playList = result.log().block();
         Optional<NowPlaying> playing = stationPlayerHelper.getStationNowPlaying(STATION_ID);
@@ -453,10 +456,10 @@ public class SongServiceImplTest {
         when(userRepository.findById(playListCreatorId.get(2))).thenReturn(Optional.of(user1));
         when(userRepository.findById(playListCreatorId.get(3))).thenReturn(Optional.of(user2));
 
-        stationPlayerHelper.addNowPlaying(STATION_ID, songMapper.songToSongDTO(song3));
+        stationPlayerHelper.addNowPlaying(STATION_ID, songMapper.songToSongDTO(song3), 0);
 
         //then test
-        Mono<PlayList> result = songService.getPlayListByStationId(STATION_ID);
+        Mono<PlayList> result = songService.getPlayListByStationId(STATION_ID, 0);
 
         PlayList playList = result.log().block();
         Optional<NowPlaying> playing = stationPlayerHelper.getStationNowPlaying(STATION_ID);
@@ -502,10 +505,10 @@ public class SongServiceImplTest {
         //when song repository call
         when(songRepository.findByIdIn(playListCreatorId)).thenReturn(resultSearchSong);
 
-        stationPlayerHelper.addNowPlaying(STATION_ID, songMapper.songToSongDTO(song4));
+        stationPlayerHelper.addNowPlaying(STATION_ID, songMapper.songToSongDTO(song4), 0);
 
         //then test
-        Mono<PlayList> result = songService.getPlayListByStationId(STATION_ID);
+        Mono<PlayList> result = songService.getPlayListByStationId(STATION_ID, 0);
 
         PlayList playList = result.log().block();
 
