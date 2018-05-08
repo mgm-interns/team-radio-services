@@ -137,8 +137,8 @@ public class StationController extends BaseRadioController {
     @PostMapping
     public Mono<StationDTO> createStation(@Validated @RequestBody StationDTO stationDTO, BindingResult bindingResult) throws RadioException {
         String userId = getCurrentUser().isPresent() ? getCurrentUser().get().getId() : null;
-        if(bindingResult.hasErrors()) {
-            return Mono.error(new RadioDuplicateNameException(stationDTO.getName()));
+        if (bindingResult.hasErrors()) {
+            return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
         return stationService.create(userId, stationDTO);
     }
@@ -154,7 +154,10 @@ public class StationController extends BaseRadioController {
     })
     @PutMapping("/{id}")
     public Mono<StationDTO> updateStation(@PathVariable(value = "id") final String id,
-                                          @Validated @RequestBody final StationDTO stationDTO) {
+                                          @Validated @RequestBody final StationDTO stationDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
+        }
         return stationService.update(id, stationDTO);
     }
 

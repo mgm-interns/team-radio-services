@@ -2,20 +2,14 @@ package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.station.StationConfiguration;
-import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
-import com.mgmtp.radio.exception.StationNotFoundException;
-import com.mgmtp.radio.dto.user.UserDTO;
-import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.exception.RadioNotFoundException;
+import com.mgmtp.radio.exception.StationNotFoundException;
+import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.respository.station.StationRepository;
-import org.aspectj.lang.annotation.Aspect;
-import com.mgmtp.radio.sdo.SkipRuleType;
 import com.mgmtp.radio.sdo.StationPrivacy;
-import org.aspectj.lang.annotation.AfterReturning;
-import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,8 +18,8 @@ import java.text.Normalizer;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.*;
 
 @Service
 public class StationServiceImpl implements StationService {
@@ -74,6 +68,7 @@ public class StationServiceImpl implements StationService {
 
     @Override
     public Mono<StationDTO> create(String userId, StationDTO stationDTO) {
+        stationDTO.setName(stationDTO.getName().trim());
         stationDTO.setOwnerId(userId);
         stationDTO.setCreatedAt(LocalDate.now());
         String friendlyId = createFriendlyIdFromStationName(stationDTO.getName());
@@ -105,7 +100,7 @@ public class StationServiceImpl implements StationService {
         return stationRepository.retriveByIdOrFriendlyId(stationId)
                 .switchIfEmpty(Mono.error(new RadioNotFoundException("Station id is not found.")))
                 .flatMap(station -> {
-                    station.setName(stationDTO.getName());
+                    station.setName(stationDTO.getName().trim());
                     return stationRepository.save(station);
                 })
                 .map(stationMapper::stationToStationDTO);
