@@ -9,8 +9,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.integration.annotation.MessageEndpoint;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,7 +67,7 @@ public class HistoryChannelEndpoint extends BaseEventMessageEndpoint {
                 }).map(station -> {
                     songRepository.findById(songId).flatMap(song -> {
                         History history = new History();
-                        history.setCreatedAt(LocalDate.now());
+                        history.setCreatedAt(LocalDateTime.now());
                         history.setSongId(song.getSongId());
                         history.setStationId(stationId);
                         history.setUrl(song.getUrl());
@@ -76,7 +75,6 @@ public class HistoryChannelEndpoint extends BaseEventMessageEndpoint {
                         history.setThumbnail(song.getThumbnail());
                         history.setDuration(song.getDuration());
                         history.setCreatorId(song.getCreatorId());
-
                         return historyRepository.save(history);
                     }).subscribe();
                     return station;
