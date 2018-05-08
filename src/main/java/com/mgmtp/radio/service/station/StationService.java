@@ -22,7 +22,7 @@ public interface StationService {
     Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO);
     boolean existsByName(String stationName);
     Flux<StationDTO> getListStationByListStationId(List<String> listStationId);
-    Mono<StationDTO> joinStation(String stationId, UserDTO userDto);
+    void joinStation(String stationId, UserDTO userDto);
     StationDTO removeUserFromStationOnlineList(String stationId, UserDTO userDTO);
     void leaveStation (String stationId, UserDTO userDTO);
     Mono<Station> retriveByIdOrFriendlyId(String friendlyId);

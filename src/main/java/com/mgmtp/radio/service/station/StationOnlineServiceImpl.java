@@ -1,13 +1,15 @@
 package com.mgmtp.radio.service.station;
 
+import com.mgmtp.radio.domain.station.NowPlaying;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
+import com.mgmtp.radio.support.StationPlayerHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service("stationOnlineService")
@@ -19,8 +21,14 @@ public class StationOnlineServiceImpl implements StationOnlineService {
     private static final int SMALLER = 1;
     private static final int EQUAL = 0;
 
+    private final StationPlayerHelper stationPlayerHelper;
+
+    public StationOnlineServiceImpl(StationPlayerHelper stationPlayerHelper) {
+        this.stationPlayerHelper = stationPlayerHelper;
+    }
+
     public void addStationToList(StationDTO stationDTO) {
-        allStations.put(stationDTO.getId(), stationDTO);
+        allStations.put(stationDTO.getFriendlyId(), stationDTO);
     }
 
     public void removeStationFromList(String stationId) {
@@ -62,11 +70,16 @@ public class StationOnlineServiceImpl implements StationOnlineService {
     };
 
     public Map<String, StationDTO> getAllStation() {
-        return sortByStation(allStations);
+        Map<String, StationDTO> result = sortByStation(allStations);
+        result.forEach(((stationId, stationDTO) -> {
+            Optional<NowPlaying> nowPlaying = stationPlayerHelper.getStationNowPlaying(stationId);
+            nowPlaying.ifPresent(currentPlaying -> stationDTO.setPicture(currentPlaying.getThumbnail()));
+        }));
+        return result;
     }
 
-    private Map<String, StationDTO> sortByStation(Map<String, StationDTO> unsortMap) {
-        return unsortMap.entrySet().stream().sorted(comparatorStation)
+    private Map<String, StationDTO> sortByStation(Map<String, StationDTO> unSortMap) {
+        return unSortMap.entrySet().stream().sorted(comparatorStation)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
     }
 }

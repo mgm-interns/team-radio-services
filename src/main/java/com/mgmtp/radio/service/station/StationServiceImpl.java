@@ -69,7 +69,7 @@ public class StationServiceImpl implements StationService {
 
     @Override
     public Mono<StationDTO> findById(String id) {
-        return stationRepository.retriveByIdOrFriendlyId(id).map(stationMapper::stationToStationDTO);
+        return retriveByIdOrFriendlyId(id).map(stationMapper::stationToStationDTO);
     }
 
     @Override
@@ -146,14 +146,12 @@ public class StationServiceImpl implements StationService {
                 .switchIfEmpty(Mono.error(new StationNotFoundException(friendlyId)));
     }
     @Override
-    public Mono<StationDTO> joinStation(String stationId, UserDTO userDto) {
-        final Mono<StationDTO> monoStationDto = findById(stationId);
-        return monoStationDto
-                .doOnNext(stationDTO -> addUserToStationOnlineList(stationDTO, userDto));
+    public void joinStation(String stationId, UserDTO userDto) {
+        addUserToStationOnlineList(stationId, userDto);
     }
 
-    public void addUserToStationOnlineList(StationDTO stationDTO, UserDTO userDto) {
-        stationOnlineService.addOnlineUser(userDto, stationDTO.getId());
+    public void addUserToStationOnlineList(String stationId, UserDTO userDto) {
+        stationOnlineService.addOnlineUser(userDto, stationId);
     }
 
 
