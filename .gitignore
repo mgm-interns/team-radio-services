@@ -24,3 +24,9 @@ nbdist/
 .nb-gradle/
 
 local.properties
+application-dev.properties
+application-stg.properties
+application-prod.properties
+
+
+
