@@ -21,7 +21,7 @@ public interface StationService {
     Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO);
     boolean existsByName(String stationName);
     Flux<StationDTO> getListStationByListStationId(List<String> listStationId);
-    void joinStation(String stationId, UserDTO userDto);
+    Mono<StationDTO> joinStation(String stationId, UserDTO userDto);
     StationDTO removeUserFromStationOnlineList(String stationId, UserDTO userDTO);
     void leaveStation (String stationId, UserDTO userDTO);
     Mono<Station> retrieveByIdOrFriendlyId(String friendlyId);

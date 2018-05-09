@@ -140,8 +140,9 @@ public class StationServiceImpl implements StationService {
                 .switchIfEmpty(Mono.error(new StationNotFoundException(friendlyId)));
     }
     @Override
-    public void joinStation(String stationId, UserDTO userDto) {
+    public Mono<StationDTO> joinStation(String stationId, UserDTO userDto) {
         addUserToStationOnlineList(stationId, userDto);
+        return Mono.just(stationOnlineService.getStationById(stationId));
     }
 
     public void addUserToStationOnlineList(String stationId, UserDTO userDto) {
