@@ -131,7 +131,7 @@ public class SaveSongAfterSkippedTest {
 		station.setOwnerId(user.getId());
 
 		when(stationRepository.save(any(Station.class))).thenReturn(Mono.just(station));
-		when(stationRepository.retriveByIdOrFriendlyId(any(String.class))).thenReturn(Mono.just(station));
+		when(stationRepository.retrieveByIdOrFriendlyId(any(String.class))).thenReturn(Mono.just(station));
 
 		//Fake the song from DB
 		Song song = new Song();

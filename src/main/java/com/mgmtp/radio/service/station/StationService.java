@@ -24,6 +24,6 @@ public interface StationService {
     Mono<StationDTO> joinStation(String stationId, UserDTO userDto);
     StationDTO removeUserFromStationOnlineList(String stationId, UserDTO userDTO);
     void leaveStation (String stationId, UserDTO userDTO);
-    Mono<Station> retriveByIdOrFriendlyId(String friendlyId);
+    Mono<Station> retrieveByIdOrFriendlyId(String friendlyId);
 
 }

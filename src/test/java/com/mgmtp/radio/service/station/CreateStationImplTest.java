@@ -49,7 +49,7 @@ public class CreateStationImplTest {
         savedStation.setOwnerId(userId);
 
         Mockito.when(stationRepository.save(any(Station.class))).thenReturn(Mono.just(savedStation));
-        Mockito.when(stationRepository.retriveByIdOrFriendlyId(any(String.class))).thenReturn(Mono.empty());
+        Mockito.when(stationRepository.retrieveByIdOrFriendlyId(any(String.class))).thenReturn(Mono.empty());
 
         // when
         Mono<StationDTO> result = stationService.create(userId, stationDTO);

@@ -42,7 +42,7 @@ public class StationServiceImpl implements StationService {
 
     @Override
     public Mono<Station> findStationByIdAndDeletedFalse(String stationId) {
-        return stationRepository.retriveByIdOrFriendlyId(stationId);
+        return stationRepository.retrieveByIdOrFriendlyId(stationId);
     }
 
 
@@ -63,7 +63,7 @@ public class StationServiceImpl implements StationService {
 
     @Override
     public Mono<StationDTO> findById(String id) {
-        return stationRepository.retriveByIdOrFriendlyId(id).map(stationMapper::stationToStationDTO);
+        return retrieveByIdOrFriendlyId(id).map(stationMapper::stationToStationDTO);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class StationServiceImpl implements StationService {
 	    String friendlyId = Normalizer.normalize(stationName, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
 	    friendlyId = friendlyId.replaceAll("đ", "d").replaceAll("Đ", "D");
         friendlyId = friendlyId.replaceAll("\\s+", "-");
-        Optional<Station> station = stationRepository.retriveByIdOrFriendlyId(friendlyId).blockOptional();
+        Optional<Station> station = stationRepository.retrieveByIdOrFriendlyId(friendlyId).blockOptional();
         if(station.isPresent()) {
             Long now = LocalDate.now().toEpochDay();
             friendlyId += "-" + now.toString();
@@ -97,7 +97,7 @@ public class StationServiceImpl implements StationService {
 
     @Override
     public Mono<StationDTO> update(String stationId, StationDTO stationDTO){
-        return stationRepository.retriveByIdOrFriendlyId(stationId)
+        return stationRepository.retrieveByIdOrFriendlyId(stationId)
                 .switchIfEmpty(Mono.error(new RadioNotFoundException("Station id is not found.")))
                 .flatMap(station -> {
                     station.setName(stationDTO.getName().trim());
@@ -108,7 +108,7 @@ public class StationServiceImpl implements StationService {
 
     @Override
 	public Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO) {
-		return stationRepository.retriveByIdOrFriendlyId(id)
+		return stationRepository.retrieveByIdOrFriendlyId(id)
 			.map(station -> {
 				final StationConfiguration stationConfiguration =
 					stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO);
@@ -132,9 +132,9 @@ public class StationServiceImpl implements StationService {
     }
 
     @Override
-    public Mono<Station> retriveByIdOrFriendlyId(String friendlyId) {
+    public Mono<Station> retrieveByIdOrFriendlyId(String friendlyId) {
         int[] count  = {0};
-        return stationRepository.retriveByIdOrFriendlyId(friendlyId)
+        return stationRepository.retrieveByIdOrFriendlyId(friendlyId)
                 .delayElement(Duration.ofMillis(100))
                 .doOnNext(station -> count[0]++)
                 .filter(station -> count[0] == 1)
@@ -142,13 +142,12 @@ public class StationServiceImpl implements StationService {
     }
     @Override
     public Mono<StationDTO> joinStation(String stationId, UserDTO userDto) {
-        final Mono<StationDTO> monoStationDto = findById(stationId);
-        return monoStationDto
-                .doOnNext(stationDTO -> addUserToStationOnlineList(stationDTO, userDto));
+        addUserToStationOnlineList(stationId, userDto);
+        return Mono.just(stationOnlineService.getStationById(stationId));
     }
 
-    public void addUserToStationOnlineList(StationDTO stationDTO, UserDTO userDto) {
-        stationOnlineService.addOnlineUser(userDto, stationDTO.getId());
+    public void addUserToStationOnlineList(String stationId, UserDTO userDto) {
+        stationOnlineService.addOnlineUser(userDto, stationId);
     }
 
 
