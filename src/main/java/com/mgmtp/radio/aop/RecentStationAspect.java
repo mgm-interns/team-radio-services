@@ -24,7 +24,6 @@ public class RecentStationAspect {
 
     @AfterReturning(value = "execution(* com.mgmtp.radio.service.station.SongServiceImpl.addSongToStationPlaylist(..))")
     public void createRecentStationAfterAddSong() {
-        System.out.println("addSong");
         String url = request.getRequestURI();
         String[] urlSplit = url.split("/");
         String stationId = urlSplit[urlSplit.length - 2];
