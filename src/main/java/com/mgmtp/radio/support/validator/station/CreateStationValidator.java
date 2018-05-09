@@ -30,6 +30,7 @@ public class CreateStationValidator implements Validator {
 	public void validate(Object target, Errors errors) {
 		StationDTO stationDTO = (StationDTO) target;
 
+		this.validateStationName(stationDTO, errors);
 		this.validateUnique(stationDTO, errors);
 	}
 
@@ -39,7 +40,14 @@ public class CreateStationValidator implements Validator {
 		}
 	}
 
+	private void validateStationName(StationDTO stationDTO, Errors errors) {
+		if (stationDTO.getName().trim().isEmpty()) {
+			errors.rejectValue("name", "", messageSourceAccessor.getMessage("validation.error.empty", new String[]{"name"}));
+		}
+	}
+
 	private boolean isStationExisted(String name) {
 		return stationService.existsByName(name);
 	}
+
 }
