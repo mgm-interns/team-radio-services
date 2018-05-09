@@ -1,5 +1,6 @@
 package com.mgmtp.radio.service.user;
 
+import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.domain.user.Role;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.StationDTO;
@@ -35,19 +36,21 @@ public class UserServiceImpl implements UserService {
     private final StationRepository stationRepository;
     private final StationMapper stationMapper;
     private final ReputationService reputationService;
+    private final Constant constant;
 
     public UserServiceImpl(UserMapper userMapper,
                            UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            StationRepository stationRepository,
                            ReputationService reputationService,
-                           StationMapper stationMapper) {
+                           StationMapper stationMapper, Constant constant) {
         this.userMapper = userMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.stationRepository= stationRepository;
         this.stationMapper = stationMapper;
         this.reputationService = reputationService;
+        this.constant = constant;
     }
 
     @Override
@@ -289,5 +292,22 @@ public class UserServiceImpl implements UserService {
     public Flux<StationDTO> getStationsByUserIdAndPrivacy(String userId, StationPrivacy privacy) {
         return stationRepository.findByOwnerIdAndPrivacy(userId, privacy)
                 .map(station -> stationMapper.stationToStationDTO(station));
+    }
+
+    @Override
+    public User getAnonymousUser(String cookieId) {
+        if (cookieId.isEmpty() || cookieId.equals(constant.getDefaultCookie())) {
+            User user = new User();
+            String unique = UUID.randomUUID().toString();
+            user.setUsername(unique);
+            user.setName(unique);
+            user.setCookieId(unique);
+            return userRepository.save(user);
+        }
+        Optional<User> user = userRepository.findByCookieId(cookieId);
+        if (!user.isPresent()) {
+            throw new RadioNotFoundException();
+        }
+        return user.get();
     }
 }

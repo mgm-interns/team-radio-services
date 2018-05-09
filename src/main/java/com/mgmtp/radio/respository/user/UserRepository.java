@@ -17,4 +17,5 @@ public interface UserRepository extends MongoRepository<User, String> {
     List<User> findByUpdatedAtEquals(LocalDate date);
     Optional<User> findByIdAndPassword(String userId, String password);
     Optional<User> findByResetPasswordTokenAndResetPasswordTokenExpiryDateAfter(String resetPasswordToken, LocalDate resetPasswordDate);
+    Optional<User> findByCookieId(String cookieId);
 }

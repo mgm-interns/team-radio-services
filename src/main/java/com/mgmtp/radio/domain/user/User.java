@@ -66,6 +66,8 @@ public class User implements UserDetails, Serializable {
 
     private int reputation;
 
+    private String cookieId;
+
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate resetPasswordTokenExpiryDate;
