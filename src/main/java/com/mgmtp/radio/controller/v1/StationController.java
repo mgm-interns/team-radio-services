@@ -2,12 +2,15 @@ package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
+import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.exception.RadioDuplicateNameException;
+import com.mgmtp.radio.mapper.user.UserMapper;
+import com.mgmtp.radio.service.station.StationOnlineService;
 import com.mgmtp.radio.service.station.StationService;
 import com.mgmtp.radio.support.validator.station.CreateStationValidator;
 import io.swagger.annotations.ApiOperation;
@@ -27,6 +30,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -38,13 +42,19 @@ public class StationController extends BaseRadioController {
     private final StationService stationService;
     private final CreateStationValidator createStationValidator;
     private final SubscribableChannel allStationChannel;
+    private final StationOnlineService stationOnlineService;
+    private final UserMapper userMapper;
 
     public StationController(StationService stationService,
                              CreateStationValidator createStationValidator,
-                             SubscribableChannel allStationChannel) {
+                             SubscribableChannel allStationChannel,
+                             StationOnlineService stationOnlineService,
+                             UserMapper userMapper) {
         this.stationService = stationService;
         this.createStationValidator = createStationValidator;
         this.allStationChannel = allStationChannel;
+        this.stationOnlineService = stationOnlineService;
+        this.userMapper = userMapper;
     }
 
     @InitBinder
@@ -78,8 +88,7 @@ public class StationController extends BaseRadioController {
             sink.onDispose(() -> allStationChannel.unsubscribe(messageHandler));
             allStationChannel.subscribe(messageHandler);
         })
-        .map(mapper -> (Map<String, StationDTO>) mapper)
-        .distinct();
+        .map(mapper -> (Map<String, StationDTO>) mapper);
     }
 
 	@GetMapping
@@ -99,7 +108,18 @@ public class StationController extends BaseRadioController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
-        return this.stationService.findById(stationId).switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
+        Optional<User> user = getCurrentUser();
+        User realUser;
+        if (user.isPresent()){
+            realUser = user.get();
+        } else {
+            realUser = new User();
+            realUser.setId("anonymousId");
+            realUser.setName("anonymous");
+        }
+        return this.stationService.findById(stationId).doOnNext(stationDTO -> {
+            stationOnlineService.addOnlineUser(userMapper.userToUserDTO(realUser), stationDTO.getFriendlyId());
+        }).switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
     }
 
     @ApiOperation(

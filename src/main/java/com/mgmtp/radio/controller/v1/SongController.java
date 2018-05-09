@@ -42,14 +42,10 @@ public class SongController extends BaseRadioController {
 
     private final SongService songService;
     private final HistoryService historyService;
-    private final StationService stationService;
-    private final UserMapper userMapper;
 
-    public SongController(SongService songService, HistoryService historyService, StationService stationService, UserMapper userMapper) {
+    public SongController(SongService songService, HistoryService historyService) {
         this.songService = songService;
         this.historyService = historyService;
-        this.stationService = stationService;
-        this.userMapper = userMapper;
     }
 
     @ApiOperation(
@@ -101,27 +97,13 @@ public class SongController extends BaseRadioController {
                             .publish()
                             .refCount()
                             .doOnSubscribe(subscription -> {
-                                if (user.isPresent()) {
-                                    stationService.joinStation(stationId, userMapper.userToUserDTO(user.get()));
-                                } else {
-                                    User anonymousUser = new User();
-                                    anonymousUser.setId("anonymous");
-                                    anonymousUser.setName("anonymous");
-                                    stationService.joinStation(stationId, userMapper.userToUserDTO(anonymousUser));
-                                }
                                 compareHash.remove(stationId);
                                 currentTimetamp[0] = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
                             });
 
             stationStream.put(stationId, stationPlayListStream);
         }
-        return stationPlayListStream.doFinally(signalType -> leaveStation(stationId, user));
-    }
-
-    private void leaveStation(String stationId, Optional<User> user) {
-        if (user.isPresent()) {
-            stationService.leaveStation(stationId, userMapper.userToUserDTO(user.get()));
-        }
+        return stationPlayListStream;
     }
 
     @ApiOperation(

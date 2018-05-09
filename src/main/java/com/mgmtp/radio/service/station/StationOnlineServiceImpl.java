@@ -6,16 +6,14 @@ import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.support.StationPlayerHelper;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service("stationOnlineService")
 public class StationOnlineServiceImpl implements StationOnlineService {
 
     private static Map<String, StationDTO> allStations = new LinkedHashMap<>();
+    private static Map<String, String> userManager = new HashMap<>();
 
     private static final int LARGER = -1;
     private static final int SMALLER = 1;
@@ -37,6 +35,10 @@ public class StationOnlineServiceImpl implements StationOnlineService {
 
     public void addOnlineUser(UserDTO userDTO, String stationId) {
         StationDTO stationDTO = allStations.get(stationId);
+        if (userManager.get(userDTO.getId()) != null){
+            removeOnlineUser(userDTO, userManager.get(userDTO.getId()));
+        }
+        userManager.put(userDTO.getId(), stationId);
         stationDTO.getOnlineUsers().put(userDTO.getId(), userDTO);
     }
 
