@@ -68,7 +68,7 @@ public class RecentStationAspect {
     }
 
     private String getStationIdFromFriendlyId(String friendlyStationId){
-        return stationService.retriveByIdOrFriendlyId(friendlyStationId).block().getId();
+        return stationService.retrieveByIdOrFriendlyId(friendlyStationId).block().getId();
     }
 
     private String getSegmentOfURI(int segmentNumber){
