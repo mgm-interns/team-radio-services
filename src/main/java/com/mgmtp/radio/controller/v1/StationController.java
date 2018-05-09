@@ -91,8 +91,7 @@ public class StationController extends BaseRadioController {
             sink.onDispose(() -> allStationChannel.unsubscribe(messageHandler));
             allStationChannel.subscribe(messageHandler);
         })
-        .map(mapper -> (Map<String, StationDTO>) mapper)
-        .distinct();
+        .map(mapper -> (Map<String, StationDTO>) mapper);
     }
 
 	@GetMapping
