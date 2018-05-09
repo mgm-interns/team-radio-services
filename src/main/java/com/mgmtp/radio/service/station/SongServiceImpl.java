@@ -20,7 +20,6 @@ import com.mgmtp.radio.sdo.SkipRuleType;
 import com.mgmtp.radio.sdo.SongStatus;
 import com.mgmtp.radio.sdo.SubscriptionEvents;
 import com.mgmtp.radio.support.*;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
@@ -84,7 +83,7 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public Flux<SongDTO> getListSongByStationId(String stationId) {
-        return stationService.retriveByIdOrFriendlyId(stationId).flatMapMany(station -> {
+        return stationService.retrieveByIdOrFriendlyId(stationId).flatMapMany(station -> {
             List<String> listSongId = station.getPlaylist();
             return getListSongByListSongId(listSongId);
         }).switchIfEmpty(Mono.error(new RadioBadRequestException("Invalid station ID!")));
@@ -137,7 +136,7 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public Mono<PlayList> getPlayListByStationId(String stationId, long joinTime) {
-        return stationService.retriveByIdOrFriendlyId(stationId)
+        return stationService.retrieveByIdOrFriendlyId(stationId)
             .map(station -> {
                 List<String> listSongId = station.getPlaylist();
                 return getListSongByListSongId(listSongId);
@@ -382,7 +381,7 @@ public class SongServiceImpl implements SongService {
         }
 
         return songRepository.save(song).flatMap(newSong ->
-                stationService.retriveByIdOrFriendlyId(stationId)
+                stationService.retrieveByIdOrFriendlyId(stationId)
                         .switchIfEmpty(Mono.error(new RadioNotFoundException()))
                         .flatMap(station -> {
                             if (station.getPlaylist() == null) {
@@ -457,7 +456,7 @@ public class SongServiceImpl implements SongService {
     }
 
     private Mono<SongDTO> handleSkipRule (SongDTO songDTO){
-        return stationService.retriveByIdOrFriendlyId(songDTO.getStationId()).map(tempStation ->{
+        return stationService.retrieveByIdOrFriendlyId(songDTO.getStationId()).map(tempStation ->{
             final StationConfiguration stationConfiguration = tempStation.getStationConfiguration();
             boolean isSkipped = false;
 
@@ -507,7 +506,7 @@ public class SongServiceImpl implements SongService {
      */
     private Mono<Station> findStation(String stationId) {
         return stationService
-                .retriveByIdOrFriendlyId(stationId);
+                .retrieveByIdOrFriendlyId(stationId);
     }
 
     /**

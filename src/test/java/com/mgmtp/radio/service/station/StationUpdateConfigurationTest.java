@@ -51,7 +51,7 @@ public class StationUpdateConfigurationTest {
 		final String id= "123456";
 		Station station = new Station();
 
-		when(stationRepository.retriveByIdOrFriendlyId(id)).thenReturn(Mono.just(station));
+		when(stationRepository.retrieveByIdOrFriendlyId(id)).thenReturn(Mono.just(station));
 		when(stationRepository.save(station)).thenReturn(Mono.just(station));
 
 		//Fake input StationConfigurationDto
@@ -69,7 +69,7 @@ public class StationUpdateConfigurationTest {
 		stationConfiguration.setSkipRule(skipRule);
 		station.setStationConfiguration(stationConfiguration);
 
-		Mono<StationConfigurationDTO> monoStationConfig = stationRepository.retriveByIdOrFriendlyId(id).map(originalStation -> {
+		Mono<StationConfigurationDTO> monoStationConfig = stationRepository.retrieveByIdOrFriendlyId(id).map(originalStation -> {
 			StationConfiguration originalStationConfig = new StationConfiguration();
 			when(stationMapper.stationConfigurationDtoToStationConfiguration(inputStationConfigurationDTO)).thenReturn(
 				originalStationConfig
