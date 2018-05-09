@@ -2,6 +2,9 @@ package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
+import com.mgmtp.radio.dto.user.UserDTO;
+import com.mgmtp.radio.sdo.StationPrivacy;
+import reactor.core.publisher.Mono;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import reactor.core.publisher.Flux;
@@ -25,5 +28,5 @@ public interface StationService {
     StationDTO removeUserFromStationOnlineList(String stationId, UserDTO userDTO);
     void leaveStation (String stationId, UserDTO userDTO);
     Mono<Station> retrieveByIdOrFriendlyId(String friendlyId);
-
+    Flux<StationDTO> getListStationByListStationIdAndPrivacy(List<String> listStationId, StationPrivacy privacy);
 }

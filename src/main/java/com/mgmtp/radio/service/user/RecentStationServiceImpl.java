@@ -1,13 +1,17 @@
 package com.mgmtp.radio.service.user;
 
+import com.mgmtp.radio.domain.user.RecentStation;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.RecentStationDTO;
 import com.mgmtp.radio.mapper.user.RecentStationMapper;
 import com.mgmtp.radio.respository.user.RecentStationRepository;
+import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.service.station.StationService;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,10 +51,38 @@ public class RecentStationServiceImpl implements RecentStationService {
     }
 
     @Override
-    public void createRecentStation() {
+    public Flux<StationDTO> getRecentStationsByUserIdAndPrivacy(String userId, StationPrivacy privacy) {
+        Flux<RecentStationDTO> recentStationDTOFlux =
+                recentStationRepository.findByUserIdOrderByJoinedTimeDesc(userId).map(recentStationMapper::recentStationToRecentStationDTO);
+
+        List<String> recentStationIdList = recentStationDTOFlux.map(RecentStationDTO::getStationId).toStream().collect(Collectors.toList());
+        Flux<StationDTO> stationDTOFlux = stationService.getListStationByListStationIdAndPrivacy(recentStationIdList, StationPrivacy.station_public);
+
+        List<StationDTO> stationDTOListSorted = new ArrayList<>();
+        recentStationIdList.forEach(recentStationId -> {
+            Optional<StationDTO> stationDTOOptional = stationDTOFlux.toStream().filter(stationDTO ->
+                    stationDTO.getId().equals(recentStationId)
+            ).findFirst();
+            if(stationDTOOptional.isPresent()) {
+                stationDTOListSorted.add(stationDTOOptional.get());
+            }
+        });
+        return Flux.fromIterable(stationDTOListSorted);
+    };
+
+    @Override
+    public Mono<RecentStationDTO> createRecentStation(String userId, String stationId) {
+        RecentStationDTO recentStationDTO = new RecentStationDTO();
+        recentStationDTO.setUserId(userId);
+        recentStationDTO.setStationId(stationId);
+        recentStationDTO.setJoinedTime(LocalDateTime.now());
+        RecentStation recentStation = recentStationMapper.recentStationDTOToRecentStation(recentStationDTO);
+        return recentStationRepository
+                .save(recentStation).map(recentStationMapper::recentStationToRecentStationDTO);
     }
 
     @Override
-    public void updateRecentStation() {
+    public boolean existsByUserIdAndStationId(String userId, String stationId){
+        return recentStationRepository.findByUserIdAndStationId(userId, stationId).blockOptional().isPresent();
     }
 }
