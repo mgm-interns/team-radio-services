@@ -47,7 +47,8 @@ public class MessageServiceImpl implements MessageService {
         String avatarUrlFormat = "%-"+constant.getAvatarLimit()+"s";
         sender.setUserId(user.getId());
         sender.setUsername(String.format(userNameFormat, user.getName()));
-        sender.setAvatarUrl(String.format(avatarUrlFormat, user.getAvatarUrl()));
+        String avatar = user.getAvatarUrl() != null ? user.getAvatarUrl() : "";
+        sender.setAvatarUrl(String.format(avatarUrlFormat, avatar));
         return sender;
     }
 
