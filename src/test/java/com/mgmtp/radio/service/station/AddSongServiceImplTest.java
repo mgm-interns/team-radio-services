@@ -126,7 +126,7 @@ public class AddSongServiceImplTest {
         station.setOwnerId(user.getId());
 
         when(stationRepository.save(any(Station.class))).thenReturn(Mono.just(station));
-        when(stationRepository.retriveByIdOrFriendlyId(any(String.class))).thenReturn(Mono.just(station));
+        when(stationRepository.retrieveByIdOrFriendlyId(any(String.class))).thenReturn(Mono.just(station));
     }
 
     @Test
@@ -170,7 +170,7 @@ public class AddSongServiceImplTest {
 
         when(songRepository.save(any(Song.class))).thenReturn(Mono.just(savedSong));
         when(youTubeHelper.getYouTubeVideoById("mNh6MCoMPis")).thenReturn(video);
-        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
+        when(stationService.retrieveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         SongDTO savedSongDTO = songService.addSongToStationPlaylist(
                 station.getId(), "mNh6MCoMPis", "Nhac Audition", user.getId()

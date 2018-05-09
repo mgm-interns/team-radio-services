@@ -116,7 +116,7 @@ public class SongServiceImplTest {
         station.setOwnerId(STATION_ID);
         station.setPlaylist(playListCreatorId);
 
-        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
+        when(stationService.retrieveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         //given these song
         Song song1  = new Song();
@@ -179,7 +179,7 @@ public class SongServiceImplTest {
         station.setOwnerId(STATION_ID);
         station.setPlaylist(playListCreatorId);
 
-        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
+        when(stationService.retrieveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         //given these song
         Song song1 = new Song();
@@ -276,7 +276,7 @@ public class SongServiceImplTest {
         station.setOwnerId(STATION_ID);
         station.setPlaylist(playListCreatorId);
 
-        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
+        when(stationService.retrieveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         //given these song
         Song song1 = new Song();
@@ -387,7 +387,7 @@ public class SongServiceImplTest {
         station.setOwnerId(STATION_ID);
         station.setPlaylist(playListCreatorId);
 
-        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
+        when(stationService.retrieveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         //given these song
         Song song3 = new Song();
@@ -487,7 +487,7 @@ public class SongServiceImplTest {
         station.setOwnerId(STATION_ID);
         station.setPlaylist(playListCreatorId);
 
-        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
+        when(stationService.retrieveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         //given these song
         Song song4 = new Song();
