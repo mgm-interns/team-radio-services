@@ -1,5 +1,6 @@
 package com.mgmtp.radio.service.user;
 
+import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.station.StationConfiguration;
 import com.mgmtp.radio.dto.station.StationDTO;
@@ -33,6 +34,9 @@ public class GetAllMyStationOfUserTest {
     @Mock
     StationMapper stationMapper;
 
+    @Mock
+    Constant constant;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -41,7 +45,7 @@ public class GetAllMyStationOfUserTest {
                 null,
                 stationRepository,
                 reputationService,
-                stationMapper);
+                stationMapper, constant);
     }
 
     @Test

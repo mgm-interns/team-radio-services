@@ -18,4 +18,10 @@ public class Constant {
 
     @Value("${user.limit.avatar}")
     private String avatarLimit;
+
+    @Value("${user.type.anonymous.cookie}")
+    private String defaultCookie;
+
+    @Value("${user.type.anonymous.cookie.key}")
+    private String cookieId;
 }

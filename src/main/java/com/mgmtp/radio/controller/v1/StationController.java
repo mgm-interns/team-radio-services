@@ -3,14 +3,16 @@ package com.mgmtp.radio.controller.v1;
 import com.mgmtp.radio.config.Constant;
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
+import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
+import com.mgmtp.radio.exception.RadioDuplicateNameException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
-import com.mgmtp.radio.exception.RadioDuplicateNameException;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.service.station.StationService;
+import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.support.validator.station.CreateStationValidator;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -18,7 +20,6 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.validation.BindingResult;
@@ -28,11 +29,11 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.validation.Valid;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Log4j2
 @RestController
@@ -46,14 +47,16 @@ public class StationController extends BaseRadioController {
     private final Constant constant;
     private final CreateStationValidator createStationValidator;
     private final SubscribableChannel allStationChannel;
+    private final UserService userService;
 
     public StationController(StationService stationService, UserMapper userMapper, Constant constant,
-                             CreateStationValidator createStationValidator, SubscribableChannel allStationChannel) {
+                             CreateStationValidator createStationValidator, SubscribableChannel allStationChannel, UserService userService) {
         this.stationService = stationService;
         this.userMapper = userMapper;
         this.constant = constant;
         this.createStationValidator = createStationValidator;
         this.allStationChannel = allStationChannel;
+        this.userService = userService;
     }
 
     @InitBinder
@@ -107,13 +110,19 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId) throws RadioNotFoundException {
+    public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId, @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId, HttpServletResponse response) throws RadioNotFoundException {
+        User user;
         if (getCurrentUser().isPresent()) {
-            return this.stationService
-                    .joinStation(stationId, userMapper.userToUserDTO(getCurrentUser().get()))
-                    .switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
+            user = getCurrentUser().get();
+        } else {
+            user = userService.getAnonymousUser(cookieId);
+            if (constant.getDefaultCookie().equals(cookieId)) {
+                response.addCookie(new Cookie(constant.getCookieId(), user.getCookieId()));
+            }
         }
-        return this.stationService.findById(stationId).switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
+        return this.stationService
+                .joinStation(stationId, userMapper.userToUserDTO(user))
+                .switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
     }
 
     @ApiOperation(

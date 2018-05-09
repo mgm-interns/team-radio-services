@@ -45,4 +45,6 @@ public class UserDTO {
 
     int reputation;
 
+    String cookieId;
+
 }
