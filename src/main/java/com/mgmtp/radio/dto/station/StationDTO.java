@@ -38,6 +38,8 @@ public class StationDTO {
 
 	Map<String, UserDTO> onlineUsers;
 
+	String picture;
+
 	public StationDTO() {
 		stationConfiguration = new StationConfigurationDTO();
 		stationConfiguration.setSkipRule(new SkipRuleDTO(SkipRuleType.BASIC));

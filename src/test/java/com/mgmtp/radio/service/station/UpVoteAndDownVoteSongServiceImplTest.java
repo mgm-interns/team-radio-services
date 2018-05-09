@@ -128,7 +128,7 @@ public class UpVoteAndDownVoteSongServiceImplTest {
         station.setOwnerId(user.getId());
 
         when(stationRepository.save(any(Station.class))).thenReturn(Mono.just(station));
-        when(stationRepository.retriveByIdOrFriendlyId(any(String.class))).thenReturn(Mono.just(station));
+        when(stationRepository.retrieveByIdOrFriendlyId(any(String.class))).thenReturn(Mono.just(station));
 
         // Init new song
         song = new Song();
@@ -160,7 +160,7 @@ public class UpVoteAndDownVoteSongServiceImplTest {
         savedSong.getUpVoteUserIdList().add(user.getId());
 
         when(songRepository.save(any(Song.class))).thenReturn(Mono.just(savedSong));
-        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
+        when(stationService.retrieveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         SongDTO savedSongDTO = songService.upVoteSongInStationPlaylist(
                 station.getId(),
@@ -182,7 +182,7 @@ public class UpVoteAndDownVoteSongServiceImplTest {
         savedSong.setCreatorId(user.getId());
 
         when(songRepository.findById(song.getId())).thenReturn(Mono.just(savedSong));
-        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
+        when(stationService.retrieveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         // Service will thrown bad request exception
         songService.upVoteSongInStationPlaylist(
@@ -204,7 +204,7 @@ public class UpVoteAndDownVoteSongServiceImplTest {
         savedSong.getDownVoteUserIdList().add(user.getId());
 
         when(songRepository.save(any(Song.class))).thenReturn(Mono.just(savedSong));
-        when(stationService.retriveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
+        when(stationService.retrieveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         SongDTO savedSongDTO = songService.downVoteSongInStationPlaylist(
                 station.getId(),

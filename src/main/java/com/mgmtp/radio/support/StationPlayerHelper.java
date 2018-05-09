@@ -27,6 +27,7 @@ public class StationPlayerHelper {
         nowPlaying.setUrl(song.getUrl());
         nowPlaying.setMessage(song.getMessage());
         nowPlaying.setEnded(false);
+        nowPlaying.setTitle(song.getTitle());
 
         Optional<Tuple2<NowPlaying, NowPlaying>> currentNowPlaying = Optional.ofNullable(stationPlayer.get(stationId));
         if (currentNowPlaying.isPresent()){

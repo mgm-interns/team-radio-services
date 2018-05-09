@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface StationRepository extends ReactiveMongoRepository<Station, String> {
     @Query("{ $or: [ { '_id': ?#{[0]} }, { 'friendlyId': ?#{[0]} } ] }")
-    Mono<Station> retriveByIdOrFriendlyId(String friendlyId);
+    Mono<Station> retrieveByIdOrFriendlyId(String friendlyId);
     Flux<Station> findByOwnerId(String Id);
 	Mono<Station> findFirstByName(String stationId);
 	Flux<Station> findByOwnerIdAndPrivacy(String ownerId, StationPrivacy privacy);
