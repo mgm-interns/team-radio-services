@@ -9,6 +9,7 @@ import java.util.List;
 @NoArgsConstructor
 public class NowPlaying {
     private String songId;
+    private String title;
     private String url;
     private long startingTime;
     private long duration;

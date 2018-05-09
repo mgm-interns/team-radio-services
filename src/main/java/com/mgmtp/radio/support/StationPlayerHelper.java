@@ -20,6 +20,7 @@ public class StationPlayerHelper {
     public Optional<NowPlaying> addNowPlaying(String stationId, SongDTO song, long joinTime) {
         NowPlaying nowPlaying = new NowPlaying();
         nowPlaying.setSongId(song.getId());
+        nowPlaying.setTitle(song.getTitle());
         nowPlaying.setDuration(song.getDuration());
         nowPlaying.setStartingTime(joinTime == 0 ? LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond() : joinTime);
         nowPlaying.setThumbnail(song.getThumbnail());
