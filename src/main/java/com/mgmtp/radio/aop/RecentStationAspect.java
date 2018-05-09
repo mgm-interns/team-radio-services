@@ -15,12 +15,10 @@ import java.util.Optional;
 @Component
 public class RecentStationAspect {
     private final RecentStationService recentStationService;
-    private final StationService stationService;
     private final HttpServletRequest request;
 
-    public RecentStationAspect(RecentStationService recentStationService, StationService stationService, HttpServletRequest request) {
+    public RecentStationAspect(RecentStationService recentStationService, HttpServletRequest request) {
         this.recentStationService = recentStationService;
-        this.stationService = stationService;
         this.request = request;
     }
 
