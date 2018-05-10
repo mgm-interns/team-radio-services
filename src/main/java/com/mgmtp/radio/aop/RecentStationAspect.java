@@ -1,11 +1,12 @@
 package com.mgmtp.radio.aop;
 
-import com.mgmtp.radio.domain.user.User;
+import com.mgmtp.radio.domain.station.Station;
+import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.service.station.StationService;
 import com.mgmtp.radio.service.user.RecentStationService;
+import com.mgmtp.radio.support.UserHelper;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,51 +15,36 @@ import java.util.Optional;
 @Aspect
 @Component
 public class RecentStationAspect {
+    public static final int SEGMENT_NUMBER = 4; // according to uri /api/v1/stations/stationId
     private final RecentStationService recentStationService;
     private final StationService stationService;
     private final HttpServletRequest request;
+    private final UserHelper userHelper;
 
-    public RecentStationAspect(RecentStationService recentStationService, StationService stationService, HttpServletRequest request) {
+    public RecentStationAspect(RecentStationService recentStationService, StationService stationService, HttpServletRequest request, UserHelper userHelper) {
         this.recentStationService = recentStationService;
         this.stationService = stationService;
         this.request = request;
+        this.userHelper = userHelper;
     }
 
-    @AfterReturning(value = "execution(* com.mgmtp.radio.service.station.SongServiceImpl.addSongToStationPlaylist(..))")
+    @AfterReturning(
+        value = "execution(* com.mgmtp.radio.service.station.SongServiceImpl.addSongToStationPlaylist(..)) || " +
+            "execution(* com.mgmtp.radio.service.station.SongServiceImpl.downVoteSongInStationPlaylist(..)) || " +
+            "execution(* com.mgmtp.radio.service.station.SongServiceImpl.upVoteSongInStationPlaylist(..)) || " +
+            "execution(* com.mgmtp.radio.service.conversation.MessageServiceImpl.create(..))"
+    )
     public void createRecentStationAfterAddSong() {
-        String friendlystationId = getSegmentOfURI(4);
-        createRecentStation(getCurrentUserId(), getStationIdFromFriendlyId(friendlystationId));
-    }
+        String friendlystationId = getSegmentOfURI(SEGMENT_NUMBER);
 
-    @AfterReturning(value = "execution(* com.mgmtp.radio.service.station.SongServiceImpl.downVoteSongInStationPlaylist(..))")
-    public void createRecentStationAfterDownVote() {
-        String friendlystationId = getSegmentOfURI(4);
-        createRecentStation(getCurrentUserId(), getStationIdFromFriendlyId(friendlystationId));
-    }
-
-    @AfterReturning(value = "execution(* com.mgmtp.radio.service.station.SongServiceImpl.upVoteSongInStationPlaylist(..))")
-    public void createRecentStationAfterUpvote() {
-        String friendlystationId = getSegmentOfURI(4);
-        createRecentStation(getCurrentUserId(), getStationIdFromFriendlyId(friendlystationId));
-    }
-
-    @AfterReturning(value = "execution(* com.mgmtp.radio.service.conversation.MessageServiceImpl.create(..))")
-    public void createRecentStationAfterSendMessage() {
-        String friendlystationId = getSegmentOfURI(4);
-        createRecentStation(getCurrentUserId(), getStationIdFromFriendlyId(friendlystationId));
-    }
-
-    private String getCurrentUserId() {
-        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<User> user = Optional.empty();
-        if(!principal.equals("anonymousUser")) {
-            user = Optional.of((User) principal);
+        if (!userHelper.getCurrentUser().isPresent()) {
+            throw new RadioNotFoundException("Please login to use this feature!!!");
         }
-        return user.get().getId();
+        createRecentStation(userHelper.getCurrentUser().get().getId(), getStationIdFromFriendlyId(friendlystationId));
     }
 
     private void createRecentStation(String userId, String stationId){
-        if(!checkIfExistRecentStation(userId, stationId)) {
+        if (!checkIfExistRecentStation(userId, stationId)) {
             recentStationService.createRecentStation(userId, stationId).subscribe();
         }
     }
@@ -68,7 +54,11 @@ public class RecentStationAspect {
     }
 
     private String getStationIdFromFriendlyId(String friendlyStationId){
-        return stationService.retrieveByIdOrFriendlyId(friendlyStationId).block().getId();
+        Optional<Station> station = stationService.retrieveByIdOrFriendlyId(friendlyStationId).blockOptional();
+        if (!station.isPresent()) {
+            throw new RadioNotFoundException("Can not find station");
+        }
+        return station.get().getId();
     }
 
     private String getSegmentOfURI(int segmentNumber){
