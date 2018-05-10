@@ -9,7 +9,6 @@ import org.springframework.context.support.MessageSourceAccessor;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
-@PropertySource(value = {"classpath:local.properties"}, ignoreResourceNotFound = true)
 @PropertySource(value = {"classpath:messages.properties"})
 @PropertySource(value = {"classpath:constants.properties"})
 @EnableScheduling
