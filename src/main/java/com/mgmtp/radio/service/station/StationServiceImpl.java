@@ -132,6 +132,11 @@ public class StationServiceImpl implements StationService {
     }
 
     @Override
+    public Flux<StationDTO> getListStationByListStationIdAndPrivacy(List<String> listStationId, StationPrivacy privacy) {
+        return stationRepository.findByIdInAndPrivacy(listStationId, privacy).map(stationMapper::stationToStationDTO);
+    }
+
+    @Override
     public Mono<Station> retrieveByIdOrFriendlyId(String friendlyId) {
         int[] count  = {0};
         return stationRepository.retrieveByIdOrFriendlyId(friendlyId)

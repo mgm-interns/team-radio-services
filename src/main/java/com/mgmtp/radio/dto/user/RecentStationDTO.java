@@ -13,5 +13,5 @@ public class RecentStationDTO {
 
     private String stationId;
 
-    private LocalDateTime joinedTime;
+    private LocalDateTime createdAt;
 }
