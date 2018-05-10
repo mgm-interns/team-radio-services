@@ -11,4 +11,5 @@ public interface RecentStationMapper {
 
     RecentStationDTO recentStationToRecentStationDTO(RecentStation recentStation);
 
+    RecentStation recentStationDTOToRecentStation(RecentStationDTO recentStationDTO);
 }

@@ -20,5 +20,5 @@ public class RecentStation {
 
     private String stationId;
 
-    private LocalDateTime joinedTime;
+    private LocalDateTime createdAt;
 }

@@ -16,4 +16,5 @@ public interface StationRepository extends ReactiveMongoRepository<Station, Stri
 	Mono<Station> findFirstByName(String stationId);
 	Flux<Station> findByOwnerIdAndPrivacy(String ownerId, StationPrivacy privacy);
     Flux<Station> findByIdIn(List<String> listStationId);
+    Flux<Station> findByIdInAndPrivacy(List<String> listStationId, StationPrivacy privacy);
 }
