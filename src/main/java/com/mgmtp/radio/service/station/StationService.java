@@ -19,14 +19,10 @@ public interface StationService {
     Mono<StationDTO> findById(String id);
     Mono<StationDTO> create(String userId, StationDTO stationDTO);
     Mono<StationDTO> update(String id, StationDTO stationDTO);
-    int getOnlineUsersNumber(StationDTO stationDTO);
-    Mono<Station> findStationByIdAndDeletedFalse(String stationId);
     Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO);
     boolean existsByName(String stationName);
     Flux<StationDTO> getListStationByListStationId(List<String> listStationId);
     Mono<StationDTO> joinStation(String stationId, UserDTO userDto);
-    StationDTO removeUserFromStationOnlineList(String stationId, UserDTO userDTO);
-    void leaveStation (String stationId, UserDTO userDTO);
     Mono<Station> retrieveByIdOrFriendlyId(String friendlyId);
     Flux<StationDTO> getListStationByListStationIdAndPrivacy(List<String> listStationId, StationPrivacy privacy);
 }
