@@ -25,7 +25,7 @@ import java.util.Optional;
 @RequestMapping(RecentStationController.BASE_URL)
 public class RecentStationController extends BaseRadioController {
 
-    public static final String BASE_URL = "/api/v1/user";
+    public static final String BASE_URL = "/api/v1/users";
 
     private final UserService userService;
     private final RecentStationService recentStationService;
