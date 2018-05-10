@@ -12,9 +12,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,15 +56,14 @@ public class RecentStationServiceImpl implements RecentStationService {
         List<String> recentStationIdList = recentStationDTOFlux.map(RecentStationDTO::getStationId).toStream().collect(Collectors.toList());
         Flux<StationDTO> stationDTOFlux = stationService.getListStationByListStationIdAndPrivacy(recentStationIdList, StationPrivacy.station_public);
 
+        Optional<Map<String, StationDTO>> listStationsOptional = stationDTOFlux.collectMap(stationDTO -> stationDTO.getId(), stationDTO -> stationDTO).blockOptional();
+
         List<StationDTO> stationDTOListSorted = new ArrayList<>();
-        recentStationIdList.forEach(recentStationId -> {
-            Optional<StationDTO> stationDTOOptional = stationDTOFlux.toStream().filter(stationDTO ->
-                    stationDTO.getId().equals(recentStationId)
-            ).findFirst();
-            if(stationDTOOptional.isPresent()) {
-                stationDTOListSorted.add(stationDTOOptional.get());
-            }
-        });
+        if (listStationsOptional.isPresent()) {
+            Map<String, StationDTO> stations = listStationsOptional.get();
+            stationDTOListSorted = recentStationIdList.stream().filter(id -> stations.get(id) != null).map(stations::get).collect(Collectors.toList());
+        }
+
         return Flux.fromIterable(stationDTOListSorted);
     };
 
