@@ -82,6 +82,9 @@ public class UpVoteAndDownVoteSongServiceImplTest {
 
     MessageChannel shiftSongChannel;
 
+    @Mock
+    private StationOnlineService stationOnlineService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -106,7 +109,7 @@ public class UpVoteAndDownVoteSongServiceImplTest {
                 historyChannel,
                 stationSongSkipHelper,
                 stationService,
-                shiftSongChannel);
+                shiftSongChannel, stationOnlineService);
 
         //given
         user = new User();

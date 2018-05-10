@@ -49,22 +49,24 @@ public class SongServiceImpl implements SongService {
     private final StationSongSkipHelper stationSongSkipHelper;
     private final StationService stationService;
     private final MessageChannel shiftSongChannel;
+    private final StationOnlineService stationOnlineService;
 
     public SongServiceImpl(
-            SongMapper songMapper,
-            UserMapper userMapper,
-            SongRepository songRepository,
-            StationRepository stationRepository,
-            UserRepository userRepository,
-            YouTubeHelper youTubeHelper,
-            TransferHelper transferHelper,
-            DateHelper dateHelper,
-            YouTubeConfig youTubeConfig,
-            StationPlayerHelper stationPlayerHelper,
-            MessageChannel historyChannel,
-            StationSongSkipHelper stationSongSkipHelper,
-            StationService stationService,
-            MessageChannel shiftSongChannel) {
+        SongMapper songMapper,
+        UserMapper userMapper,
+        SongRepository songRepository,
+        StationRepository stationRepository,
+        UserRepository userRepository,
+        YouTubeHelper youTubeHelper,
+        TransferHelper transferHelper,
+        DateHelper dateHelper,
+        YouTubeConfig youTubeConfig,
+        StationPlayerHelper stationPlayerHelper,
+        MessageChannel historyChannel,
+        StationSongSkipHelper stationSongSkipHelper,
+        StationService stationService,
+        MessageChannel shiftSongChannel,
+        StationOnlineService stationOnlineService) {
         this.songRepository = songRepository;
         this.stationRepository = stationRepository;
         this.userRepository = userRepository;
@@ -79,6 +81,7 @@ public class SongServiceImpl implements SongService {
         this.stationSongSkipHelper = stationSongSkipHelper;
         this.stationService = stationService;
         this.shiftSongChannel = shiftSongChannel;
+        this.stationOnlineService = stationOnlineService;
     }
 
     @Override
@@ -481,7 +484,7 @@ public class SongServiceImpl implements SongService {
     }
 
     private double calcCurrentSongDislikePercent(SongDTO songDTO, StationDTO station) {
-        final int numberOnline = getOnlineUsersNumber(station);
+        final int numberOnline = stationOnlineService.getNumberOnlineUser(station.getFriendlyId());
         double currentSongDislikePercent = 0;
         if (numberOnline > 0) {
             currentSongDislikePercent = songDTO.getDownVoteCount() / (double) numberOnline;
@@ -491,11 +494,6 @@ public class SongServiceImpl implements SongService {
 
     private boolean isOwnerDownvote(Station station, SongDTO songDTO) {
         return songDTO.getDownvoteUserList().stream().anyMatch(userDTO -> userDTO.getId().equals(station.getOwnerId()));
-    }
-
-    private int getOnlineUsersNumber(StationDTO stationDTO) {
-        //TODO Get number of online users id here
-        return 1;
     }
 
     /**

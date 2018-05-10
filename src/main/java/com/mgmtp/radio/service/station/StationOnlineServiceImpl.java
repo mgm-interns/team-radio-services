@@ -84,4 +84,9 @@ public class StationOnlineServiceImpl implements StationOnlineService {
         return unSortMap.entrySet().stream().sorted(comparatorStation)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (oldValue, newValue) -> oldValue, LinkedHashMap::new));
     }
+
+    @Override
+    public int getNumberOnlineUser(String friendlyId) {
+        return allStations.get(friendlyId).getNumberOnline();
+    }
 }

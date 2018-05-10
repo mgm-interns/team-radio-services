@@ -39,6 +39,7 @@ import static org.junit.Assert.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -87,6 +88,9 @@ public class SongServiceImplTest {
 
     MessageChannel shiftSongChannel;
 
+    @Mock
+    private StationOnlineService stationOnlineService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -104,7 +108,7 @@ public class SongServiceImplTest {
                 historyChannel,
                 stationSongSkipHelper,
                 stationService,
-                shiftSongChannel);
+                shiftSongChannel, stationOnlineService);
     }
 
     @Test
@@ -117,6 +121,7 @@ public class SongServiceImplTest {
         station.setPlaylist(playListCreatorId);
 
         when(stationService.retrieveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
+        when(stationOnlineService.getNumberOnlineUser(anyString())).thenReturn(4);
 
         //given these song
         Song song1  = new Song();

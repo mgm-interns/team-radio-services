@@ -28,23 +28,11 @@ public class StationServiceImpl implements StationService {
 	private final StationMapper stationMapper;
 	private final StationOnlineService stationOnlineService;
 
-
-    @Override
-	public int getOnlineUsersNumber(StationDTO stationDTO) {
-		return stationDTO.getNumberOnline();
-	}
-
     public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, StationOnlineService stationOnlineService) {
         this.stationMapper = stationMapper;
         this.stationRepository = stationRepository;
         this.stationOnlineService = stationOnlineService;
     }
-
-    @Override
-    public Mono<Station> findStationByIdAndDeletedFalse(String stationId) {
-        return stationRepository.retrieveByIdOrFriendlyId(stationId);
-    }
-
 
     public Map<String, StationDTO> getOrderedStations() {
         Map<String, StationDTO> result = stationOnlineService.getAllStation();
@@ -153,15 +141,5 @@ public class StationServiceImpl implements StationService {
 
     public void addUserToStationOnlineList(String stationId, UserDTO userDto) {
         stationOnlineService.addOnlineUser(userDto, stationId);
-    }
-
-
-    public void leaveStation(String stationId, UserDTO userDTO) {
-        stationOnlineService.removeOnlineUser(userDTO, stationId);
-    }
-
-    public StationDTO removeUserFromStationOnlineList(String stationId, UserDTO userDTO) {
-        stationOnlineService.removeOnlineUser(userDTO, stationId);
-        return stationOnlineService.getStationById(stationId);
     }
 }

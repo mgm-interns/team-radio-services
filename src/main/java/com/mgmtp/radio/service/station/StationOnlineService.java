@@ -17,4 +17,6 @@ public interface StationOnlineService {
     Map<String, StationDTO> getAllStation();
 
     StationDTO getStationById(String stationId);
+
+	int getNumberOnlineUser(String stationId);
 }
