@@ -6,6 +6,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface RecentStationRepository extends ReactiveMongoRepository<RecentStation, String> {
-    Flux<RecentStation> findByUserIdOrderByJoinedTimeDesc(String userId);
+    Flux<RecentStation> findByUserIdOrderByCreatedAtDesc(String userId);
     Mono<RecentStation> findByUserIdAndStationId(String userId, String stationId);
 }

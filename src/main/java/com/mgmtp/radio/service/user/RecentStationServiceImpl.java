@@ -33,7 +33,7 @@ public class RecentStationServiceImpl implements RecentStationService {
     @Override
     public Flux<StationDTO> getRecentStation(String userId) {
         Flux<RecentStationDTO> recentStationDTOFlux =
-                recentStationRepository.findByUserIdOrderByJoinedTimeDesc(userId).map(recentStationMapper::recentStationToRecentStationDTO);
+                recentStationRepository.findByUserIdOrderByCreatedAtDesc(userId).map(recentStationMapper::recentStationToRecentStationDTO);
 
         List<String> recentStationIdList = recentStationDTOFlux.map(RecentStationDTO::getStationId).toStream().collect(Collectors.toList());
         Flux<StationDTO> stationDTOFlux = stationService.getListStationByListStationId(recentStationIdList);
@@ -53,7 +53,7 @@ public class RecentStationServiceImpl implements RecentStationService {
     @Override
     public Flux<StationDTO> getRecentStationsByUserIdAndPrivacy(String userId, StationPrivacy privacy) {
         Flux<RecentStationDTO> recentStationDTOFlux =
-                recentStationRepository.findByUserIdOrderByJoinedTimeDesc(userId).map(recentStationMapper::recentStationToRecentStationDTO);
+                recentStationRepository.findByUserIdOrderByCreatedAtDesc(userId).map(recentStationMapper::recentStationToRecentStationDTO);
 
         List<String> recentStationIdList = recentStationDTOFlux.map(RecentStationDTO::getStationId).toStream().collect(Collectors.toList());
         Flux<StationDTO> stationDTOFlux = stationService.getListStationByListStationIdAndPrivacy(recentStationIdList, StationPrivacy.station_public);
@@ -75,7 +75,7 @@ public class RecentStationServiceImpl implements RecentStationService {
         RecentStationDTO recentStationDTO = new RecentStationDTO();
         recentStationDTO.setUserId(userId);
         recentStationDTO.setStationId(stationId);
-        recentStationDTO.setJoinedTime(LocalDateTime.now());
+        recentStationDTO.setCreatedAt(LocalDateTime.now());
         RecentStation recentStation = recentStationMapper.recentStationDTOToRecentStation(recentStationDTO);
         return recentStationRepository
                 .save(recentStation).map(recentStationMapper::recentStationToRecentStationDTO);
