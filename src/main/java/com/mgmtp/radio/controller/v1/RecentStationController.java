@@ -2,6 +2,7 @@ package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.controller.response.RadioSuccessResponse;
+import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioException;
@@ -36,9 +37,9 @@ public class RecentStationController extends BaseRadioController {
 
     @GetMapping("/me/recent-station")
     public Flux<StationDTO> getRecentStation() throws RadioNotFoundException {
-        String userId = getCurrentUser().isPresent() ? getCurrentUser().get().getId() : null;
-        if(userId != null) {
-            return recentStationService.getRecentStation(userId);
+        Optional<User> user = getCurrentUser();
+        if (user.isPresent()) {
+            return recentStationService.getRecentStation(user.get().getId());
         } else {
             throw new RadioNotFoundException("unauthorized");
         }
@@ -57,7 +58,7 @@ public class RecentStationController extends BaseRadioController {
     @GetMapping("/{userId}/recent-station")
     public Flux<StationDTO> getRecentStation(@PathVariable(value = "userId") String userId) throws RadioNotFoundException {
         Optional<UserDTO> user = Optional.ofNullable(userService.getUserById(userId));
-        if(user.isPresent()) {
+        if (user.isPresent()) {
             return recentStationService.getRecentStationsByUserIdAndPrivacy(userId, StationPrivacy.station_public);
         } else {
             throw new RadioNotFoundException("user is not found");
