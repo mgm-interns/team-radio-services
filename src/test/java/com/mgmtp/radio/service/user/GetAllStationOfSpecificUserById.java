@@ -8,6 +8,7 @@ import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.service.reputation.ReputationService;
+import com.mgmtp.radio.support.UserHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -37,15 +38,18 @@ public class GetAllStationOfSpecificUserById {
     @Mock
     Constant constant;
 
+    private UserHelper userHelper;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        userHelper = new UserHelper();
         userService = new UserServiceImpl(null,
                 null,
                 null,
                 stationRepository,
                 reputationService,
-                stationMapper, constant);
+                stationMapper, constant, userHelper);
     }
 
     @Test

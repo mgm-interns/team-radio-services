@@ -7,10 +7,10 @@ import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
-import com.mgmtp.radio.exception.RadioDuplicateNameException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.user.UserMapper;
+import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.service.station.StationService;
 import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.support.validator.station.CreateStationValidator;
@@ -20,7 +20,6 @@ import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.validation.BindingResult;
@@ -111,14 +110,9 @@ public class StationController extends BaseRadioController {
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId, @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId, HttpServletResponse response) throws RadioNotFoundException {
-        User user;
-        if (getCurrentUser().isPresent()) {
-            user = getCurrentUser().get();
-        } else {
-            user = userService.getAnonymousUser(cookieId);
-            if (constant.getDefaultCookie().equals(cookieId)) {
-                response.addCookie(new Cookie(constant.getCookieId(), user.getCookieId()));
-            }
+        User user = userService.getAccessUser(cookieId);
+        if (!getCurrentUser().isPresent() && constant.getDefaultCookie().equals(cookieId)) {
+            response.addCookie(new Cookie(constant.getCookieId(), user.getCookieId()));
         }
         return this.stationService
                 .joinStation(stationId, userMapper.userToUserDTO(user))
@@ -135,12 +129,18 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
     @PostMapping
-    public Mono<StationDTO> createStation(@Validated @RequestBody StationDTO stationDTO, BindingResult bindingResult) throws RadioException {
-        String userId = getCurrentUser().isPresent() ? getCurrentUser().get().getId() : null;
+    public Mono<StationDTO> createStation(@Validated @RequestBody StationDTO stationDTO, BindingResult bindingResult, @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId, HttpServletResponse response) throws RadioException {
         if (bindingResult.hasErrors()) {
             return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
-        return stationService.create(userId, stationDTO);
+        User user = userService.getAccessUser(cookieId);
+        if (!getCurrentUser().isPresent()) {
+            stationDTO.setPrivacy(StationPrivacy.station_private);
+            if (constant.getDefaultCookie().equals(cookieId)) {
+                response.addCookie(new Cookie(constant.getCookieId(), user.getCookieId()));
+            }
+        }
+        return stationService.create(user.getId(), stationDTO);
     }
 
     @ApiOperation(

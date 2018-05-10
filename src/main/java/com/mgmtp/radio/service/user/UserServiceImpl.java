@@ -16,14 +16,15 @@ import com.mgmtp.radio.service.reputation.ReputationService;
 import com.mgmtp.radio.social.facebook.model.FacebookAvatar;
 import com.mgmtp.radio.social.facebook.model.FacebookUser;
 import com.mgmtp.radio.social.google.model.GoogleUser;
+import com.mgmtp.radio.support.UserHelper;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
 
-import java.util.*;
 import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Log4j2
@@ -37,13 +38,14 @@ public class UserServiceImpl implements UserService {
     private final StationMapper stationMapper;
     private final ReputationService reputationService;
     private final Constant constant;
+    private final UserHelper userHelper;
 
     public UserServiceImpl(UserMapper userMapper,
                            UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
                            StationRepository stationRepository,
                            ReputationService reputationService,
-                           StationMapper stationMapper, Constant constant) {
+                           StationMapper stationMapper, Constant constant, UserHelper userHelper) {
         this.userMapper = userMapper;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -51,6 +53,7 @@ public class UserServiceImpl implements UserService {
         this.stationMapper = stationMapper;
         this.reputationService = reputationService;
         this.constant = constant;
+        this.userHelper = userHelper;
     }
 
     @Override
@@ -309,5 +312,16 @@ public class UserServiceImpl implements UserService {
             throw new RadioNotFoundException();
         }
         return user.get();
+    }
+
+    @Override
+    public User getAccessUser(String cookieId) {
+        User user;
+        if (userHelper.getCurrentUser().isPresent()) {
+            user = userHelper.getCurrentUser().get();
+        } else {
+            user = getAnonymousUser(cookieId);
+        }
+        return user;
     }
 }

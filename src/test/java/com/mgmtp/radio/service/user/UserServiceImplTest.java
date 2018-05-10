@@ -6,6 +6,7 @@ import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.user.UserRepository;
 import com.mgmtp.radio.service.reputation.ReputationService;
+import com.mgmtp.radio.support.UserHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -34,11 +35,14 @@ public class UserServiceImplTest {
     @Mock
     Constant constant;
 
+    private UserHelper userHelper;
+
     @Before
     public void setUp() throws Exception {
+        userHelper = new UserHelper();
         MockitoAnnotations.initMocks(this);
         passwordEncoder = new BCryptPasswordEncoder();
-        userService = new UserServiceImpl(userMapper, userRepository, passwordEncoder,null, reputationService,null, constant);
+        userService = new UserServiceImpl(userMapper, userRepository, passwordEncoder,null, reputationService,null, constant, userHelper);
     }
 
     @Test
