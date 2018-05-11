@@ -33,13 +33,14 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Log4j2
 @RestController
 @RequestMapping(StationController.BASE_URL)
 public class StationController extends BaseRadioController {
-    private static Flux<Map<String, StationDTO>> allStationStream;
+    private static Map<String, Flux<Map<String, Object>>> onlineUserStream = new ConcurrentHashMap<>();
     public static final String BASE_URL = "/api/v1/stations";
 
     private final StationService stationService;
@@ -122,18 +123,24 @@ public class StationController extends BaseRadioController {
             cookie.setPath("/");
             response.addCookie(cookie);
         }
-        return Flux.create(sink -> {
-            MessageHandler messageHandler = message -> {
-                Map<String, Object> data = (Map<String, Object>) message.getPayload();
-                StationDTO stationInfo = (StationDTO) data.get("stationInfo");
-                if (stationId.equals(stationInfo.getFriendlyId())){
-                    sink.next(data);
-                }
-            };
-            sink.onDispose(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
-            sink.onCancel(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
-            onlineUserOnlineChannel.subscribe(messageHandler);
-        });
+        Flux<Map<String, Object>> stationOnlineStream = onlineUserStream.get(stationId);
+        if (stationOnlineStream == null) {
+            stationOnlineStream = Flux.create(sink -> {
+                MessageHandler messageHandler = message -> {
+                    Map<String, Object> data = (Map<String, Object>) message.getPayload();
+                    StationDTO stationInfo = (StationDTO) data.get("stationInfo");
+                    if (stationId.equals(stationInfo.getFriendlyId())) {
+                        sink.next(data);
+                    }
+                };
+                sink.onDispose(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
+                sink.onCancel(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
+                onlineUserOnlineChannel.subscribe(messageHandler);
+            });
+            onlineUserStream.put(stationId, stationOnlineStream);
+        }
+
+        return stationOnlineStream.publish().refCount().doOnSubscribe(subscription -> stationService.joinStation(stationId, userMapper.userToUserDTO(user)));
     }
 
     @ApiOperation(
