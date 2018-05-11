@@ -302,8 +302,8 @@ public class UserServiceImpl implements UserService {
         if (cookieId.isEmpty() || cookieId.equals(constant.getDefaultCookie())) {
             User user = new User();
             String unique = UUID.randomUUID().toString();
-            user.setUsername(unique);
-            user.setName(unique);
+            user.setUsername(constant.getAnonymousUsername());
+            user.setName(constant.getAnonymousUsername());
             user.setCookieId(unique);
             return userRepository.save(user);
         }

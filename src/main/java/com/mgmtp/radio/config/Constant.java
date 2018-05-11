@@ -24,4 +24,7 @@ public class Constant {
 
     @Value("${user.type.anonymous.cookie.key}")
     private String cookieId;
+
+    @Value("${user.type.anonymous.username}")
+    private String anonymousUsername;
 }
