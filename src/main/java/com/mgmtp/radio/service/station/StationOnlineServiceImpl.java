@@ -5,6 +5,8 @@ import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.support.StationPlayerHelper;
+import org.springframework.messaging.SubscribableChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
@@ -26,9 +28,12 @@ public class StationOnlineServiceImpl implements StationOnlineService {
     private static final int EQUAL = 0;
 
     private final StationPlayerHelper stationPlayerHelper;
+    private final SubscribableChannel onlineUserOnlineChannel;
 
-    public StationOnlineServiceImpl(StationPlayerHelper stationPlayerHelper) {
+    public StationOnlineServiceImpl(StationPlayerHelper stationPlayerHelper,
+                                    SubscribableChannel onlineUserOnlineChannel) {
         this.stationPlayerHelper = stationPlayerHelper;
+        this.onlineUserOnlineChannel = onlineUserOnlineChannel;
     }
 
     public void addStationToList(StationDTO stationDTO) {
@@ -46,11 +51,13 @@ public class StationOnlineServiceImpl implements StationOnlineService {
         }
         userManager.put(userDTO.getId(), stationId);
         stationDTO.getOnlineUsers().put(userDTO.getId(), userDTO);
+        sendMessage(stationId, userDTO, null);
     }
 
     public void removeOnlineUser(UserDTO userDTO, String stationId) {
         StationDTO stationDTO = allStations.get(stationId);
         stationDTO.getOnlineUsers().remove(userDTO.getId());
+        sendMessage(stationId, null, userDTO);
     }
 
     public StationDTO getStationById(String stationId) {
@@ -103,5 +110,14 @@ public class StationOnlineServiceImpl implements StationOnlineService {
 
     StationDTO getStationByFriendlyId(String friendlyId) {
         return allStations.get(friendlyId);
+    }
+
+    private void sendMessage(String stationId, UserDTO joinUser, UserDTO leaveUser){
+        Map<String, Object> param = new HashMap<>();
+        param.put("stationInfo", allStations.get(stationId));
+        param.put("joinUser", joinUser != null ? joinUser.getName() : "");
+        param.put("leaveUser", leaveUser != null ? leaveUser.getName() : "");
+
+        onlineUserOnlineChannel.send(MessageBuilder.withPayload(param).build());
     }
 }
