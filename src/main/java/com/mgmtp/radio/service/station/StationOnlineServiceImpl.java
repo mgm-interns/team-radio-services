@@ -39,8 +39,9 @@ public class StationOnlineServiceImpl implements StationOnlineService {
 
     public void addOnlineUser(UserDTO userDTO, String stationId) {
         StationDTO stationDTO = allStations.get(stationId);
-        if (userManager.get(userDTO.getId()) != null){
-            removeOnlineUser(userDTO, userManager.get(userDTO.getId()));
+        String previousStationId = userManager.get(userDTO.getId());
+        if (previousStationId != null && !previousStationId.equals(stationId)){
+            removeOnlineUser(userDTO, previousStationId);
         }
         userManager.put(userDTO.getId(), stationId);
         stationDTO.getOnlineUsers().put(userDTO.getId(), userDTO);
@@ -48,7 +49,9 @@ public class StationOnlineServiceImpl implements StationOnlineService {
 
     public void removeOnlineUser(UserDTO userDTO, String stationId) {
         StationDTO stationDTO = allStations.get(stationId);
-        stationDTO.getOnlineUsers().remove(userDTO.getId());
+        if (!userManager.get(userDTO.getId()).equals(stationId)) {
+            stationDTO.getOnlineUsers().remove(userDTO.getId());
+        }
     }
 
     public StationDTO getStationById(String stationId) {

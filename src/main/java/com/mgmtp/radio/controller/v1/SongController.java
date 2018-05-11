@@ -5,7 +5,6 @@ import com.mgmtp.radio.domain.station.PlayList;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.HistoryDTO;
 import com.mgmtp.radio.dto.station.SongDTO;
-import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
@@ -13,7 +12,7 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.sdo.HistoryLimitation;
 import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
-import com.mgmtp.radio.service.station.StationService;
+import com.mgmtp.radio.service.station.StationOnlineService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -29,7 +28,6 @@ import java.time.Duration;
 import java.util.Optional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Log4j2
@@ -42,10 +40,17 @@ public class SongController extends BaseRadioController {
 
     private final SongService songService;
     private final HistoryService historyService;
+    private final StationOnlineService stationOnlineService;
+    private final UserMapper userMapper;
 
-    public SongController(SongService songService, HistoryService historyService) {
+    public SongController(SongService songService,
+                          HistoryService historyService,
+                          StationOnlineService stationOnlineService,
+                          UserMapper userMapper) {
         this.songService = songService;
         this.historyService = historyService;
+        this.stationOnlineService = stationOnlineService;
+        this.userMapper = userMapper;
     }
 
     @ApiOperation(
@@ -75,6 +80,14 @@ public class SongController extends BaseRadioController {
     public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId) {
         Flux<ServerSentEvent<PlayList>> stationPlayListStream = stationStream.get(stationId);
         Optional<User> user = getCurrentUser();
+        User currentUser;
+        if (user.isPresent()){
+            currentUser = user.get();
+        } else {
+            currentUser = new User();
+            currentUser.setId("anonymous");
+            currentUser.setName("anonymous");
+        }
         if (stationPlayListStream == null) {
             long[] currentTimetamp = new long[]{0};
             long[] lastDataTick = new long[]{0};
@@ -84,7 +97,7 @@ public class SongController extends BaseRadioController {
                                         int currentHash = playList.hashCode();
                                         Optional<Integer> previousHash = Optional.ofNullable(compareHash.get(stationId));
                                         currentTimetamp[0] = 0;
-                                        if (!previousHash.isPresent() || previousHash.get() != currentHash || (data.getT1() - lastDataTick[0]) >= 40 ) {
+                                        if (!previousHash.isPresent() || previousHash.get() != currentHash || (data.getT1() - lastDataTick[0]) >= 5 ) {
                                             lastDataTick[0] = data.getT1();
                                             compareHash.put(stationId, currentHash);
                                             return ServerSentEvent.<PlayList>builder().id(Long.toString(data.getT1())).event("fetch").data(playList).build();
@@ -103,7 +116,7 @@ public class SongController extends BaseRadioController {
 
             stationStream.put(stationId, stationPlayListStream);
         }
-        return stationPlayListStream;
+        return stationPlayListStream.doFinally(signalType -> stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(currentUser), stationId));
     }
 
     @ApiOperation(
