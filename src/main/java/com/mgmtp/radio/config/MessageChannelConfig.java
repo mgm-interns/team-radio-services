@@ -14,7 +14,9 @@ import org.springframework.integration.dsl.IntegrationFlows;
 import org.springframework.integration.dsl.Pollers;
 import org.springframework.integration.dsl.channel.MessageChannels;
 import org.springframework.integration.support.MessageBuilder;
+import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.SubscribableChannel;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
@@ -75,5 +77,10 @@ public class MessageChannelConfig {
     @Bean
     MessageChannel shiftSongChannel(@Qualifier(TASK_EXECUTOR) TaskExecutor taskExecutor){
         return new PublishSubscribeChannel(taskExecutor);
+    }
+
+    @Bean
+    SubscribableChannel onlineUserOnlineChannel(){
+        return MessageChannels.publishSubscribe().get();
     }
 }

@@ -49,15 +49,18 @@ public class StationController extends BaseRadioController {
     private final CreateStationValidator createStationValidator;
     private final SubscribableChannel allStationChannel;
     private final UserService userService;
+    private final SubscribableChannel onlineUserOnlineChannel;
 
     public StationController(StationService stationService, UserMapper userMapper, Constant constant,
-                             CreateStationValidator createStationValidator, SubscribableChannel allStationChannel, UserService userService) {
+                             CreateStationValidator createStationValidator, SubscribableChannel allStationChannel, UserService userService,
+                             SubscribableChannel onlineUserOnlineChannel) {
         this.stationService = stationService;
         this.userMapper = userMapper;
         this.constant = constant;
         this.createStationValidator = createStationValidator;
         this.allStationChannel = allStationChannel;
         this.userService = userService;
+        this.onlineUserOnlineChannel = onlineUserOnlineChannel;
     }
 
     @InitBinder
@@ -108,9 +111,9 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId,
+    public Flux<Map<String, Object>>  getStation(@PathVariable(value = "id") String stationId,
                                        HttpServletResponse response,
                                        @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId
     ) throws RadioNotFoundException {
@@ -120,9 +123,18 @@ public class StationController extends BaseRadioController {
             cookie.setPath("/");
             response.addCookie(cookie);
         }
-        return this.stationService
-                .joinStation(stationId, userMapper.userToUserDTO(user))
-                .switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
+        return Flux.create(sink -> {
+            MessageHandler messageHandler = message -> {
+                Map<String, Object> data = (Map<String, Object>) message.getPayload();
+                StationDTO stationInfo = (StationDTO) data.get("stationInfo");
+                if (stationId.equals(stationInfo.getFriendlyId())){
+                    sink.next(data);
+                }
+            };
+            sink.onDispose(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
+            sink.onCancel(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
+            onlineUserOnlineChannel.subscribe(messageHandler);
+        });
     }
 
     @ApiOperation(
