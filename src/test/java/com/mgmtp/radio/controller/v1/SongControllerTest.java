@@ -7,7 +7,7 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
 import com.mgmtp.radio.service.station.StationService;
-import com.mgmtp.radio.service.user.UserService;
+import com.mgmtp.radio.support.CookieHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -53,12 +53,12 @@ public class SongControllerTest {
     HistoryService historyService;
 
     @Mock
-    UserService userService;
+    CookieHelper cookieHelper;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        songController = new SongController(songService,historyService, userService);
+        songController = new SongController(songService,historyService, cookieHelper);
         webTestClient = WebTestClient.bindToController(songController).build();
     }
 
