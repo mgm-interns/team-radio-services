@@ -13,10 +13,12 @@ import com.mgmtp.radio.sdo.HistoryLimitation;
 import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
 import com.mgmtp.radio.service.station.StationOnlineService;
+import com.mgmtp.radio.service.user.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import java.util.Optional;
 import java.time.LocalDateTime;
@@ -42,15 +46,24 @@ public class SongController extends BaseRadioController {
     private final HistoryService historyService;
     private final StationOnlineService stationOnlineService;
     private final UserMapper userMapper;
+    private final UserService userService;
+
+    @Value("${user.type.anonymous.cookie}")
+    private String defaultCookie;
+
+    @Value("${user.type.anonymous.cookie.key}")
+    private String cookieId;
 
     public SongController(SongService songService,
                           HistoryService historyService,
                           StationOnlineService stationOnlineService,
-                          UserMapper userMapper) {
+                          UserMapper userMapper,
+                          UserService userService) {
         this.songService = songService;
         this.historyService = historyService;
         this.stationOnlineService = stationOnlineService;
         this.userMapper = userMapper;
+        this.userService = userService;
     }
 
     @ApiOperation(
@@ -77,16 +90,17 @@ public class SongController extends BaseRadioController {
     })
     @GetMapping("/{stationId}/playList")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId) {
+    public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId, @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId, HttpServletResponse response) {
         Flux<ServerSentEvent<PlayList>> stationPlayListStream = stationStream.get(stationId);
         Optional<User> user = getCurrentUser();
         User currentUser;
         if (user.isPresent()){
             currentUser = user.get();
         } else {
-            currentUser = new User();
-            currentUser.setId("anonymous");
-            currentUser.setName("anonymous");
+            currentUser = userService.getAnonymousUser(cookieId);
+            if (defaultCookie.equals(cookieId)) {
+                response.addCookie(new Cookie(cookieId, currentUser.getCookieId()));
+            }
         }
         if (stationPlayListStream == null) {
             long[] currentTimetamp = new long[]{0};
