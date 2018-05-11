@@ -6,7 +6,11 @@ import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.support.StationPlayerHelper;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service("stationOnlineService")
@@ -87,6 +91,10 @@ public class StationOnlineServiceImpl implements StationOnlineService {
 
     @Override
     public int getNumberOnlineUser(String friendlyId) {
-        return allStations.get(friendlyId).getNumberOnline();
+        return getStationByFriendlyId(friendlyId).getNumberOnline();
+    }
+
+    StationDTO getStationByFriendlyId(String friendlyId) {
+        return allStations.get(friendlyId);
     }
 }

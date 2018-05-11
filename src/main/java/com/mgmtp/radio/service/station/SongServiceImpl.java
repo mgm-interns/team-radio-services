@@ -459,7 +459,7 @@ public class SongServiceImpl implements SongService {
     }
 
     private Mono<SongDTO> handleSkipRule (SongDTO songDTO){
-        return stationService.retrieveByIdOrFriendlyId(songDTO.getStationId()).map(tempStation ->{
+        return stationService.retrieveByIdOrFriendlyId(songDTO.getStationFriendlyId()).map(tempStation ->{
             final StationConfiguration stationConfiguration = tempStation.getStationConfiguration();
             boolean isSkipped = false;
 
@@ -468,15 +468,16 @@ public class SongServiceImpl implements SongService {
                     isSkipped = true;
                 }
             } else {
-                double downVotePercent = calcCurrentSongDislikePercent(songDTO, new StationDTO());
+            	final StationDTO stationDTO = stationOnlineService.getStationById(songDTO.getStationFriendlyId());
+                double downVotePercent = calcCurrentSongDislikePercent(songDTO, stationDTO);
                 if (downVotePercent > DOWN_VOTE_THRES_PERCENT) {
                     isSkipped = true;
                 }
             }
             if (isSkipped){
-                stationSongSkipHelper.addSkipSong(songDTO.getStationId(), songDTO);
+                stationSongSkipHelper.addSkipSong(songDTO.getStationFriendlyId(), songDTO);
             } else {
-                stationSongSkipHelper.removeSkipSong(songDTO.getStationId(), songDTO);
+                stationSongSkipHelper.removeSkipSong(songDTO.getStationFriendlyId(), songDTO);
             }
 
             return songDTO;
@@ -525,7 +526,7 @@ public class SongServiceImpl implements SongService {
         });
     }
 
-    private Mono<SongDTO> mapSongToSongDTO(Song song, String stationId) {
+    private Mono<SongDTO> mapSongToSongDTO(Song song, String stationFriendly) {
         SongDTO songDTO = songMapper.songToSongDTO(song);
 
         List<User> upVoteUserList = userRepository.findByIdIn(song.getUpVoteUserIdList());
@@ -540,7 +541,7 @@ public class SongServiceImpl implements SongService {
             songDTO.getDownvoteUserList().add(userDTO);
         }
 
-        songDTO.setStationId(stationId);
+        songDTO.setStationFriendlyId(stationFriendly);
 
         return Mono.just(songDTO);
     }

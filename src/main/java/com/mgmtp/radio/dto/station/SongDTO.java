@@ -29,5 +29,5 @@ public class SongDTO {
 	List<UserDTO> downvoteUserList = new ArrayList<>();
 	String message;
 	LocalDate createdAt;
-	String stationId;
+	String stationFriendlyId;
 }

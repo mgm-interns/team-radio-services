@@ -65,6 +65,8 @@ public class StationServiceImpl implements StationService {
 
         station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationDTO.getStationConfiguration()));
 	    station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationDTO.getStationConfiguration().getSkipRule()));
+
+	    stationOnlineService.addStationToList(stationDTO);
         return stationRepository
                 .save(station)
                 .map(stationMapper::stationToStationDTO)
@@ -89,6 +91,7 @@ public class StationServiceImpl implements StationService {
                 .switchIfEmpty(Mono.error(new RadioNotFoundException("Station id is not found.")))
                 .flatMap(station -> {
                     station.setName(stationDTO.getName().trim());
+                    stationOnlineService.addStationToList(stationDTO);
                     return stationRepository.save(station);
                 })
                 .map(stationMapper::stationToStationDTO);
@@ -103,9 +106,12 @@ public class StationServiceImpl implements StationService {
 					station.setStationConfiguration(stationConfiguration);
 				station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO));
 					stationRepository.save(station).subscribe();
+					final StationDTO stationDTO = stationMapper.stationToStationDTO(station);
+					stationOnlineService.addStationToList(stationDTO);
 					return stationConfiguration;
 			})
 			.map(stationMapper::stationConfigurationToStationConfigurationDto);
+
 	}
 
 	@Override
