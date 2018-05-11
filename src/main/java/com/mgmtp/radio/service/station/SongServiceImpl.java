@@ -1,5 +1,6 @@
 package com.mgmtp.radio.service.station;
 
+import com.cloudinary.utils.StringUtils;
 import com.google.api.services.youtube.model.Video;
 import com.mgmtp.radio.config.YouTubeConfig;
 import com.mgmtp.radio.domain.station.*;
@@ -355,13 +356,27 @@ public class SongServiceImpl implements SongService {
         }).subscribe();
     }
 
+    private boolean checkAddSongPermission(String stationId, User user) {
+        Optional<Station> station = stationService.retrieveByIdOrFriendlyId(stationId).blockOptional();
+        if (!station.isPresent()) {
+            throw new RadioNotFoundException();
+        }
+        if (!StringUtils.isEmpty(user.getCookieId()) && !user.getId().equals(station.get().getOwnerId())) {
+            throw new RadioBadRequestException("Please login to use this feature!!!");
+        }
+        return true;
+    }
+
     @Override
     public Mono<SongDTO> addSongToStationPlaylist(
             String stationId,
             String videoId,
             String message,
-            String creatorId
+            User creator
     ) {
+
+        checkAddSongPermission(stationId, creator);
+
         Song song = new Song();
         Video video = youTubeHelper.getYouTubeVideoById(videoId);
 
@@ -374,7 +389,7 @@ public class SongServiceImpl implements SongService {
             song.setMessage(message);
             song.setThumbnail(video.getSnippet().getThumbnails().getDefault().getUrl());
             song.setUrl(youTubeConfig.getUrl() + videoId + "&t=0");
-            song.setCreatorId(creatorId);
+            song.setCreatorId(creator.getId());
             song.setSource(video.getKind().split("#")[0]);
             song.setDuration(transferHelper.transferVideoDuration(video.getContentDetails().getDuration()));
             song.setStatus(SongStatus.not_play_yet);

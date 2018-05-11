@@ -5,15 +5,13 @@ import com.mgmtp.radio.domain.station.PlayList;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.HistoryDTO;
 import com.mgmtp.radio.dto.station.SongDTO;
-import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
-import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.sdo.HistoryLimitation;
 import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
-import com.mgmtp.radio.service.station.StationService;
+import com.mgmtp.radio.service.user.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -26,10 +24,9 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Log4j2
@@ -42,10 +39,12 @@ public class SongController extends BaseRadioController {
 
     private final SongService songService;
     private final HistoryService historyService;
+    private final UserService userService;
 
-    public SongController(SongService songService, HistoryService historyService) {
+    public SongController(SongService songService, HistoryService historyService, UserService userService) {
         this.songService = songService;
         this.historyService = historyService;
+        this.userService = userService;
     }
 
     @ApiOperation(
@@ -121,16 +120,13 @@ public class SongController extends BaseRadioController {
     public Mono<SongDTO> addSong(
             @PathVariable String stationId,
             @PathVariable String youTubeVideoId,
-            @RequestBody(required = false) String message
+            @RequestBody(required = false) String message,
+            @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId
     ) {
         log.info("POST /api/v1/song  - data: " + youTubeVideoId.toString());
 
-        if (getCurrentUser().isPresent()) {
-            String userId = getCurrentUser().get().getId();
-            return songService.addSongToStationPlaylist(stationId, youTubeVideoId, message, userId);
-        } else {
-            throw new RadioNotFoundException("Please login to use this feature!!!");
-        }
+        User user = userService.getAccessUser(cookieId);
+        return songService.addSongToStationPlaylist(stationId, youTubeVideoId, message, user);
     }
 
     @ApiOperation(

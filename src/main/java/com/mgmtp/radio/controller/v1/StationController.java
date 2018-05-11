@@ -112,7 +112,9 @@ public class StationController extends BaseRadioController {
     public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId, @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId, HttpServletResponse response) throws RadioNotFoundException {
         User user = userService.getAccessUser(cookieId);
         if (!getCurrentUser().isPresent() && constant.getDefaultCookie().equals(cookieId)) {
-            response.addCookie(new Cookie(constant.getCookieId(), user.getCookieId()));
+            Cookie cookie = new Cookie(constant.getCookieId(), user.getCookieId());
+            cookie.setPath("/");
+            response.addCookie(cookie);
         }
         return this.stationService
                 .joinStation(stationId, userMapper.userToUserDTO(user))
@@ -137,7 +139,9 @@ public class StationController extends BaseRadioController {
         if (!getCurrentUser().isPresent()) {
             stationDTO.setPrivacy(StationPrivacy.station_private);
             if (constant.getDefaultCookie().equals(cookieId)) {
-                response.addCookie(new Cookie(constant.getCookieId(), user.getCookieId()));
+                Cookie cookie = new Cookie(constant.getCookieId(), user.getCookieId());
+                cookie.setPath("/");
+                response.addCookie(cookie);
             }
         }
         return stationService.create(user.getId(), stationDTO);

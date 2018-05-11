@@ -1,8 +1,8 @@
 package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.domain.station.PlayList;
+import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.SongDTO;
-import org.aspectj.lang.annotation.AfterReturning;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -19,7 +19,7 @@ public interface SongService {
 
     Mono<SongDTO> downVoteSongInStationPlaylist(String stationId, String songId, String userId);
 
-    Mono<SongDTO> addSongToStationPlaylist(String stationId, String videoId, String message, String creatorId) ;
+    Mono<SongDTO> addSongToStationPlaylist(String stationId, String videoId, String message, User creator) ;
 
     Mono<Boolean> existsById(String id);
 
