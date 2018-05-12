@@ -39,10 +39,6 @@ public class StationOnlineServiceImpl implements StationOnlineService {
 
     public void addOnlineUser(UserDTO userDTO, String stationId) {
         StationDTO stationDTO = allStations.get(stationId);
-        String previousStationId = userManager.get(userDTO.getId());
-        if (previousStationId != null && !previousStationId.equals(stationId)){
-            removeOnlineUser(userDTO, previousStationId);
-        }
         userManager.put(userDTO.getId(), stationId);
         stationDTO.getOnlineUsers().put(userDTO.getId(), userDTO);
     }
