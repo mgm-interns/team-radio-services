@@ -5,7 +5,6 @@ import com.mgmtp.radio.domain.station.PlayList;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.HistoryDTO;
 import com.mgmtp.radio.dto.station.SongDTO;
-import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
@@ -13,11 +12,13 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.sdo.HistoryLimitation;
 import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
-import com.mgmtp.radio.service.station.StationService;
+import com.mgmtp.radio.service.station.StationOnlineService;
+import com.mgmtp.radio.service.user.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
@@ -25,11 +26,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import java.util.Optional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Log4j2
@@ -42,10 +44,26 @@ public class SongController extends BaseRadioController {
 
     private final SongService songService;
     private final HistoryService historyService;
+    private final StationOnlineService stationOnlineService;
+    private final UserMapper userMapper;
+    private final UserService userService;
 
-    public SongController(SongService songService, HistoryService historyService) {
+    @Value("${user.type.anonymous.cookie}")
+    private String defaultCookie;
+
+    @Value("${user.type.anonymous.cookie.key}")
+    private String cookieId;
+
+    public SongController(SongService songService,
+                          HistoryService historyService,
+                          StationOnlineService stationOnlineService,
+                          UserMapper userMapper,
+                          UserService userService) {
         this.songService = songService;
         this.historyService = historyService;
+        this.stationOnlineService = stationOnlineService;
+        this.userMapper = userMapper;
+        this.userService = userService;
     }
 
     @ApiOperation(
@@ -72,9 +90,18 @@ public class SongController extends BaseRadioController {
     })
     @GetMapping("/{stationId}/playList")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId) {
+    public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId, @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId, HttpServletResponse response) {
         Flux<ServerSentEvent<PlayList>> stationPlayListStream = stationStream.get(stationId);
         Optional<User> user = getCurrentUser();
+        User currentUser;
+        if (user.isPresent()){
+            currentUser = user.get();
+        } else {
+            currentUser = userService.getAnonymousUser(cookieId);
+            if (defaultCookie.equals(cookieId)) {
+                response.addCookie(new Cookie(cookieId, currentUser.getCookieId()));
+            }
+        }
         if (stationPlayListStream == null) {
             long[] currentTimetamp = new long[]{0};
             long[] lastDataTick = new long[]{0};
@@ -84,7 +111,7 @@ public class SongController extends BaseRadioController {
                                         int currentHash = playList.hashCode();
                                         Optional<Integer> previousHash = Optional.ofNullable(compareHash.get(stationId));
                                         currentTimetamp[0] = 0;
-                                        if (!previousHash.isPresent() || previousHash.get() != currentHash || (data.getT1() - lastDataTick[0]) >= 40 ) {
+                                        if (!previousHash.isPresent() || previousHash.get() != currentHash || (data.getT1() - lastDataTick[0]) >= 5 ) {
                                             lastDataTick[0] = data.getT1();
                                             compareHash.put(stationId, currentHash);
                                             return ServerSentEvent.<PlayList>builder().id(Long.toString(data.getT1())).event("fetch").data(playList).build();
@@ -103,7 +130,7 @@ public class SongController extends BaseRadioController {
 
             stationStream.put(stationId, stationPlayListStream);
         }
-        return stationPlayListStream;
+        return stationPlayListStream.doFinally(signalType -> stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(currentUser), stationId));
     }
 
     @ApiOperation(

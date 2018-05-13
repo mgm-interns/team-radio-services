@@ -213,6 +213,8 @@ public class SongServiceImpl implements SongService {
                 nowPlaying = stationPlayerHelper.addNowPlaying(stationId, willBePlaySong, joinTime);
                 updateShiftSong(shiftSongList);
             }
+
+            updateSongPlayingStatusAndMessage(willBePlaySong.getId(), SongStatus.playing, willBePlaySong.getMessage());
         }
 
         return nowPlaying;
