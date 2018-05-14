@@ -28,6 +28,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SynchronousSink;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -130,7 +131,9 @@ public class StationController extends BaseRadioController {
                 MessageHandler messageHandler = message -> {
                     Map<String, Object> data = (Map<String, Object>) message.getPayload();
                     StationDTO stationInfo = (StationDTO) data.get("stationInfo");
+                    System.out.println("Station name " + stationInfo.getName());
                     if (stationId.equals(stationInfo.getFriendlyId())) {
+                        System.out.println("HIT send station " + data);
                         sink.next(data);
                     }
                 };
@@ -138,10 +141,12 @@ public class StationController extends BaseRadioController {
                 sink.onCancel(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
                 onlineUserOnlineChannel.subscribe(messageHandler);
             });
-            onlineUserStream.put(stationId, stationOnlineStream);
+            onlineUserStream.put(stationId, stationOnlineStream
+                    .publish()
+                    .refCount()
+                    .doOnSubscribe(subscription -> stationService.joinStation(stationId, userMapper.userToUserDTO(user))));
         }
-
-        return stationOnlineStream.publish().refCount().doOnSubscribe(subscription -> stationService.joinStation(stationId, userMapper.userToUserDTO(user)));
+        return stationOnlineStream;
     }
 
     @ApiOperation(
