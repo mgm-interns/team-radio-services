@@ -58,7 +58,6 @@ public class SongController extends BaseRadioController {
     @GetMapping("/{stationId}/history")
     @ResponseStatus(HttpStatus.OK)
     public Flux<HistoryDTO> getListSongHistory(@PathVariable(value = "stationId") String stationId) {
-        System.out.println(cookieHelper.getUserWithCookie());
         return historyService.getHistoryByStationId(stationId)
                 .take(HistoryLimitation.first.getLimit());
     }
