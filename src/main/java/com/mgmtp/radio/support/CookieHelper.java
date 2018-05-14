@@ -38,4 +38,8 @@ public class CookieHelper {
         User user = userService.getAccessUser(this.cookieId);
         return user;
     }
+
+    public void resetCookieId() {
+        this.cookieId = constant.getDefaultCookie();
+    }
 }

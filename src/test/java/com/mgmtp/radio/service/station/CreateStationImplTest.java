@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import reactor.core.publisher.Mono;
 
 import static org.junit.Assert.assertEquals;
@@ -27,10 +28,13 @@ public class CreateStationImplTest {
     @Mock
     StationOnlineService stationOnlineService;
 
+    @Mock
+    MongoTemplate mongoTemplate;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        stationService = new StationServiceImpl(stationMapper, stationRepository, stationOnlineService);
+        stationService = new StationServiceImpl(stationMapper, stationRepository, stationOnlineService, mongoTemplate);
     }
 
     @Test

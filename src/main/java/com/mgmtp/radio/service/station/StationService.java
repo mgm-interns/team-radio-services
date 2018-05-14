@@ -2,11 +2,9 @@ package com.mgmtp.radio.service.station;
 
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.dto.station.StationConfigurationDTO;
-import com.mgmtp.radio.dto.user.UserDTO;
-import com.mgmtp.radio.sdo.StationPrivacy;
-import reactor.core.publisher.Mono;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
+import com.mgmtp.radio.sdo.StationPrivacy;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -25,4 +23,5 @@ public interface StationService {
     Mono<StationDTO> joinStation(String stationId, UserDTO userDto);
     Mono<Station> retrieveByIdOrFriendlyId(String friendlyId);
     Flux<StationDTO> getListStationByListStationIdAndPrivacy(List<String> listStationId, StationPrivacy privacy);
+    void updateOwnerId(String ownerId, String newOwnerId);
 }

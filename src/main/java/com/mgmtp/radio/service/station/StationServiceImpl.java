@@ -10,6 +10,10 @@ import com.mgmtp.radio.exception.StationNotFoundException;
 import com.mgmtp.radio.mapper.station.StationMapper;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.sdo.StationPrivacy;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,11 +31,13 @@ public class StationServiceImpl implements StationService {
 	private final StationRepository stationRepository;
 	private final StationMapper stationMapper;
 	private final StationOnlineService stationOnlineService;
+	private final MongoTemplate mongoTemplate;
 
-    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, StationOnlineService stationOnlineService) {
+    public StationServiceImpl(StationMapper stationMapper, StationRepository stationRepository, StationOnlineService stationOnlineService, MongoTemplate mongoTemplate) {
         this.stationMapper = stationMapper;
         this.stationRepository = stationRepository;
         this.stationOnlineService = stationOnlineService;
+        this.mongoTemplate = mongoTemplate;
     }
 
     public Map<String, StationDTO> getOrderedStations() {
@@ -147,5 +153,14 @@ public class StationServiceImpl implements StationService {
 
     public void addUserToStationOnlineList(String stationId, UserDTO userDto) {
         stationOnlineService.addOnlineUser(userDto, stationId);
+    }
+
+    @Override
+    public void updateOwnerId(String ownerId, String newOwnerId) {
+        Query query = new Query();
+        query.addCriteria(new Criteria("ownerId").is(ownerId));
+        Update update = new Update();
+        update.set("ownerId", newOwnerId);
+        mongoTemplate.updateMulti(query, update, Station.class);
     }
 }

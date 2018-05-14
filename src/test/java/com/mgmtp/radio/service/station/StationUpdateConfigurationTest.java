@@ -15,6 +15,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import reactor.core.publisher.Mono;
 
@@ -35,10 +36,13 @@ public class StationUpdateConfigurationTest {
 	@Mock
     StationOnlineService stationOnlineService;
 
+	@Mock
+	MongoTemplate mongoTemplate;
+
 	@Before
 	public void setUp() {
 		MockitoAnnotations.initMocks(stationRepository);
-		stationService = new StationServiceImpl(stationMapper, stationRepository, stationOnlineService);
+		stationService = new StationServiceImpl(stationMapper, stationRepository, stationOnlineService, mongoTemplate);
 	}
 
 	/**

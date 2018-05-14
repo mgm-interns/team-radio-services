@@ -299,18 +299,22 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getAnonymousUser(String cookieId) {
         if (cookieId.isEmpty() || cookieId.equals(constant.getDefaultCookie())) {
-            User user = new User();
-            String unique = UUID.randomUUID().toString();
-            user.setUsername(constant.getAnonymousUsername());
-            user.setName(constant.getAnonymousUsername());
-            user.setCookieId(unique);
-            return userRepository.save(user);
+            return createNewAnonymousUser();
         }
         Optional<User> user = userRepository.findByCookieId(cookieId);
-        if (!user.isPresent()) {
-            throw new RadioNotFoundException();
+        if (user.isPresent()) {
+            return user.get();
         }
-        return user.get();
+        return createNewAnonymousUser();
+    }
+
+    private User createNewAnonymousUser() {
+        User user = new User();
+        String unique = UUID.randomUUID().toString();
+        user.setUsername(constant.getAnonymousUsername());
+        user.setName(constant.getAnonymousUsername());
+        user.setCookieId(unique);
+        return userRepository.save(user);
     }
 
     @Override
@@ -322,5 +326,10 @@ public class UserServiceImpl implements UserService {
             user = getAnonymousUser(cookieId);
         }
         return user;
+    }
+
+    @Override
+    public void deleteById(String id) {
+        userRepository.deleteById(id);
     }
 }
