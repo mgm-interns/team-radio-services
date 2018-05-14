@@ -5,15 +5,13 @@ import com.mgmtp.radio.domain.station.PlayList;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.HistoryDTO;
 import com.mgmtp.radio.dto.station.SongDTO;
-import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
-import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.sdo.HistoryLimitation;
 import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
-import com.mgmtp.radio.service.station.StationService;
+import com.mgmtp.radio.support.CookieHelper;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -26,10 +24,9 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.time.Duration;
-import java.util.Optional;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.*;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Log4j2
@@ -42,10 +39,12 @@ public class SongController extends BaseRadioController {
 
     private final SongService songService;
     private final HistoryService historyService;
+    private final CookieHelper cookieHelper;
 
-    public SongController(SongService songService, HistoryService historyService) {
+    public SongController(SongService songService, HistoryService historyService, CookieHelper cookieHelper) {
         this.songService = songService;
         this.historyService = historyService;
+        this.cookieHelper = cookieHelper;
     }
 
     @ApiOperation(
@@ -59,6 +58,7 @@ public class SongController extends BaseRadioController {
     @GetMapping("/{stationId}/history")
     @ResponseStatus(HttpStatus.OK)
     public Flux<HistoryDTO> getListSongHistory(@PathVariable(value = "stationId") String stationId) {
+        System.out.println(cookieHelper.getUserWithCookie());
         return historyService.getHistoryByStationId(stationId)
                 .take(HistoryLimitation.first.getLimit());
     }
@@ -125,12 +125,8 @@ public class SongController extends BaseRadioController {
     ) {
         log.info("POST /api/v1/song  - data: " + youTubeVideoId.toString());
 
-        if (getCurrentUser().isPresent()) {
-            String userId = getCurrentUser().get().getId();
-            return songService.addSongToStationPlaylist(stationId, youTubeVideoId, message, userId);
-        } else {
-            throw new RadioNotFoundException("Please login to use this feature!!!");
-        }
+        User user = cookieHelper.getUserWithCookie();
+        return songService.addSongToStationPlaylist(stationId, youTubeVideoId, message, user);
     }
 
     @ApiOperation(

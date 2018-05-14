@@ -175,7 +175,7 @@ public class AddSongServiceImplTest {
         when(stationService.retrieveByIdOrFriendlyId(station.getId())).thenReturn(Mono.just(station));
 
         SongDTO savedSongDTO = songService.addSongToStationPlaylist(
-                station.getId(), "mNh6MCoMPis", "Nhac Audition", user.getId()
+                station.getId(), "mNh6MCoMPis", "Nhac Audition", user
         ).block();
 
         assertEquals(songDTO.getTitle(), savedSongDTO.getTitle());

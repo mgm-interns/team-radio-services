@@ -34,4 +34,5 @@ public interface UserService {
     UserDTO resetPassword(String resetPasswordToken, String newPassword);
     Flux<StationDTO> getStationsByUserIdAndPrivacy(String userId, StationPrivacy privacy);
     User getAnonymousUser(String cookieId);
+    User getAccessUser(String cookieId);
 }
