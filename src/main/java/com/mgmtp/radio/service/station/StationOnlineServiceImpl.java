@@ -51,6 +51,7 @@ public class StationOnlineServiceImpl implements StationOnlineService {
         userManager.put(userDTO.getId(), stationId);
         stationDTO.getJoiningUsers().put(userDTO.getId(), userDTO);
         stationDTO.getOnlineUsers().put(userDTO.getId(), userDTO);
+        System.out.println("Add online " + userDTO);
         sendMessage(stationId, userDTO, null);
     }
 
@@ -58,6 +59,7 @@ public class StationOnlineServiceImpl implements StationOnlineService {
         StationDTO stationDTO = allStations.get(stationId);
         stationDTO.getJoiningUsers().remove(userDTO.getId());
         stationDTO.getOnlineUsers().remove(userDTO.getId());
+        System.out.println("Remove online " + userDTO);
         sendMessage(stationId, null, userDTO);
     }
 
@@ -114,9 +116,8 @@ public class StationOnlineServiceImpl implements StationOnlineService {
     }
 
     private void sendMessage(String stationId, UserDTO joinUser, UserDTO leaveUser){
-        StationDTO stationDTO = allStations.get(stationId);
         Map<String, Object> param = new HashMap<>();
-        param.put("stationInfo", stationDTO);
+        param.put("stationInfo", allStations.get(stationId));
         param.put("joinUser", joinUser != null ? joinUser.getName() : "");
         param.put("leaveUser", leaveUser != null ? leaveUser.getName() : "");
 
