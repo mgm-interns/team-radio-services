@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
@@ -23,9 +22,6 @@ public class GetAllStationImplTest {
     @Mock
     StationRepository stationRepository;
 
-    @Mock
-    MongoTemplate mongoTemplate;
-
     StationMapper stationMapper = StationMapper.INSTANCE;
 
     StationService stationService;
@@ -35,7 +31,7 @@ public class GetAllStationImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        stationService = new StationServiceImpl(stationMapper, stationRepository, stationOnlineService, mongoTemplate);
+        stationService = new StationServiceImpl(stationMapper, stationRepository, stationOnlineService);
     }
 
     @Test

@@ -23,5 +23,4 @@ public interface StationService {
     Mono<StationDTO> joinStation(String stationId, UserDTO userDto);
     Mono<Station> retrieveByIdOrFriendlyId(String friendlyId);
     Flux<StationDTO> getListStationByListStationIdAndPrivacy(List<String> listStationId, StationPrivacy privacy);
-    void updateOwnerId(String ownerId, String newOwnerId);
 }

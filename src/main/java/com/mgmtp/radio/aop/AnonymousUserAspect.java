@@ -1,11 +1,12 @@
 package com.mgmtp.radio.aop;
 
 import com.mgmtp.radio.config.Constant;
+import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.user.UserDTO;
-import com.mgmtp.radio.service.station.StationService;
 import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.support.CookieHelper;
+import com.mgmtp.radio.support.MappingAnonymousHelper;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
@@ -22,21 +23,22 @@ public class AnonymousUserAspect {
 
     private final Constant constant;
     private final CookieHelper cookieHelper;
-    private final StationService stationService;
     private final UserService userService;
+    private final MappingAnonymousHelper mappingAnonymousHelper;
 
-    public AnonymousUserAspect(Constant constant, CookieHelper cookieHelper, StationService stationService, UserService userService) {
+    public AnonymousUserAspect(Constant constant, CookieHelper cookieHelper, UserService userService, MappingAnonymousHelper mappingAnonymousHelper) {
         this.constant = constant;
         this.cookieHelper = cookieHelper;
-        this.stationService = stationService;
         this.userService = userService;
+        this.mappingAnonymousHelper = mappingAnonymousHelper;
     }
+
 
     @AfterReturning(value = "execution(* com.mgmtp.radio.service.user.UserServiceImpl.getUserById(..))", returning = "userInfo")
     public void mapAnonymousUser(UserDTO userInfo) {
         if (!constant.getDefaultCookie().equals(cookieHelper.getCookieId())) {
             User anonymousUser = userService.getAnonymousUser(cookieHelper.getCookieId());
-            stationService.updateOwnerId(anonymousUser.getId(), userInfo.getId());
+            mappingAnonymousHelper.updateUserId(anonymousUser.getId(), userInfo.getId(), "ownerId", Station.class);
             userService.deleteById(anonymousUser.getId());
 
             // delete cookie

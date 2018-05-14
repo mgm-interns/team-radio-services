@@ -10,7 +10,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -34,15 +33,12 @@ public class GetStationByIdImplTest {
     @Mock
     SongService songService;
 
-    @Mock
-    MongoTemplate mongoTemplate;
-
     StationOnlineService stationOnlineService;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        stationService = new StationServiceImpl(stationMapper, stationRepository, stationOnlineService, mongoTemplate);
+        stationService = new StationServiceImpl(stationMapper, stationRepository, stationOnlineService);
     }
 
     @Test
