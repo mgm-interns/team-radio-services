@@ -131,9 +131,7 @@ public class StationController extends BaseRadioController {
                 MessageHandler messageHandler = message -> {
                     Map<String, Object> data = (Map<String, Object>) message.getPayload();
                     StationDTO stationInfo = (StationDTO) data.get("stationInfo");
-                    System.out.println("Station name " + stationInfo.getName());
                     if (stationId.equals(stationInfo.getFriendlyId())) {
-                        System.out.println("HIT send station " + data);
                         sink.next(data);
                     }
                 };

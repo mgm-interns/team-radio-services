@@ -44,7 +44,6 @@ public class StationOnlineServiceImpl implements StationOnlineService {
     }
 
     public void addOnlineUser(UserDTO userDTO, String stationId) {
-        System.out.println("HIT add online ");
         StationDTO stationDTO = allStations.get(stationId);
         if (userManager.get(userDTO.getId()) != null){
             removeOnlineUser(userDTO, userManager.get(userDTO.getId()));
@@ -116,8 +115,6 @@ public class StationOnlineServiceImpl implements StationOnlineService {
 
     private void sendMessage(String stationId, UserDTO joinUser, UserDTO leaveUser){
         StationDTO stationDTO = allStations.get(stationId);
-        System.out.println("Station " + stationDTO);
-        System.out.println("HIT send message " + joinUser + " " + leaveUser);
         Map<String, Object> param = new HashMap<>();
         param.put("stationInfo", stationDTO);
         param.put("joinUser", joinUser != null ? joinUser.getName() : "");
