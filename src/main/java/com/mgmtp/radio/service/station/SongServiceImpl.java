@@ -498,7 +498,8 @@ public class SongServiceImpl implements SongService {
         });
     }
 
-    private Mono<SongDTO> handleSkipRule (SongDTO songDTO){
+    @Override
+    public Mono<SongDTO> handleSkipRule (SongDTO songDTO){
         return stationService.retrieveByIdOrFriendlyId(songDTO.getStationFriendlyId()).map(tempStation ->{
             final StationConfiguration stationConfiguration = tempStation.getStationConfiguration();
             boolean isSkipped = false;

@@ -6,7 +6,6 @@ import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.support.StationPlayerHelper;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -45,12 +44,12 @@ public class StationOnlineServiceImpl implements StationOnlineService {
             removeOnlineUser(userDTO, userManager.get(userDTO.getId()));
         }
         userManager.put(userDTO.getId(), stationId);
-        stationDTO.getOnlineUsers().put(userDTO.getId(), userDTO);
+        stationDTO.getJoiningUsers().put(userDTO.getId(), userDTO);
     }
 
     public void removeOnlineUser(UserDTO userDTO, String stationId) {
         StationDTO stationDTO = allStations.get(stationId);
-        stationDTO.getOnlineUsers().remove(userDTO.getId());
+        stationDTO.getJoiningUsers().remove(userDTO.getId());
     }
 
     public StationDTO getStationById(String stationId) {
