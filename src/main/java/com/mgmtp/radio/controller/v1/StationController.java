@@ -139,11 +139,9 @@ public class StationController extends BaseRadioController {
                 sink.onDispose(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
                 sink.onCancel(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
                 onlineUserOnlineChannel.subscribe(messageHandler);
-            });
-            onlineUserStream.put(stationId, stationOnlineStream
-                    .publish()
-                    .refCount()
-                    .doOnSubscribe(subscription -> stationService.joinStation(stationId, userMapper.userToUserDTO(user))));
+            })
+            .map((o -> (Map<String, Object>) o));
+            onlineUserStream.put(stationId, stationOnlineStream.share());
         }
         return stationOnlineStream;
     }
