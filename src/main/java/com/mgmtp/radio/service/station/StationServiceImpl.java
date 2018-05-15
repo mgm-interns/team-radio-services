@@ -37,9 +37,7 @@ public class StationServiceImpl implements StationService {
     public Map<String, StationDTO> getOrderedStations() {
         Map<String, StationDTO> result = stationOnlineService.getAllStation();
         if (result.isEmpty()) {
-            getAll().filter(stationDTO -> stationDTO.getPrivacy() == StationPrivacy.station_public)
-                    .subscribe(stationDTO ->
-                            stationOnlineService.addStationToList(stationDTO));
+            getAll().subscribe(stationDTO -> stationOnlineService.addStationToList(stationDTO));
         }
         return stationOnlineService.getAllStation();
     }
@@ -66,7 +64,6 @@ public class StationServiceImpl implements StationService {
         station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationDTO.getStationConfiguration()));
 	    station.getStationConfiguration().setSkipRule(stationMapper.skipRuleDtoToSkipRule(stationDTO.getStationConfiguration().getSkipRule()));
 
-	    stationOnlineService.addStationToList(stationDTO);
         return stationRepository
                 .save(station)
                 .map(stationMapper::stationToStationDTO)
