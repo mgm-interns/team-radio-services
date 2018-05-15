@@ -5,6 +5,7 @@ import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.support.StationPlayerHelper;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -79,7 +80,11 @@ public class StationOnlineServiceImpl implements StationOnlineService {
         Map<String, StationDTO> result = sortByStation(allStations);
         result.forEach(((stationId, stationDTO) -> {
             Optional<NowPlaying> nowPlaying = stationPlayerHelper.getStationNowPlaying(stationId);
-            nowPlaying.ifPresent(currentPlaying -> stationDTO.setPicture(currentPlaying.getThumbnail()));
+            if(nowPlaying.isPresent()) {
+                stationDTO.setPicture(nowPlaying.get().getThumbnail());
+            } else {
+                stationDTO.setPicture("");
+            }
         }));
         return result;
     }
