@@ -95,15 +95,9 @@ public class SongController extends BaseRadioController {
                                                                   @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId) {
         Flux<ServerSentEvent<PlayList>> stationPlayListStream = stationStream.get(stationId);
         if (stationPlayListStream == null) {
-            User[] user = new User[1];
-            user[0] = userService.getAccessUser(cookieId);
-            if (!getCurrentUser().isPresent() && defaultCookie.equals(cookieId)) {
-                Cookie cookie = new Cookie(cookieId, user[0].getCookieId());
-                cookie.setPath("/");
-                response.addCookie(cookie);
-            }
             long[] currentTimetamp = new long[]{0};
             long[] lastDataTick = new long[]{0};
+            User[] user = new User[1];
             stationPlayListStream =
                     Flux.interval(Duration.ofMillis(1100)).map(tick -> Tuples.of(tick, songService.getPlayListByStationId(stationId, currentTimetamp[0])))
                             .map(data -> data.getT2().map(playList -> {
@@ -125,6 +119,13 @@ public class SongController extends BaseRadioController {
                             .doOnSubscribe(subscription -> {
                                 compareHash.remove(stationId);
                                 currentTimetamp[0] = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
+                                user[0] = userService.getAccessUser(cookieId);
+                                if (!getCurrentUser().isPresent() && defaultCookie.equals(cookieId)) {
+                                    Cookie cookie = new Cookie(cookieId, user[0].getCookieId());
+                                    cookie.setPath("/");
+                                    response.addCookie(cookie);
+                                }
+
                             })
                             .doFinally(signalType -> {
                                 stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(user[0]), stationId);
