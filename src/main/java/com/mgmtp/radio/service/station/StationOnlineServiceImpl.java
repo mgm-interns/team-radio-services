@@ -3,6 +3,7 @@ package com.mgmtp.radio.service.station;
 import com.mgmtp.radio.domain.station.NowPlaying;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
+import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.support.StationPlayerHelper;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -86,6 +87,7 @@ public class StationOnlineServiceImpl implements StationOnlineService {
                 stationDTO.setPicture("");
             }
         }));
+        result.entrySet().removeIf(entry -> entry.getValue().getPrivacy() == StationPrivacy.station_private);
         return result;
     }
 
