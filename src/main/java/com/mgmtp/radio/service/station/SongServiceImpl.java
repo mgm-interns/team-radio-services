@@ -267,33 +267,33 @@ public class SongServiceImpl implements SongService {
             String endedSongId = nowPlaying.get().getSongId();
             nowPlaying = getNextSongFromList(stationId, endedSongId, listSong, jointTime);
         } else {
-                Optional<Set<SongDTO>> stationSkipSong = stationSongSkipHelper.getListSkipSong(stationId);
-                Set<String> listSkippedSongId = Collections.EMPTY_SET;
-                if (stationSkipSong.isPresent()) {
-                    listSkippedSongId = stationSkipSong.get().stream().map(SongDTO::getId).collect(Collectors.toSet());
-                }
-                if (!listSkippedSongId.isEmpty()) {
-                    if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
-                        long curentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
-                        nowPlaying.get().setSkipTimeLeft(TOTAL_TIME_SKIP - (curentTime - startingTimeSkip));
-                        nowPlaying.get().setSkipped(true);
-                        if(is_skipping == false) {
-                            try {
-                                is_skipping = true;
-                                startingTimeSkip = curentTime;
-                                Thread.sleep(TOTAL_TIME_SKIP*1000 + 1100);
-                                String skippedSongId = nowPlaying.get().getSongId();
-                                nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
-                                is_skipping = false;
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
+            Optional<Set<SongDTO>> stationSkipSong = stationSongSkipHelper.getListSkipSong(stationId);
+            Set<String> listSkippedSongId = Collections.EMPTY_SET;
+            if (stationSkipSong.isPresent()) {
+                listSkippedSongId = stationSkipSong.get().stream().map(SongDTO::getId).collect(Collectors.toSet());
+            }
+            if (!listSkippedSongId.isEmpty()) {
+                if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
+                    long curentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
+                    nowPlaying.get().setSkipTimeLeft(TOTAL_TIME_SKIP - (curentTime - startingTimeSkip));
+                    nowPlaying.get().setSkipped(true);
+                    if(is_skipping == false) {
+                        try {
+                            is_skipping = true;
+                            startingTimeSkip = curentTime;
+                            Thread.sleep(TOTAL_TIME_SKIP*1000 + 1100);
+                            String skippedSongId = nowPlaying.get().getSongId();
+                            nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
+                            is_skipping = false;
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
                     }
-                    changeFlagForWillBeSkipSongInList(listSong, listSkippedSongId);
                 }
-                changeFlagForNotSkipSongAnyMore(listSong, listSkippedSongId);
+                changeFlagForWillBeSkipSongInList(listSong, listSkippedSongId);
             }
+            changeFlagForNotSkipSongAnyMore(listSong, listSkippedSongId);
+        }
         return nowPlaying;
     }
 
