@@ -37,7 +37,7 @@ public class RecentStationAspect {
     )
     public void createRecentStationAfterAddSong() {
         String friendlyStationId = getSegmentOfURI(SEGMENT_NUMBER);
-        User user = cookieHelper.getUserWithCookie();
+        User user = cookieHelper.getUserWithCookie(request);
         createRecentStation(user.getId(), getStationIdFromFriendlyId(friendlyStationId));
     }
 

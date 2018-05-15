@@ -15,22 +15,20 @@ import java.util.Optional;
 @Data
 public class CookieHelper {
 
-    private final HttpServletRequest request;
     private final UserService userService;
     private final Constant constant;
     private final UserHelper userHelper;
 
     private String cookieId;
 
-    public CookieHelper(HttpServletRequest request, UserService userService, Constant constant, UserHelper userHelper) {
-        this.request = request;
+    public CookieHelper(UserService userService, Constant constant, UserHelper userHelper) {
         this.userService = userService;
         this.constant = constant;
         this.userHelper = userHelper;
         cookieId = constant.getDefaultCookie();
     }
 
-    public User getUserWithCookie() {
+    public User getUserWithCookie(HttpServletRequest request) {
         Optional<Cookie> cookie = Optional.ofNullable(WebUtils.getCookie(request, constant.getCookieId()));
         if (cookie.isPresent()) {
             this.cookieId = cookie.get().getValue();

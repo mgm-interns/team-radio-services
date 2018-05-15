@@ -30,6 +30,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -109,8 +110,8 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId, HttpServletResponse response) throws RadioNotFoundException {
-        User user = cookieHelper.getUserWithCookie();
+    public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId, HttpServletRequest request, HttpServletResponse response) throws RadioNotFoundException {
+        User user = cookieHelper.getUserWithCookie(request);
         if (!getCurrentUser().isPresent() && constant.getDefaultCookie().equals(cookieHelper.getCookieId())) {
             Cookie cookie = new Cookie(constant.getCookieId(), user.getCookieId());
             cookie.setPath("/");
@@ -131,11 +132,11 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
     @PostMapping
-    public Mono<StationDTO> createStation(@Validated @RequestBody StationDTO stationDTO, BindingResult bindingResult, HttpServletResponse response) throws RadioException {
+    public Mono<StationDTO> createStation(@Validated @RequestBody StationDTO stationDTO, BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) throws RadioException {
         if (bindingResult.hasErrors()) {
             return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
-        User user = cookieHelper.getUserWithCookie();
+        User user = cookieHelper.getUserWithCookie(request);
         if (!getCurrentUser().isPresent()) {
             stationDTO.setPrivacy(StationPrivacy.station_private);
             if (constant.getDefaultCookie().equals(cookieHelper.getCookieId())) {

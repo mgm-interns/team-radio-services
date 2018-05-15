@@ -23,6 +23,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -120,11 +121,12 @@ public class SongController extends BaseRadioController {
     public Mono<SongDTO> addSong(
             @PathVariable String stationId,
             @PathVariable String youTubeVideoId,
-            @RequestBody(required = false) String message
+            @RequestBody(required = false) String message,
+            HttpServletRequest request
     ) {
         log.info("POST /api/v1/song  - data: " + youTubeVideoId.toString());
 
-        User user = cookieHelper.getUserWithCookie();
+        User user = cookieHelper.getUserWithCookie(request);
         return songService.addSongToStationPlaylist(stationId, youTubeVideoId, message, user);
     }
 
