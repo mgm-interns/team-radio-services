@@ -1,6 +1,7 @@
 package com.mgmtp.radio.aop;
 
 import com.mgmtp.radio.config.Constant;
+import com.mgmtp.radio.domain.station.Song;
 import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.user.RecentStation;
 import com.mgmtp.radio.domain.user.User;
@@ -49,6 +50,7 @@ public class AnonymousUserAspect {
             User anonymousUser = userService.getAnonymousUser(cookieOptional.get().getValue());
             mappingAnonymousHelper.updateUserId(anonymousUser.getId(), userInfo.getId(), "ownerId", Station.class);
             mappingAnonymousHelper.updateUserId(anonymousUser.getId(), userInfo.getId(), "userId", RecentStation.class);
+            mappingAnonymousHelper.updateUserId(anonymousUser.getId(), userInfo.getId(), "creatorId", Song.class);
             userService.deleteById(anonymousUser.getId());
 
             // delete cookie
