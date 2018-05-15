@@ -11,7 +11,7 @@ import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.sdo.HistoryLimitation;
 import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
-import com.mgmtp.radio.support.CookieHelper;
+import com.mgmtp.radio.service.user.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -23,7 +23,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -40,12 +39,12 @@ public class SongController extends BaseRadioController {
 
     private final SongService songService;
     private final HistoryService historyService;
-    private final CookieHelper cookieHelper;
+    private final UserService userService;
 
-    public SongController(SongService songService, HistoryService historyService, CookieHelper cookieHelper) {
+    public SongController(SongService songService, HistoryService historyService, UserService userService) {
         this.songService = songService;
         this.historyService = historyService;
-        this.cookieHelper = cookieHelper;
+        this.userService = userService;
     }
 
     @ApiOperation(
@@ -122,11 +121,11 @@ public class SongController extends BaseRadioController {
             @PathVariable String stationId,
             @PathVariable String youTubeVideoId,
             @RequestBody(required = false) String message,
-            HttpServletRequest request
+            @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId
     ) {
         log.info("POST /api/v1/song  - data: " + youTubeVideoId.toString());
 
-        User user = cookieHelper.getUserWithCookie(request);
+        User user = userService.getAccessUser(cookieId);
         return songService.addSongToStationPlaylist(stationId, youTubeVideoId, message, user);
     }
 

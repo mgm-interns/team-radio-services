@@ -12,7 +12,7 @@ import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.service.station.StationService;
-import com.mgmtp.radio.support.CookieHelper;
+import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.support.validator.station.CreateStationValidator;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -30,7 +30,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -48,16 +47,16 @@ public class StationController extends BaseRadioController {
     private final Constant constant;
     private final CreateStationValidator createStationValidator;
     private final SubscribableChannel allStationChannel;
-    private final CookieHelper cookieHelper;
+    private final UserService userService;
 
     public StationController(StationService stationService, UserMapper userMapper, Constant constant,
-                             CreateStationValidator createStationValidator, SubscribableChannel allStationChannel, CookieHelper cookieHelper) {
+                             CreateStationValidator createStationValidator, SubscribableChannel allStationChannel, UserService userService) {
         this.stationService = stationService;
         this.userMapper = userMapper;
         this.constant = constant;
         this.createStationValidator = createStationValidator;
         this.allStationChannel = allStationChannel;
-        this.cookieHelper = cookieHelper;
+        this.userService = userService;
     }
 
     @InitBinder
@@ -110,9 +109,12 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId, HttpServletRequest request, HttpServletResponse response) throws RadioNotFoundException {
-        User user = cookieHelper.getUserWithCookie(request);
-        if (!getCurrentUser().isPresent() && constant.getDefaultCookie().equals(cookieHelper.getCookieId())) {
+    public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId,
+                                       HttpServletResponse response,
+                                       @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId
+    ) throws RadioNotFoundException {
+        User user = userService.getAccessUser(cookieId);
+        if (!getCurrentUser().isPresent() && constant.getDefaultCookie().equals(cookieId)) {
             Cookie cookie = new Cookie(constant.getCookieId(), user.getCookieId());
             cookie.setPath("/");
             response.addCookie(cookie);
@@ -132,14 +134,18 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
     @PostMapping
-    public Mono<StationDTO> createStation(@Validated @RequestBody StationDTO stationDTO, BindingResult bindingResult, HttpServletRequest request, HttpServletResponse response) throws RadioException {
+    public Mono<StationDTO> createStation(@Validated @RequestBody StationDTO stationDTO,
+                                          BindingResult bindingResult,
+                                          HttpServletResponse response,
+                                          @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId
+    ) throws RadioException {
         if (bindingResult.hasErrors()) {
             return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
-        User user = cookieHelper.getUserWithCookie(request);
+        User user = userService.getAccessUser(cookieId);
         if (!getCurrentUser().isPresent()) {
             stationDTO.setPrivacy(StationPrivacy.station_private);
-            if (constant.getDefaultCookie().equals(cookieHelper.getCookieId())) {
+            if (constant.getDefaultCookie().equals(cookieId)) {
                 Cookie cookie = new Cookie(constant.getCookieId(), user.getCookieId());
                 cookie.setPath("/");
                 response.addCookie(cookie);
