@@ -83,4 +83,18 @@ public class MessageChannelConfig {
     SubscribableChannel onlineUserOnlineChannel(){
         return MessageChannels.publishSubscribe().get();
     }
+
+    @Bean
+    MessageSource<Map<String, Object>> onlineUserMessageSource(StationService stationService){
+        return () -> MessageBuilder.withPayload(stationService.getAllStationInfo()).build();
+    }
+
+    @Bean
+    IntegrationFlow onlineUserFlow(StationService stationService){
+        return IntegrationFlows
+                .from(onlineUserMessageSource(stationService),
+                    resourcePolling -> resourcePolling.poller(Pollers.fixedRate(3 * 1000).maxMessagesPerPoll(1)))
+                .channel(onlineUserOnlineChannel())
+                .get();
+    }
 }

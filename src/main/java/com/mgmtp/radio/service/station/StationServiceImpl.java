@@ -139,10 +139,24 @@ public class StationServiceImpl implements StationService {
     @Override
     public void joinStation(String stationId, UserDTO userDto) {
         addUserToStationOnlineList(stationId, userDto);
-//        return stationOnlineService.getStationById(stationId);
     }
 
     public void addUserToStationOnlineList(String stationId, UserDTO userDto) {
         stationOnlineService.addOnlineUser(userDto, stationId);
+    }
+
+    @Override
+    public Map<String, Object> getAllStationInfo() {
+        return stationOnlineService.getStationInfo();
+    }
+
+    @Override
+    public void clearJoinUserInfo(String stationId) {
+        stationOnlineService.clearJoinUserInfo(stationId);
+    }
+
+    @Override
+    public void clearLeaveUserInfo(String stationId) {
+        stationOnlineService.clearLeaveUserInfo(stationId);
     }
 }
