@@ -35,7 +35,7 @@ public class SongServiceImpl implements SongService {
     private static final String BLANK = "";
     private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
     private static final long TOTAL_TIME_SKIP = 5;
-    private static boolean is_skipping = false;
+    private static boolean isSkipping = false;
     private static long startingTimeSkip;
 
     private final StationRepository stationRepository;
@@ -275,16 +275,16 @@ public class SongServiceImpl implements SongService {
             if (!listSkippedSongId.isEmpty()) {
                 if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
                     long curentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
-                    nowPlaying.get().setSkipTimeLeft(TOTAL_TIME_SKIP - (curentTime - startingTimeSkip));
+                    nowPlaying.get().setTimeSkipLeft(TOTAL_TIME_SKIP - (curentTime - startingTimeSkip) + 1);
                     nowPlaying.get().setSkipped(true);
-                    if(is_skipping == false) {
+                    if(isSkipping == false) {
                         try {
-                            is_skipping = true;
+                            isSkipping = true;
                             startingTimeSkip = curentTime;
                             Thread.sleep(TOTAL_TIME_SKIP*1000 + 1100);
                             String skippedSongId = nowPlaying.get().getSongId();
                             nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
-                            is_skipping = false;
+                            isSkipping = false;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
