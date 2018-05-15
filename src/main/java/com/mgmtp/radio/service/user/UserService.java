@@ -35,4 +35,5 @@ public interface UserService {
     Flux<StationDTO> getStationsByUserIdAndPrivacy(String userId, StationPrivacy privacy);
     User getAnonymousUser(String cookieId);
     User getAccessUser(String cookieId);
+    void deleteById(String id);
 }

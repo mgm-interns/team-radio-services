@@ -16,10 +16,7 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
-import com.mgmtp.radio.sdo.EventDataKeys;
-import com.mgmtp.radio.sdo.SkipRuleType;
-import com.mgmtp.radio.sdo.SongStatus;
-import com.mgmtp.radio.sdo.SubscriptionEvents;
+import com.mgmtp.radio.sdo.*;
 import com.mgmtp.radio.support.*;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -360,14 +357,24 @@ public class SongServiceImpl implements SongService {
     }
 
     private boolean checkAddSongPermission(String stationId, User user) {
-        Optional<Station> station = stationService.retrieveByIdOrFriendlyId(stationId).blockOptional();
-        if (!station.isPresent()) {
+        Optional<Station> stationOptional = stationService.retrieveByIdOrFriendlyId(stationId).blockOptional();
+
+        if (!stationOptional.isPresent()) {
             throw new RadioNotFoundException();
         }
-        if (!StringUtils.isEmpty(user.getCookieId()) && !user.getId().equals(station.get().getOwnerId())) {
-            throw new RadioBadRequestException("Please login to use this feature!!!");
+        if (!isAnonymousUser(user)) {
+            return true;
         }
-        return true;
+
+        Station station = stationOptional.get();
+        if (isAnonymousUser(user) && user.getId().equals(station.getOwnerId())) {
+            return true;
+        }
+        throw new RadioBadRequestException("Please login to use this feature!!!");
+    }
+
+    private boolean isAnonymousUser(User user) {
+        return !StringUtils.isEmpty(user.getCookieId()) && "Anonymous".equals(user.getUsername());
     }
 
     @Override

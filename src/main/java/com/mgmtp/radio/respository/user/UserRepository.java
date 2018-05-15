@@ -18,4 +18,5 @@ public interface UserRepository extends MongoRepository<User, String> {
     Optional<User> findByIdAndPassword(String userId, String password);
     Optional<User> findByResetPasswordTokenAndResetPasswordTokenExpiryDateAfter(String resetPasswordToken, LocalDate resetPasswordDate);
     Optional<User> findByCookieId(String cookieId);
+    void deleteById(String id);
 }
