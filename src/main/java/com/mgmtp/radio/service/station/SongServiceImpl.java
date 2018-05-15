@@ -286,9 +286,9 @@ public class SongServiceImpl implements SongService {
                             e.printStackTrace();
                         }
                         finally {
+                            isSkipping = false;
                             String skippedSongId = nowPlaying.get().getSongId();
                             nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
-                            isSkipping = false;
                         }
                     }
                 }
