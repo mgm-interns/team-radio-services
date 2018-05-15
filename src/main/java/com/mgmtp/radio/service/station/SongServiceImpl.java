@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -32,6 +34,9 @@ import java.util.stream.Collectors;
 public class SongServiceImpl implements SongService {
     private static final String BLANK = "";
     private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
+    private static final long TOTAL_TIME_SKIP = 5;
+    private static boolean is_skipping = false;
+    private static long startingTimeSkip;
 
     private final StationRepository stationRepository;
     private final SongRepository songRepository;
@@ -262,20 +267,33 @@ public class SongServiceImpl implements SongService {
             String endedSongId = nowPlaying.get().getSongId();
             nowPlaying = getNextSongFromList(stationId, endedSongId, listSong, jointTime);
         } else {
-            Optional<Set<SongDTO>> stationSkipSong = stationSongSkipHelper.getListSkipSong(stationId);
-            Set<String> listSkippedSongId = Collections.EMPTY_SET;
-            if (stationSkipSong.isPresent()){
-                listSkippedSongId = stationSkipSong.get().stream().map(SongDTO::getId).collect(Collectors.toSet());
-            }
-            if (!listSkippedSongId.isEmpty()) {
-                if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
-                    String skippedSongId = nowPlaying.get().getSongId();
-                    nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
+                Optional<Set<SongDTO>> stationSkipSong = stationSongSkipHelper.getListSkipSong(stationId);
+                Set<String> listSkippedSongId = Collections.EMPTY_SET;
+                if (stationSkipSong.isPresent()) {
+                    listSkippedSongId = stationSkipSong.get().stream().map(SongDTO::getId).collect(Collectors.toSet());
                 }
-                changeFlagForWillBeSkipSongInList(listSong, listSkippedSongId);
+                if (!listSkippedSongId.isEmpty()) {
+                    if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
+                        long curentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
+                        nowPlaying.get().setSkipTimeLeft(TOTAL_TIME_SKIP - (curentTime - startingTimeSkip));
+                        nowPlaying.get().setSkipped(true);
+                        if(is_skipping == false) {
+                            try {
+                                is_skipping = true;
+                                startingTimeSkip = curentTime;
+                                Thread.sleep(TOTAL_TIME_SKIP*1000 + 1100);
+                                String skippedSongId = nowPlaying.get().getSongId();
+                                nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
+                                is_skipping = false;
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                    changeFlagForWillBeSkipSongInList(listSong, listSkippedSongId);
+                }
+                changeFlagForNotSkipSongAnyMore(listSong, listSkippedSongId);
             }
-            changeFlagForNotSkipSongAnyMore(listSong, listSkippedSongId);
-        }
         return nowPlaying;
     }
 
