@@ -10,6 +10,7 @@ public interface StationOnlineService {
      * Add a stationDTO to list all stations
      * - If the stationId is existed, then the old station in list would be replaced by the new station
      * - Else, add a new station to list
+     *
      * @param stationDTO
      */
     void addStationToList(StationDTO stationDTO);
@@ -24,5 +25,11 @@ public interface StationOnlineService {
 
     StationDTO getStationById(String stationId);
 
-	int getNumberOnlineUser(String stationId);
+    int getNumberOnlineUser(String stationId);
+
+    Map<String, Object> getStationInfo();
+
+    void clearJoinUserInfo(String stationId);
+
+    void clearLeaveUserInfo(String stationId);
 }

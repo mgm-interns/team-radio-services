@@ -125,15 +125,25 @@ public class StationController extends BaseRadioController {
             cookie.setPath("/");
             response.addCookie(cookie);
         }
+        stationService.joinStation(stationId, userMapper.userToUserDTO(user));
         Flux<Map<String, Object>> stationOnlineStream = onlineUserStream.get(stationId);
         if (stationOnlineStream == null) {
             stationOnlineStream = Flux.create(sink -> {
                 MessageHandler messageHandler = message -> {
                     Map<String, Object> data = (Map<String, Object>) message.getPayload();
-                    StationDTO stationInfo = (StationDTO) data.get("stationInfo");
-                    if (stationId.equals(stationInfo.getFriendlyId())) {
-                        System.out.println("Data " + data);
-                        sink.next(data);
+                    if (data.containsKey(stationId)){
+                        Map<String, Object> stationInfo = (Map<String, Object>) data.get(stationId);
+                        sink.next(stationInfo);
+
+                        List<String> joinUserList = (List<String>) stationInfo.get("joinUser");
+                        if (!joinUserList.isEmpty()){
+                            stationService.clearJoinUserInfo(stationId);
+                        }
+
+                        List<String> leaveUserList = (List<String>) stationInfo.get("leaveUser");
+                        if (!leaveUserList.isEmpty()){
+                            stationService.clearLeaveUserInfo(stationId);
+                        }
                     }
                 };
                 sink.onDispose(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
@@ -141,7 +151,7 @@ public class StationController extends BaseRadioController {
                 onlineUserOnlineChannel.subscribe(messageHandler);
             })
             .map((o -> (Map<String, Object>) o));
-            onlineUserStream.put(stationId, stationOnlineStream.share());
+            onlineUserStream.put(stationId, stationOnlineStream.share().distinct());
         }
         return stationOnlineStream;
     }

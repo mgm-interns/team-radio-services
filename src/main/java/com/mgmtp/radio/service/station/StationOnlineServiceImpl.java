@@ -5,34 +5,27 @@ import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.support.StationPlayerHelper;
-import org.springframework.messaging.SubscribableChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service("stationOnlineService")
 public class StationOnlineServiceImpl implements StationOnlineService {
 
     private static Map<String, StationDTO> allStations = new LinkedHashMap<>();
-    private static Map<String, String> userManager = new HashMap<>();
+    private static Map<String, Map<String, String>> joinUser = new HashMap<>();
+    private static Map<String, Map<String, String>> leaveUser = new HashMap<>();
 
     private static final int LARGER = -1;
     private static final int SMALLER = 1;
     private static final int EQUAL = 0;
 
     private final StationPlayerHelper stationPlayerHelper;
-    private final SubscribableChannel onlineUserOnlineChannel;
 
-    public StationOnlineServiceImpl(StationPlayerHelper stationPlayerHelper,
-                                    SubscribableChannel onlineUserOnlineChannel) {
+    public StationOnlineServiceImpl(StationPlayerHelper stationPlayerHelper) {
         this.stationPlayerHelper = stationPlayerHelper;
-        this.onlineUserOnlineChannel = onlineUserOnlineChannel;
     }
 
     public void addStationToList(StationDTO stationDTO) {
@@ -45,22 +38,34 @@ public class StationOnlineServiceImpl implements StationOnlineService {
 
     public void addOnlineUser(UserDTO userDTO, String stationId) {
         StationDTO stationDTO = allStations.get(stationId);
-        if (userManager.get(userDTO.getId()) != null){
-            removeOnlineUser(userDTO, userManager.get(userDTO.getId()));
-        }
-        userManager.put(userDTO.getId(), stationId);
-        stationDTO.getJoiningUsers().put(userDTO.getId(), userDTO);
-        stationDTO.getOnlineUsers().put(userDTO.getId(), userDTO);
         System.out.println("Add online " + userDTO);
-        sendMessage(stationId, userDTO, null);
+        stationDTO.getOnlineUsers().put(userDTO.getId(), userDTO);
+        Map<String, String> joinUserMap = joinUser.get(stationId);
+        if (joinUserMap == null) {
+            joinUserMap = new HashMap<>();
+            joinUserMap.put(userDTO.getId(), userDTO.getName());
+            joinUser.put(stationId, joinUserMap);
+        } else {
+            joinUserMap.put(userDTO.getId(), userDTO.getName());
+        }
     }
 
     public void removeOnlineUser(UserDTO userDTO, String stationId) {
         StationDTO stationDTO = allStations.get(stationId);
-        stationDTO.getJoiningUsers().remove(userDTO.getId());
-        stationDTO.getOnlineUsers().remove(userDTO.getId());
-        System.out.println("Remove online " + userDTO);
-        sendMessage(stationId, null, userDTO);
+        System.out.println("HIT remove " + stationId + " user " + userDTO.getId());
+        System.out.println("Join user " + joinUser.get(stationId));
+        if (joinUser.get(stationId) == null || !joinUser.get(stationId).containsKey(userDTO.getId())) {
+            System.out.println("Remove online " + userDTO);
+            stationDTO.getOnlineUsers().remove(userDTO.getId());
+        }
+        Map<String, String> leaveUserMap = leaveUser.get(stationId);
+        if (leaveUserMap != null) {
+            leaveUserMap.put(userDTO.getId(), userDTO.getName());
+        } else {
+            leaveUserMap = new HashMap<>();
+            leaveUserMap.put(userDTO.getId(), userDTO.getName());
+            leaveUser.put(stationId, leaveUserMap);
+        }
     }
 
     public StationDTO getStationById(String stationId) {
@@ -111,16 +116,44 @@ public class StationOnlineServiceImpl implements StationOnlineService {
         return getStationByFriendlyId(friendlyId).getNumberOnline();
     }
 
-    StationDTO getStationByFriendlyId(String friendlyId) {
+    private StationDTO getStationByFriendlyId(String friendlyId) {
         return allStations.get(friendlyId);
     }
 
-    private void sendMessage(String stationId, UserDTO joinUser, UserDTO leaveUser){
-        Map<String, Object> param = new HashMap<>();
-        param.put("stationInfo", allStations.get(stationId));
-        param.put("joinUser", joinUser != null ? joinUser.getName() : "");
-        param.put("leaveUser", leaveUser != null ? leaveUser.getName() : "");
+    @Override
+    public Map<String, Object> getStationInfo() {
+        Map<String, Object> result = new HashMap<>();
+        allStations.forEach((stationFriendlyId, stationDTO) -> {
+            Map<String, Object> stationInfo = new HashMap<>();
+            stationInfo.put("stationInfo", stationDTO);
 
-        onlineUserOnlineChannel.send(MessageBuilder.withPayload(param).build());
+            Map<String, String> joinUserInfo = joinUser.get(stationFriendlyId);
+            if (joinUserInfo != null) {
+                stationInfo.put("joinUser", new ArrayList<>(joinUserInfo.values()));
+            } else {
+                stationInfo.put("joinUser", Collections.EMPTY_LIST);
+            }
+
+            Map<String, String> leaveUserInfo = leaveUser.get(stationFriendlyId);
+            if (leaveUserInfo != null) {
+                stationInfo.put("leaveUser", new ArrayList<>(leaveUserInfo.values()));
+            } else {
+                stationInfo.put("leaveUser", Collections.EMPTY_LIST);
+            }
+
+            result.put(stationFriendlyId, stationInfo);
+        });
+
+        return result;
+    }
+
+    @Override
+    public void clearJoinUserInfo(String stationId){
+        joinUser.remove(stationId);
+    }
+
+    @Override
+    public void clearLeaveUserInfo(String stationId){
+        leaveUser.remove(stationId);
     }
 }
