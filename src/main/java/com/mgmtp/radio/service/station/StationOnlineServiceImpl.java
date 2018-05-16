@@ -9,14 +9,15 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Service("stationOnlineService")
 public class StationOnlineServiceImpl implements StationOnlineService {
 
     private static Map<String, StationDTO> allStations = new LinkedHashMap<>();
-    private static Map<String, Map<String, String>> joinUser = new HashMap<>();
-    private static Map<String, Map<String, String>> leaveUser = new HashMap<>();
+    private static Map<String, Map<String, String>> joinUser = new ConcurrentHashMap<>();
+    private static Map<String, Map<String, String>> leaveUser = new ConcurrentHashMap<>();
 
     private static final int LARGER = -1;
     private static final int SMALLER = 1;
