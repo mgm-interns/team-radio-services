@@ -8,6 +8,7 @@ import lombok.ToString;
 
 import javax.validation.constraints.Email;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -46,5 +47,9 @@ public class UserDTO {
     int reputation;
 
     String cookieId;
+
+    LocalDateTime createdAt;
+
+    boolean anonymous;
 
 }
