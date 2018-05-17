@@ -137,7 +137,9 @@ public class SongController extends BaseRadioController {
         }
         return stationPlayListStream
                 .doFinally(signalType -> {
-                    stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(user), stationId);
+                    if (!user.isAnonymous()) {
+                        stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(user), stationId);
+                    }
                 });
     }
 

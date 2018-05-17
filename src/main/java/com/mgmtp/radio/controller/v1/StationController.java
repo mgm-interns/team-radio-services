@@ -125,7 +125,9 @@ public class StationController extends BaseRadioController {
             cookie.setPath("/");
             response.addCookie(cookie);
         }
-        stationService.joinStation(stationId, userMapper.userToUserDTO(user));
+        if (!user.isAnonymous()) {
+            stationService.joinStation(stationId, userMapper.userToUserDTO(user));
+        }
         Flux<Map<String, Object>> stationOnlineStream = onlineUserStream.get(stationId);
         if (stationOnlineStream == null) {
             stationOnlineStream = Flux.create(sink -> {
