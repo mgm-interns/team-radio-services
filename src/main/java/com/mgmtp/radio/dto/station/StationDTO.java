@@ -49,9 +49,13 @@ public class StationDTO {
 		joiningUsers = new HashMap<>();
 	}
 
+	/**
+	 * We don't count anonymous users in online users number
+	 * @return
+	 */
 	public Map<String, UserDTO> getOnlineUsers() {
 		return joiningUsers.entrySet().stream().filter(user -> {
-			if(user.getKey() == null) {
+			if(user.getValue().isAnonymous()) {
 				return false;
 			}
 			return true;
