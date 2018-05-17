@@ -82,12 +82,8 @@ public class SongController extends BaseRadioController {
     @GetMapping("/{friendlyId}/history")
     @ResponseStatus(HttpStatus.OK)
     public Flux<HistoryDTO> getListSongHistory(@PathVariable(value = "friendlyId") String friendlyId) {
-        return stationService.retrieveByIdOrFriendlyId(friendlyId)
-                .flatMapMany(station -> {
-                    System.out.println(station.getName());
-                    return historyService.getHistoryByStationId(station.getId())
-                            .take(HistoryLimitation.first.getLimit());
-                });
+        return historyService.getHistoryByStationId(friendlyId)
+                .take(HistoryLimitation.first.getLimit());
 
     }
 
