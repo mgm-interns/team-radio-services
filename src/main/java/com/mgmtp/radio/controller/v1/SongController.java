@@ -2,15 +2,18 @@ package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.domain.station.PlayList;
+import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.HistoryDTO;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
+import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.sdo.HistoryLimitation;
 import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
+import com.mgmtp.radio.service.station.StationService;
 import com.mgmtp.radio.service.user.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -40,11 +43,13 @@ public class SongController extends BaseRadioController {
     private final SongService songService;
     private final HistoryService historyService;
     private final UserService userService;
+    private final StationService stationService;
 
-    public SongController(SongService songService, HistoryService historyService, UserService userService) {
+    public SongController(SongService songService, HistoryService historyService, UserService userService, StationService stationService) {
         this.songService = songService;
         this.historyService = historyService;
         this.userService = userService;
+        this.stationService = stationService;
     }
 
     @ApiOperation(
@@ -55,11 +60,16 @@ public class SongController extends BaseRadioController {
             @ApiResponse(code = 200, message = "Request processed successfully"),
             @ApiResponse(code = 200, message = "No message then there is error, connection close")
     })
-    @GetMapping("/{stationId}/history")
+    @GetMapping("/{friendlyId}/history")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<HistoryDTO> getListSongHistory(@PathVariable(value = "stationId") String stationId) {
-        return historyService.getHistoryByStationId(stationId)
-                .take(HistoryLimitation.first.getLimit());
+    public Flux<HistoryDTO> getListSongHistory(@PathVariable(value = "friendlyId") String friendlyId) {
+        return stationService.retrieveByIdOrFriendlyId(friendlyId)
+                .flatMapMany(station -> {
+                    System.out.println(station.getName());
+                    return historyService.getHistoryByStationId(station.getId())
+                            .take(HistoryLimitation.first.getLimit());
+                });
+
     }
 
     @ApiOperation(
