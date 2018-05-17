@@ -68,8 +68,7 @@ public class StationOnlineServiceImpl implements StationOnlineService {
     public StationDTO getStationById(String stationId) {
         return allStations.get(stationId);
     }
-
-
+    
     private Comparator<Map.Entry<String, StationDTO>> comparatorStation = (Map.Entry<String, StationDTO> entry1, Map.Entry<String, StationDTO> entry2) -> {
         StationDTO stationDTO1 = entry1.getValue();
         StationDTO stationDTO2 = entry2.getValue();
