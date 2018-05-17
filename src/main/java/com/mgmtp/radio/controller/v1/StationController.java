@@ -151,7 +151,7 @@ public class StationController extends BaseRadioController {
                 onlineUserOnlineChannel.subscribe(messageHandler);
             })
             .map((o -> (Map<String, Object>) o));
-            onlineUserStream.put(stationId, stationOnlineStream.share().distinct());
+            onlineUserStream.put(stationId, stationOnlineStream.share());
         }
         return stationOnlineStream;
     }
