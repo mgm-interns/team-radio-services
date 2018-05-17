@@ -32,4 +32,6 @@ public interface SongService {
     Flux<SongDTO> getListSongByListSongIdId(List<String> listSongId);
 
     boolean existsBySongId(String songId);
+
+    Mono<SongDTO> handleSkipRule (SongDTO songDTO);
 }

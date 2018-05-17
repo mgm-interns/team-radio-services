@@ -94,21 +94,21 @@ public class StationServiceImpl implements StationService {
                 .map(stationMapper::stationToStationDTO);
     }
 
-    @Override
-	public Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO) {
-		return stationRepository.retrieveByIdOrFriendlyId(id)
+	@Override
+	public Mono<StationConfigurationDTO> updateConfiguration(String stationId, StationConfigurationDTO stationConfigurationDTO) {
+		return stationRepository.retrieveByIdOrFriendlyId(stationId)
 			.map(station -> {
 				final StationConfiguration stationConfiguration =
 					stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO);
 					station.setStationConfiguration(stationConfiguration);
 				station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO));
-					stationRepository.save(station).subscribe();
-					final StationDTO stationDTO = stationMapper.stationToStationDTO(station);
-					stationOnlineService.addStationToList(stationDTO);
-					return stationConfiguration;
+				stationRepository.save(station).subscribe();
+				final StationDTO stationDTO = stationMapper.stationToStationDTO(station);
+				stationOnlineService.addStationToList(stationDTO);
+				stationConfiguration.setStationFriendlyId(station.getFriendlyId());
+				return stationConfiguration;
 			})
 			.map(stationMapper::stationConfigurationToStationConfigurationDto);
-
 	}
 
 	@Override
