@@ -1,27 +1,41 @@
 package com.mgmtp.radio.support;
 
+import com.mgmtp.radio.exception.RadioException;
+import com.mgmtp.radio.sdo.RadioTimeUnit;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.util.Date;
 
 @Component
 public class TransferHelper {
+
     public long transferVideoDuration(String youTubeDuration) {
         String time = youTubeDuration.substring(2);
+        if (youTubeDuration.contains(RadioTimeUnit.DAY.getKey())) {
+            time = youTubeDuration.substring(1);
+        }
+        RadioTimeUnit []timers = {
+            RadioTimeUnit.DAY,
+            RadioTimeUnit.HOUR,
+            RadioTimeUnit.MINUTE,
+            RadioTimeUnit.SECOND
+        };
+
         long duration = 0L;
-        Object[][] indexs = new Object[][]{{"H", 3600}, {"M", 60}, {"S", 1}};
-        for (int i = 0; i < indexs.length; i++) {
-            int index = time.indexOf((String) indexs[i][0]);
-            if (index != -1) {
-                String value = time.substring(0, index);
-                duration += Integer.parseInt(value) * (int) indexs[i][1] * 1000;
-                time = time.substring(value.length() + 1);
+        int index;
+        String value;
+        try {
+            for (RadioTimeUnit timer: timers) {
+                index = time.indexOf(timer.getKey());
+                if (index != -1) {
+                    value = time.substring(0, time.indexOf(timer.getKey()));
+                    time = time.substring(value.length() + timer.getKey().length());
+                    duration += Integer.parseInt(value) * timer.getPeriod();
+                }
             }
+        } catch (NumberFormatException exception) {
+            throw new RadioException("There is something wrong with the video!");
         }
 
-        return duration;
+        return duration * RadioTimeUnit.MILLISECONDS.getPeriod();
     }
 
 //    public LocalDate convertToLocalDate(Date dateToConvert) {
