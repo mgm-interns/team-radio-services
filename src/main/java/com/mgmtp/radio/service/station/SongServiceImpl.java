@@ -1,6 +1,5 @@
 package com.mgmtp.radio.service.station;
 
-import com.cloudinary.utils.StringUtils;
 import com.google.api.services.youtube.model.Video;
 import com.mgmtp.radio.config.YouTubeConfig;
 import com.mgmtp.radio.domain.station.*;
@@ -16,7 +15,10 @@ import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.respository.station.SongRepository;
 import com.mgmtp.radio.respository.station.StationRepository;
 import com.mgmtp.radio.respository.user.UserRepository;
-import com.mgmtp.radio.sdo.*;
+import com.mgmtp.radio.sdo.EventDataKeys;
+import com.mgmtp.radio.sdo.SkipRuleType;
+import com.mgmtp.radio.sdo.SongStatus;
+import com.mgmtp.radio.sdo.SubscriptionEvents;
 import com.mgmtp.radio.support.*;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -382,19 +384,15 @@ public class SongServiceImpl implements SongService {
         if (!stationOptional.isPresent()) {
             throw new RadioNotFoundException();
         }
-        if (!isAnonymousUser(user)) {
+        if (!user.isAnonymous()) {
             return true;
         }
 
         Station station = stationOptional.get();
-        if (isAnonymousUser(user) && user.getId().equals(station.getOwnerId())) {
+        if (user.isAnonymous() && user.getId().equals(station.getOwnerId())) {
             return true;
         }
         throw new RadioBadRequestException("Please login to use this feature!!!");
-    }
-
-    private boolean isAnonymousUser(User user) {
-        return !StringUtils.isEmpty(user.getCookieId()) && "Anonymous".equals(user.getUsername());
     }
 
     @Override

@@ -14,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.validation.constraints.Email;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
 
@@ -75,6 +76,10 @@ public class User implements UserDetails, Serializable {
     @JsonDeserialize(using = LocalDateDeserializer.class)
     @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate updatedAt;
+
+    private LocalDateTime createdAt;
+
+    private boolean anonymous;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

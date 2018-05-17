@@ -24,6 +24,7 @@ import org.springframework.util.StringUtils;
 import reactor.core.publisher.Flux;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -75,6 +76,8 @@ public class UserServiceImpl implements UserService {
         userDTO.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         User user = userMapper.userDtoToUser(userDTO);
         user.setRoles(getDefaultRole());
+        user.setAnonymous(false);
+        user.setCreatedAt(LocalDateTime.now());
         User savedUser = userRepository.save(user);
         savedUser = reputationService.updateUserReputation(savedUser);
         return userMapper.userToUserDTO(savedUser);
@@ -311,9 +314,11 @@ public class UserServiceImpl implements UserService {
     private User createNewAnonymousUser() {
         User user = new User();
         String unique = UUID.randomUUID().toString();
-        user.setUsername(constant.getAnonymousUsername());
-        user.setName(constant.getAnonymousUsername());
+        user.setUsername(unique);
+        user.setName(unique);
         user.setCookieId(unique);
+        user.setAnonymous(true);
+        user.setCreatedAt(LocalDateTime.now());
         return userRepository.save(user);
     }
 
