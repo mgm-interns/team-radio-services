@@ -54,12 +54,8 @@ public class StationDTO {
 	 * @return
 	 */
 	public Map<String, UserDTO> getOnlineUsers() {
-		return joiningUsers.entrySet().stream().filter(user -> {
-			if(user.getValue().isAnonymous()) {
-				return false;
-			}
-			return true;
-		}).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+		return joiningUsers.entrySet().stream().filter(user -> user.getValue().isAnonymous()
+		).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	};
 
 	public int getNumberOnline() {
