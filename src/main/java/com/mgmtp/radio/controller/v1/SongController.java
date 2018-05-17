@@ -26,6 +26,7 @@ import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
 import reactor.util.function.Tuples;
 
 import javax.servlet.http.Cookie;
@@ -125,16 +126,17 @@ public class SongController extends BaseRadioController {
                             .doOnSubscribe(subscription -> {
                                 compareHash.remove(stationId);
                                 currentTimetamp[0] = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
-                                user[0] = userService.getAccessUser(cookieId);
-                                if (!getCurrentUser().isPresent() && defaultCookie.equals(cookieId)) {
-                                    Cookie cookie = new Cookie(cookieId, user[0].getCookieId());
-                                    cookie.setPath("/");
-                                    response.addCookie(cookie);
-                                }
-
                             })
                             .doFinally(signalType -> {
-                                stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(user[0]), stationId);
+                                if (signalType.compareTo(SignalType.CANCEL) == 0) {
+                                    user[0] = userService.getAccessUser(cookieId);
+                                    if (!getCurrentUser().isPresent() && defaultCookie.equals(cookieId)) {
+                                        Cookie cookie = new Cookie(cookieId, user[0].getCookieId());
+                                        cookie.setPath("/");
+                                        response.addCookie(cookie);
+                                    }
+                                    stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(user[0]), stationId);
+                                }
                             });
 
             stationStream.put(stationId, stationPlayListStream);
