@@ -104,7 +104,6 @@ public class SongController extends BaseRadioController {
         if (stationPlayListStream == null) {
             long[] currentTimetamp = new long[]{0};
             long[] lastDataTick = new long[]{0};
-            final User[] user = new User[1];
             stationPlayListStream =
                     Flux.interval(Duration.ofMillis(1100)).map(tick -> Tuples.of(tick, songService.getPlayListByStationId(stationId, currentTimetamp[0])))
                             .map(data -> data.getT2().map(playList -> {
@@ -126,17 +125,16 @@ public class SongController extends BaseRadioController {
                             .doOnSubscribe(subscription -> {
                                 compareHash.remove(stationId);
                                 currentTimetamp[0] = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
-
-                                user[0] = userService.getAccessUser(cookieId);
+                            })
+                            .doFinally(signalType -> {
+                                User user = userService.getAccessUser(cookieId);
                                 if (!getCurrentUser().isPresent() && defaultCookie.equals(cookieId)) {
-                                    Cookie cookie = new Cookie(cookieId, user[0].getCookieId());
+                                    Cookie cookie = new Cookie(cookieId, user.getCookieId());
                                     cookie.setPath("/");
                                     response.addCookie(cookie);
                                 }
-                            })
-                            .doFinally(signalType ->
-                                stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(user[0]), stationId)
-                            );
+                                stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(user), stationId);
+                            });
 
             stationStream.put(stationId, stationPlayListStream);
         }
