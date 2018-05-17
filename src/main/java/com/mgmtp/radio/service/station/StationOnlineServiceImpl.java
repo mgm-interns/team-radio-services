@@ -39,7 +39,6 @@ public class StationOnlineServiceImpl implements StationOnlineService {
 
     public void addOnlineUser(UserDTO userDTO, String stationId) {
         StationDTO stationDTO = allStations.get(stationId);
-        System.out.println("Add online " + userDTO);
         stationDTO.getOnlineUsers().put(userDTO.getId(), userDTO);
         Map<String, String> joinUserMap = joinUser.get(stationId);
         if (joinUserMap == null) {
@@ -53,10 +52,7 @@ public class StationOnlineServiceImpl implements StationOnlineService {
 
     public void removeOnlineUser(UserDTO userDTO, String stationId) {
         StationDTO stationDTO = allStations.get(stationId);
-        System.out.println("HIT remove " + stationId + " user " + userDTO.getId());
-        System.out.println("Join user " + joinUser.get(stationId));
         if (joinUser.get(stationId) == null || !joinUser.get(stationId).containsKey(userDTO.getId())) {
-            System.out.println("Remove online " + userDTO);
             stationDTO.getOnlineUsers().remove(userDTO.getId());
         }
         Map<String, String> leaveUserMap = leaveUser.get(stationId);
