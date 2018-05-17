@@ -282,11 +282,13 @@ public class SongServiceImpl implements SongService {
                             isSkipping = true;
                             startingTimeSkip = curentTime;
                             Thread.sleep(TOTAL_TIME_SKIP*1000 + 1100);
-                            String skippedSongId = nowPlaying.get().getSongId();
-                            nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
-                            isSkipping = false;
                         } catch (InterruptedException e) {
                             e.printStackTrace();
+                        }
+                        finally {
+                            isSkipping = false;
+                            String skippedSongId = nowPlaying.get().getSongId();
+                            nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
                         }
                     }
                 }
