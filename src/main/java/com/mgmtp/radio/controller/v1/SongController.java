@@ -128,15 +128,13 @@ public class SongController extends BaseRadioController {
                                 currentTimetamp[0] = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
                             })
                             .doFinally(signalType -> {
-                                if (signalType.compareTo(SignalType.CANCEL) == 0) {
-                                    user[0] = userService.getAccessUser(cookieId);
-                                    if (!getCurrentUser().isPresent() && defaultCookie.equals(cookieId)) {
-                                        Cookie cookie = new Cookie(cookieId, user[0].getCookieId());
-                                        cookie.setPath("/");
-                                        response.addCookie(cookie);
-                                    }
-                                    stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(user[0]), stationId);
+                                user[0] = userService.getAccessUser(cookieId);
+                                if (!getCurrentUser().isPresent() && defaultCookie.equals(cookieId)) {
+                                    Cookie cookie = new Cookie(cookieId, user[0].getCookieId());
+                                    cookie.setPath("/");
+                                    response.addCookie(cookie);
                                 }
+                                stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(user[0]), stationId);
                             });
 
             stationStream.put(stationId, stationPlayListStream);
