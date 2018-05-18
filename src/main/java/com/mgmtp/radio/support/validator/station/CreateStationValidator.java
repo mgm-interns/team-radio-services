@@ -36,7 +36,7 @@ public class CreateStationValidator implements Validator {
 
 	private void validateUnique(StationDTO stationDTO, Errors errors) {
 		if (isStationExisted(stationDTO.getName())) {
-			errors.rejectValue("id", "", messageSourceAccessor.getMessage("validation.error.unique", new String[]{"id"}));
+			errors.rejectValue("id", "", messageSourceAccessor.getMessage("validation.error.unique", new String[]{"This station name"}));
 		}
 	}
 
