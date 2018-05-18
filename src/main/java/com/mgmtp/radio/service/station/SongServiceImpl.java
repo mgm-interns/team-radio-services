@@ -26,8 +26,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -37,8 +35,6 @@ public class SongServiceImpl implements SongService {
     private static final String BLANK = "";
     private static final double DOWN_VOTE_THRES_PERCENT = 0.5;
     private static final long TOTAL_TIME_SKIP = 5;
-    private static boolean isSkipping = false;
-    private static long startingTimeSkip;
 
     private final StationRepository stationRepository;
     private final SongRepository songRepository;
@@ -276,23 +272,18 @@ public class SongServiceImpl implements SongService {
             }
             if (!listSkippedSongId.isEmpty()) {
                 if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
-                    long curentTime = LocalDateTime.now().atZone(ZoneId.systemDefault()).toEpochSecond();
-                    nowPlaying.get().setTimeSkipLeft(TOTAL_TIME_SKIP - (curentTime - startingTimeSkip) + 1);
+                    updateSongSkipped(nowPlayingSong.get().getSongId(), true);
+                    stationSongSkipHelper.removeSkipSong(stationId, nowPlayingSong.get());
                     nowPlaying.get().setSkipped(true);
-                    if(isSkipping == false) {
                         try {
-                            isSkipping = true;
-                            startingTimeSkip = curentTime;
-                            Thread.sleep(TOTAL_TIME_SKIP*1000 + 1100);
+                            Thread.sleep(TOTAL_TIME_SKIP*1000 + 2100);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
                         finally {
-                            isSkipping = false;
                             String skippedSongId = nowPlaying.get().getSongId();
                             nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
                         }
-                    }
                 }
                 changeFlagForWillBeSkipSongInList(listSong, listSkippedSongId);
             }
@@ -347,7 +338,6 @@ public class SongServiceImpl implements SongService {
         SongDTO skippedSong = listSong.stream().filter(songDTO -> songDTO.getId().equals(skipSongId)).findFirst().get();
         listSong.remove(skippedSong);
         updateSongPlayingStatusAndMessage(skipSongId, SongStatus.skipped, skippedSong.getMessage());
-        stationSongSkipHelper.removeSkipSong(stationId, skippedSong);
 
         SongDTO nowPlayingSong = listSong.get(0);
         return updateStatusAndSetNowPlayingFromSong(nowPlayingSong, stationId, joinTime);
@@ -374,6 +364,13 @@ public class SongServiceImpl implements SongService {
         songRepository.findById(songId).flatMap(song -> {
             song.setStatus(playingStatus);
             song.setMessage(message);
+            return songRepository.save(song);
+        }).subscribe();
+    }
+
+    private void updateSongSkipped(String songId, boolean isSkipped){
+        songRepository.findById(songId).flatMap(song -> {
+            song.setSkipped(isSkipped);
             return songRepository.save(song);
         }).subscribe();
     }
