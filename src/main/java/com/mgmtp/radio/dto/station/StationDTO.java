@@ -38,7 +38,7 @@ public class StationDTO {
 
 	StationConfigurationDTO stationConfiguration;
 
-	Map<String, UserDTO> joiningUsers;
+	Map<String, UserDTO> onlineUsers;
 
 	String picture;
 
@@ -46,24 +46,15 @@ public class StationDTO {
 		stationConfiguration = new StationConfigurationDTO();
 		stationConfiguration.setStationFriendlyId(friendlyId);
 		stationConfiguration.setSkipRule(new SkipRuleDTO(SkipRuleType.BASIC));
-		joiningUsers = new HashMap<>();
+		onlineUsers = new HashMap<>();
 	}
-
-	/**
-	 * We don't count anonymous users in online users number
-	 * @return
-	 */
-	public Map<String, UserDTO> getOnlineUsers() {
-		return joiningUsers.entrySet().stream().filter(user -> user.getValue().isAnonymous()
-		).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-	};
 
 	public int getNumberOnline() {
 		return getOnlineUsers().size();
 	}
 
 	public boolean hasUser() {
-		return joiningUsers.size() > 0;
+		return getOnlineUsers().size() > 0;
 	}
 
 	public boolean isNewStation() {

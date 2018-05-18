@@ -6,6 +6,7 @@ import com.mgmtp.radio.mapper.station.SongMapper;
 import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
+import com.mgmtp.radio.service.station.StationOnlineService;
 import com.mgmtp.radio.service.station.StationService;
 import com.mgmtp.radio.service.user.UserService;
 import org.junit.Before;
@@ -55,10 +56,13 @@ public class SongControllerTest {
     @Mock
     UserService userService;
 
+    @Mock
+    StationOnlineService stationOnlineService;
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        songController = new SongController(songService,historyService, userService,null);
+        songController = new SongController(songService,historyService, userService, stationOnlineService, userMapper, null);
         webTestClient = WebTestClient.bindToController(songController).build();
     }
 

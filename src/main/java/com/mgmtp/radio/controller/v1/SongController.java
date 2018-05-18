@@ -2,30 +2,35 @@ package com.mgmtp.radio.controller.v1;
 
 import com.mgmtp.radio.controller.BaseRadioController;
 import com.mgmtp.radio.domain.station.PlayList;
-import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.HistoryDTO;
 import com.mgmtp.radio.dto.station.SongDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
-import com.mgmtp.radio.respository.station.StationRepository;
+import com.mgmtp.radio.mapper.user.UserMapper;
 import com.mgmtp.radio.sdo.HistoryLimitation;
 import com.mgmtp.radio.service.station.HistoryService;
 import com.mgmtp.radio.service.station.SongService;
+import com.mgmtp.radio.service.station.StationOnlineService;
+import com.mgmtp.radio.service.station.StationService;
 import com.mgmtp.radio.service.station.StationService;
 import com.mgmtp.radio.service.user.UserService;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
 import reactor.util.function.Tuples;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -43,12 +48,27 @@ public class SongController extends BaseRadioController {
     private final SongService songService;
     private final HistoryService historyService;
     private final UserService userService;
+    private final StationOnlineService stationOnlineService;
+    private final UserMapper userMapper;
     private final StationService stationService;
 
-    public SongController(SongService songService, HistoryService historyService, UserService userService, StationService stationService) {
+    @Value("${user.type.anonymous.cookie}")
+    private String defaultCookie;
+
+    @Value("${user.type.anonymous.cookie.key}")
+    private String cookieId;
+
+    public SongController(SongService songService,
+                          HistoryService historyService,
+                          UserService userService,
+                          StationOnlineService stationOnlineService,
+                          UserMapper userMapper,
+                          StationService stationService) {
         this.songService = songService;
         this.historyService = historyService;
         this.userService = userService;
+        this.stationOnlineService = stationOnlineService;
+        this.userMapper = userMapper;
         this.stationService = stationService;
     }
 
@@ -63,12 +83,8 @@ public class SongController extends BaseRadioController {
     @GetMapping("/{friendlyId}/history")
     @ResponseStatus(HttpStatus.OK)
     public Flux<HistoryDTO> getListSongHistory(@PathVariable(value = "friendlyId") String friendlyId) {
-        return stationService.retrieveByIdOrFriendlyId(friendlyId)
-                .flatMapMany(station -> {
-                    System.out.println(station.getName());
-                    return historyService.getHistoryByStationId(station.getId())
-                            .take(HistoryLimitation.first.getLimit());
-                });
+        return historyService.getHistoryByStationId(friendlyId)
+                .take(HistoryLimitation.first.getLimit());
 
     }
 
@@ -81,9 +97,16 @@ public class SongController extends BaseRadioController {
     })
     @GetMapping("/{stationId}/playList")
     @ResponseStatus(HttpStatus.OK)
-    public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId) {
+    public Flux<ServerSentEvent<PlayList>> getPlayListByStationId(@PathVariable("stationId") String stationId,
+                                                                  HttpServletResponse response,
+                                                                  @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId) {
+        User user = userService.getAccessUser(cookieId);
+        if (!getCurrentUser().isPresent() && this.defaultCookie.equals(cookieId)) {
+            Cookie cookie = new Cookie(this.cookieId, user.getCookieId());
+            cookie.setPath("/");
+            response.addCookie(cookie);
+        }
         Flux<ServerSentEvent<PlayList>> stationPlayListStream = stationStream.get(stationId);
-        Optional<User> user = getCurrentUser();
         if (stationPlayListStream == null) {
             long[] currentTimetamp = new long[]{0};
             long[] lastDataTick = new long[]{0};
@@ -93,7 +116,7 @@ public class SongController extends BaseRadioController {
                                         int currentHash = playList.hashCode();
                                         Optional<Integer> previousHash = Optional.ofNullable(compareHash.get(stationId));
                                         currentTimetamp[0] = 0;
-                                        if (!previousHash.isPresent() || previousHash.get() != currentHash || (data.getT1() - lastDataTick[0]) >= 40 ) {
+                                        if (!previousHash.isPresent() || previousHash.get() != currentHash || (data.getT1() - lastDataTick[0]) >= 2 ) {
                                             lastDataTick[0] = data.getT1();
                                             compareHash.put(stationId, currentHash);
                                             return ServerSentEvent.<PlayList>builder().id(Long.toString(data.getT1())).event("fetch").data(playList).build();
@@ -112,7 +135,12 @@ public class SongController extends BaseRadioController {
 
             stationStream.put(stationId, stationPlayListStream);
         }
-        return stationPlayListStream;
+        return stationPlayListStream
+                .doFinally(signalType -> {
+                    if (!user.isAnonymous()) {
+                        stationOnlineService.removeOnlineUser(userMapper.userToUserDTO(user), stationId);
+                    }
+                });
     }
 
     @ApiOperation(

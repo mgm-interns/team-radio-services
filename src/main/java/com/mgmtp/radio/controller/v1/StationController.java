@@ -28,19 +28,21 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.SynchronousSink;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Log4j2
 @RestController
 @RequestMapping(StationController.BASE_URL)
 public class StationController extends BaseRadioController {
-    private static Flux<Map<String, StationDTO>> allStationStream;
+    private static Map<String, Flux<Map<String, Object>>> onlineUserStream = new ConcurrentHashMap<>();
     public static final String BASE_URL = "/api/v1/stations";
 
     private final StationService stationService;
@@ -49,15 +51,18 @@ public class StationController extends BaseRadioController {
     private final CreateStationValidator createStationValidator;
     private final SubscribableChannel allStationChannel;
     private final UserService userService;
+    private final SubscribableChannel onlineUserOnlineChannel;
 
     public StationController(StationService stationService, UserMapper userMapper, Constant constant,
-                             CreateStationValidator createStationValidator, SubscribableChannel allStationChannel, UserService userService) {
+                             CreateStationValidator createStationValidator, SubscribableChannel allStationChannel, UserService userService,
+                             SubscribableChannel onlineUserOnlineChannel) {
         this.stationService = stationService;
         this.userMapper = userMapper;
         this.constant = constant;
         this.createStationValidator = createStationValidator;
         this.allStationChannel = allStationChannel;
         this.userService = userService;
+        this.onlineUserOnlineChannel = onlineUserOnlineChannel;
     }
 
     @InitBinder
@@ -108,9 +113,9 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public Mono<StationDTO> getStation(@PathVariable(value = "id") String stationId,
+    public Flux<Map<String, Object>>  getStation(@PathVariable(value = "id") String stationId,
                                        HttpServletResponse response,
                                        @CookieValue(value = "cookieId", defaultValue = "defaultCookie") String cookieId
     ) throws RadioNotFoundException {
@@ -120,9 +125,37 @@ public class StationController extends BaseRadioController {
             cookie.setPath("/");
             response.addCookie(cookie);
         }
-        return this.stationService
-                .joinStation(stationId, userMapper.userToUserDTO(user))
-                .switchIfEmpty(Mono.error(new RadioNotFoundException("Station not found!")));
+        if (!user.isAnonymous()) {
+            stationService.joinStation(stationId, userMapper.userToUserDTO(user));
+        }
+        Flux<Map<String, Object>> stationOnlineStream = onlineUserStream.get(stationId);
+        if (stationOnlineStream == null) {
+            stationOnlineStream = Flux.create(sink -> {
+                MessageHandler messageHandler = message -> {
+                    Map<String, Object> data = (Map<String, Object>) message.getPayload();
+                    if (data.containsKey(stationId)){
+                        Map<String, Object> stationInfo = (Map<String, Object>) data.get(stationId);
+                        sink.next(stationInfo);
+
+                        List<String> joinUserList = (List<String>) stationInfo.get("joinUser");
+                        if (!joinUserList.isEmpty()){
+                            stationService.clearJoinUserInfo(stationId);
+                        }
+
+                        List<String> leaveUserList = (List<String>) stationInfo.get("leaveUser");
+                        if (!leaveUserList.isEmpty()){
+                            stationService.clearLeaveUserInfo(stationId);
+                        }
+                    }
+                };
+                sink.onDispose(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
+                sink.onCancel(() -> onlineUserOnlineChannel.unsubscribe(messageHandler));
+                onlineUserOnlineChannel.subscribe(messageHandler);
+            })
+            .map((o -> (Map<String, Object>) o));
+            onlineUserStream.put(stationId, stationOnlineStream.share());
+        }
+        return stationOnlineStream;
     }
 
     @ApiOperation(

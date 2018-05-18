@@ -20,7 +20,10 @@ public interface StationService {
     Mono<StationConfigurationDTO> updateConfiguration(String id, StationConfigurationDTO stationConfigurationDTO);
     boolean existsByName(String stationName);
     Flux<StationDTO> getListStationByListStationId(List<String> listStationId);
-    Mono<StationDTO> joinStation(String stationId, UserDTO userDto);
+    void joinStation(String stationId, UserDTO userDto);
     Mono<Station> retrieveByIdOrFriendlyId(String friendlyId);
     Flux<StationDTO> getListStationByListStationIdAndPrivacy(List<String> listStationId, StationPrivacy privacy);
+    Map<String, Object> getAllStationInfo();
+    void clearJoinUserInfo(String stationId);
+    void clearLeaveUserInfo(String stationId);
 }
