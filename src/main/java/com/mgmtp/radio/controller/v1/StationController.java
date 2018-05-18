@@ -32,6 +32,7 @@ import reactor.core.publisher.Mono;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -74,8 +75,8 @@ public class StationController extends BaseRadioController {
     })
     @GetMapping(value = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public Flux<Map<String,StationDTO>> getAllStationsStream(@RequestParam(value = "page", defaultValue = "0") int page,
-                                                      @RequestParam(value = "limit", defaultValue = "40") int limit) {
+    public Flux<List<StationDTO>> getAllStationsStream(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                       @RequestParam(value = "limit", defaultValue = "40") int limit) {
         return Flux.create(sink -> {
             MessageHandler messageHandler = message -> {
                 Map<String, StationDTO> data = (Map<String, StationDTO>) message.getPayload();
@@ -90,7 +91,7 @@ public class StationController extends BaseRadioController {
             sink.onDispose(() -> allStationChannel.unsubscribe(messageHandler));
             allStationChannel.subscribe(messageHandler);
         })
-        .map(mapper -> (Map<String, StationDTO>) mapper);
+        .map(mapper -> ((Map<String, StationDTO>) mapper).values().stream().collect(Collectors.toList()));
     }
 
 	@GetMapping
