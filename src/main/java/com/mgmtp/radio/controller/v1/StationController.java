@@ -10,7 +10,6 @@ import com.mgmtp.radio.exception.RadioBadRequestException;
 import com.mgmtp.radio.exception.RadioException;
 import com.mgmtp.radio.exception.RadioNotFoundException;
 import com.mgmtp.radio.mapper.user.UserMapper;
-import com.mgmtp.radio.sdo.StationPrivacy;
 import com.mgmtp.radio.service.station.StationService;
 import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.support.validator.station.CreateStationValidator;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.SynchronousSink;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
@@ -177,13 +175,10 @@ public class StationController extends BaseRadioController {
             return Mono.error(new RadioBadRequestException(bindingResult.getAllErrors().get(0).getDefaultMessage()));
         }
         User user = userService.getAccessUser(cookieId);
-        if (!getCurrentUser().isPresent()) {
-            stationDTO.setPrivacy(StationPrivacy.station_private);
-            if (constant.getDefaultCookie().equals(cookieId)) {
-                Cookie cookie = new Cookie(constant.getCookieId(), user.getCookieId());
-                cookie.setPath("/");
-                response.addCookie(cookie);
-            }
+        if (!getCurrentUser().isPresent() && constant.getDefaultCookie().equals(cookieId)) {
+            Cookie cookie = new Cookie(constant.getCookieId(), user.getCookieId());
+            cookie.setPath("/");
+            response.addCookie(cookie);
         }
         return stationService.create(user.getId(), stationDTO);
     }
