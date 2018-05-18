@@ -16,6 +16,5 @@ public class NowPlaying {
     private String thumbnail;
     private String message;
     private boolean isEnded;
-    private long timeSkipLeft;
     private boolean skipped;
 }
