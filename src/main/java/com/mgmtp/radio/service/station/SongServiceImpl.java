@@ -5,6 +5,7 @@ import com.mgmtp.radio.config.YouTubeConfig;
 import com.mgmtp.radio.domain.station.*;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.station.SongDTO;
+import com.mgmtp.radio.dto.station.StationConfigurationDTO;
 import com.mgmtp.radio.dto.station.StationDTO;
 import com.mgmtp.radio.dto.user.UserDTO;
 import com.mgmtp.radio.exception.RadioBadRequestException;
@@ -500,8 +501,8 @@ public class SongServiceImpl implements SongService {
 
     @Override
     public Mono<SongDTO> handleSkipRule (SongDTO songDTO){
-        return stationService.retrieveByIdOrFriendlyId(songDTO.getStationFriendlyId()).map(tempStation ->{
-            final StationConfiguration stationConfiguration = tempStation.getStationConfiguration();
+        return Mono.just(stationService.getStationById(songDTO.getStationFriendlyId())).map(tempStation ->{
+            final StationConfigurationDTO stationConfiguration = tempStation.getStationConfiguration();
             boolean isSkipped = false;
 
             if (stationConfiguration.getSkipRule().getSkipRuleType() == SkipRuleType.ADVANCE) {
@@ -509,8 +510,7 @@ public class SongServiceImpl implements SongService {
                     isSkipped = true;
                 }
             } else {
-            	final StationDTO stationDTO = stationOnlineService.getStationById(songDTO.getStationFriendlyId());
-                double downVotePercent = calcCurrentSongDislikePercent(songDTO, stationDTO);
+                double downVotePercent = calcCurrentSongDislikePercent(songDTO, tempStation);
                 if (downVotePercent > DOWN_VOTE_THRES_PERCENT) {
                     isSkipped = true;
                 }
@@ -534,7 +534,7 @@ public class SongServiceImpl implements SongService {
         return currentSongDislikePercent;
     }
 
-    private boolean isOwnerDownvote(Station station, SongDTO songDTO) {
+    private boolean isOwnerDownvote(StationDTO station, SongDTO songDTO) {
         return songDTO.getDownvoteUserList().stream().anyMatch(userDTO -> userDTO.getId().equals(station.getOwnerId()));
     }
 

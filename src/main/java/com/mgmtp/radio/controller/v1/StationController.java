@@ -113,7 +113,20 @@ public class StationController extends BaseRadioController {
             @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
             @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
     })
-    @GetMapping(value = "/{id}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping("/{id}")
+	public Mono<StationDTO> getStationById(@PathVariable(value = "id") String stationId) {
+        return Mono.just(stationService.getStationById(stationId));
+    }
+
+    @ApiOperation(
+            value = "Stream station by id",
+            notes = "Returns current station"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Request processed successfully", response = RadioSuccessResponse.class),
+            @ApiResponse(code = 500, message = "Server error", response = RadioException.class)
+    })
+    @GetMapping(value = "/{id}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public Flux<Map<String, Object>>  getStation(@PathVariable(value = "id") String stationId,
                                        HttpServletResponse response,
