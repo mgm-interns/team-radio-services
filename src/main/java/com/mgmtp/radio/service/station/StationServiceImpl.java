@@ -98,7 +98,7 @@ public class StationServiceImpl implements StationService {
 	public Mono<StationConfigurationDTO> updateConfiguration(String stationId, StationConfigurationDTO stationConfigurationDTO) {
         StationDTO currentStation = stationOnlineService.getStationById(stationId);
         currentStation.setStationConfiguration(stationConfigurationDTO);
-        stationRepository.retrieveByIdOrFriendlyId(stationId).map(station -> {
+        stationRepository.retrieveByIdOrFriendlyId(stationId).flatMap(station -> {
             station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO));
             return stationRepository.save(station);
         }).subscribe();
