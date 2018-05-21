@@ -96,19 +96,15 @@ public class StationServiceImpl implements StationService {
 
 	@Override
 	public Mono<StationConfigurationDTO> updateConfiguration(String stationId, StationConfigurationDTO stationConfigurationDTO) {
-		return stationRepository.retrieveByIdOrFriendlyId(stationId)
-			.map(station -> {
-				final StationConfiguration stationConfiguration =
-					stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO);
-					station.setStationConfiguration(stationConfiguration);
-				station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO));
-				stationRepository.save(station).subscribe();
-				final StationDTO stationDTO = stationMapper.stationToStationDTO(station);
-				stationOnlineService.addStationToList(stationDTO);
-				stationConfiguration.setStationFriendlyId(station.getFriendlyId());
-				return stationConfiguration;
-			})
-			.map(stationMapper::stationConfigurationToStationConfigurationDto);
+        StationDTO currentStation = stationOnlineService.getStationById(stationId);
+        currentStation.setStationConfiguration(stationConfigurationDTO);
+        stationRepository.retrieveByIdOrFriendlyId(stationId).flatMap(station -> {
+            station.setStationConfiguration(stationMapper.stationConfigurationDtoToStationConfiguration(stationConfigurationDTO));
+            return stationRepository.save(station);
+        }).subscribe();
+        stationOnlineService.addStationToList(currentStation);
+        stationConfigurationDTO.setStationFriendlyId(currentStation.getFriendlyId());
+        return Mono.just(stationConfigurationDTO);
 	}
 
 	@Override
@@ -141,7 +137,7 @@ public class StationServiceImpl implements StationService {
         addUserToStationOnlineList(stationId, userDto);
     }
 
-    public void addUserToStationOnlineList(String stationId, UserDTO userDto) {
+    private void addUserToStationOnlineList(String stationId, UserDTO userDto) {
         stationOnlineService.addOnlineUser(userDto, stationId);
     }
 
@@ -158,5 +154,10 @@ public class StationServiceImpl implements StationService {
     @Override
     public void clearLeaveUserInfo(String stationId) {
         stationOnlineService.clearLeaveUserInfo(stationId);
+    }
+
+    @Override
+    public StationDTO getStationById(String stationId) {
+        return stationOnlineService.getStationById(stationId);
     }
 }

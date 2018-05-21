@@ -28,10 +28,11 @@ public class UpdateStationConfigAspect {
 			final String stationFriendlyId = stationConfigDto.getStationFriendlyId();
 			if(stationPlayerHelper.getStationNowPlaying(stationFriendlyId).isPresent()) {
 				final NowPlaying nowPlaying = stationPlayerHelper.getStationNowPlaying(stationFriendlyId).get();
-				SongDTO currentSongDto = new SongDTO();
-				BeanUtils.copyProperties(nowPlaying, currentSongDto);
-				currentSongDto.setStationFriendlyId(stationFriendlyId);
-				songService.handleSkipRule(currentSongDto).subscribe();
+				Mono<SongDTO> currentSongDto = songService.getById(nowPlaying.getSongId());
+				currentSongDto.flatMap(songDTO -> {
+				    songDTO.setStationFriendlyId(stationFriendlyId);
+                    return songService.handleSkipRule(songDTO);
+                }).subscribe();
 			}
 		});
 

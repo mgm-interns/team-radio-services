@@ -16,11 +16,14 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Log4j2
 @RestController
 @RequestMapping(MessageController.BASE_URL)
 public class MessageController extends BaseRadioController {
-
+    private static Map<String, Flux<RadioSuccessResponse<MessageDTO>>> stationMessageStream = new ConcurrentHashMap<>();
     public static final String BASE_URL = "/api/v1/stations/{stationId}/messages";
 
     private final MessageService messageService;
@@ -47,7 +50,12 @@ public class MessageController extends BaseRadioController {
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseStatus(HttpStatus.OK)
     public Flux<RadioSuccessResponse<MessageDTO>> getAll(@PathVariable(value = "stationId") String stationId) {
-        return messageService.findByStationId(stationId).map(RadioSuccessResponse::new);
+        Flux<RadioSuccessResponse<MessageDTO>> currentMessageStream = stationMessageStream.get(stationId);
+        if (currentMessageStream == null){
+            currentMessageStream = messageService.findByStationId(stationId).map(RadioSuccessResponse::new).share();
+            stationMessageStream.put(stationId, currentMessageStream);
+        }
+        return currentMessageStream;
     }
 
 }

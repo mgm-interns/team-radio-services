@@ -26,4 +26,5 @@ public interface StationService {
     Map<String, Object> getAllStationInfo();
     void clearJoinUserInfo(String stationId);
     void clearLeaveUserInfo(String stationId);
+    StationDTO getStationById(String stationId);
 }
