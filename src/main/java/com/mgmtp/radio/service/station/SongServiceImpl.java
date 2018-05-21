@@ -273,7 +273,6 @@ public class SongServiceImpl implements SongService {
             }
             if (!listSkippedSongId.isEmpty()) {
                 if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
-                    updateSongSkipped(nowPlayingSong.get().getSongId(), true);
                     stationSongSkipHelper.removeSkipSong(stationId, nowPlayingSong.get());
                     nowPlaying.get().setSkipped(true);
                         try {
@@ -365,13 +364,6 @@ public class SongServiceImpl implements SongService {
         songRepository.findById(songId).flatMap(song -> {
             song.setStatus(playingStatus);
             song.setMessage(message);
-            return songRepository.save(song);
-        }).subscribe();
-    }
-
-    private void updateSongSkipped(String songId, boolean isSkipped){
-        songRepository.findById(songId).flatMap(song -> {
-            song.setSkipped(isSkipped);
             return songRepository.save(song);
         }).subscribe();
     }
