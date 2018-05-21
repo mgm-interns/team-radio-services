@@ -338,6 +338,7 @@ public class SongServiceImpl implements SongService {
         SongDTO skippedSong = listSong.stream().filter(songDTO -> songDTO.getId().equals(skipSongId)).findFirst().get();
         listSong.remove(skippedSong);
         updateSongPlayingStatusAndMessage(skipSongId, SongStatus.skipped, skippedSong.getMessage());
+        moveToHistory(stationId, skipSongId);
 
         SongDTO nowPlayingSong = listSong.get(0);
         return updateStatusAndSetNowPlayingFromSong(nowPlayingSong, stationId, joinTime);
