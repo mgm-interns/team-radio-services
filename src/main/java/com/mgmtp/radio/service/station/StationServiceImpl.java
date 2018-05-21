@@ -56,6 +56,7 @@ public class StationServiceImpl implements StationService {
     public Mono<StationDTO> create(String userId, StationDTO stationDTO) {
         stationDTO.setName(stationDTO.getName().trim());
         stationDTO.setOwnerId(userId);
+        stationDTO.setPrivacy(StationPrivacy.station_public);
         stationDTO.setCreatedAt(LocalDate.now());
         String friendlyId = createFriendlyIdFromStationName(stationDTO.getName());
         stationDTO.setFriendlyId(friendlyId);
