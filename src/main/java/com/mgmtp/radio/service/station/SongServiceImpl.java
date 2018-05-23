@@ -273,17 +273,20 @@ public class SongServiceImpl implements SongService {
             }
             if (!listSkippedSongId.isEmpty()) {
                 if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
-                    stationSongSkipHelper.removeSkipSong(stationId, nowPlayingSong.get());
+                    SongDTO skippedSongDTO = listSong.stream().filter(songDTO -> songDTO.getId().equals(songId)).findFirst().get();
+                    stationSongSkipHelper.removeSkipSong(stationId, skippedSongDTO);
+                    updateSkipped(songId, true);
                     nowPlaying.get().setSkipped(true);
-                        try {
-                            Thread.sleep(TOTAL_TIME_SKIP*1000 + 2100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        finally {
-                            String skippedSongId = nowPlaying.get().getSongId();
-                            nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
-                        }
+                    try {
+                        Thread.sleep(TOTAL_TIME_SKIP*1000 + 2100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    finally {
+                        String skippedSongId = nowPlaying.get().getSongId();
+                        updateSkipped(songId, false);
+                        nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
+                    }
                 }
                 changeFlagForWillBeSkipSongInList(listSong, listSkippedSongId);
             }
@@ -299,6 +302,14 @@ public class SongServiceImpl implements SongService {
         historyParam.put(EventDataKeys.songId.name(), songId);
 
         historyChannel.send(MessageBuilder.withPayload(historyParam).build());
+    }
+
+    private void updateSkipped(String songId, boolean isSkipped){
+        songRepository.findById(songId).subscribe();
+        songRepository.findById(songId).flatMap(song -> {
+            song.setSkipped(isSkipped);
+            return songRepository.save(song);
+        }).subscribe();
     }
 
     private void changeFlagForWillBeSkipSongInList(List<SongDTO> listSong, Set<String> listSkipSongId){
