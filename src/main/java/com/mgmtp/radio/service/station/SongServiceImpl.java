@@ -273,7 +273,8 @@ public class SongServiceImpl implements SongService {
             }
             if (!listSkippedSongId.isEmpty()) {
                 if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
-                    stationSongSkipHelper.removeSkipSong(stationId, nowPlayingSong.get());
+                    SongDTO skippedSong = listSong.stream().filter(songDTO -> songDTO.getId().equals(songId)).findFirst().get();
+                    stationSongSkipHelper.removeSkipSong(stationId, skippedSong);
                     nowPlaying.get().setSkipped(true);
                         try {
                             Thread.sleep(TOTAL_TIME_SKIP*1000 + 2100);
