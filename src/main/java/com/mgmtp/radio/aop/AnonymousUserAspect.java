@@ -6,6 +6,7 @@ import com.mgmtp.radio.domain.station.Station;
 import com.mgmtp.radio.domain.user.RecentStation;
 import com.mgmtp.radio.domain.user.User;
 import com.mgmtp.radio.dto.user.UserDTO;
+import com.mgmtp.radio.service.station.StationOnlineService;
 import com.mgmtp.radio.service.user.UserService;
 import com.mgmtp.radio.support.MappingAnonymousHelper;
 import org.aspectj.lang.annotation.AfterReturning;
@@ -29,18 +30,26 @@ public class AnonymousUserAspect {
     private final UserService userService;
     private final MappingAnonymousHelper mappingAnonymousHelper;
     private final HttpServletRequest request;
+    private final StationOnlineService stationOnlineService;
 
     public AnonymousUserAspect(Constant constant,
                                UserService userService,
                                MappingAnonymousHelper mappingAnonymousHelper,
-                               HttpServletRequest request
-    ) {
+                               HttpServletRequest request,
+                               StationOnlineService stationOnlineService) {
         this.constant = constant;
         this.userService = userService;
         this.mappingAnonymousHelper = mappingAnonymousHelper;
         this.request = request;
+        this.stationOnlineService = stationOnlineService;
     }
 
+    private void mapAnonymousUserInAllStations(String anonymousUserId, String userId) {
+        stationOnlineService.getAllStation()
+            .values().stream()
+            .filter(stationDTO -> anonymousUserId.equals(stationDTO.getOwnerId()))
+            .forEach(stationDTO -> stationDTO.setOwnerId(userId));
+    }
 
     @AfterReturning(value = "execution(* com.mgmtp.radio.service.user.UserServiceImpl.getUserById(..))", returning = "userInfo")
     public void mapAnonymousUser(UserDTO userInfo) {
@@ -48,6 +57,8 @@ public class AnonymousUserAspect {
 
         if (cookieOptional.isPresent()) {
             User anonymousUser = userService.getAnonymousUser(cookieOptional.get().getValue());
+
+            mapAnonymousUserInAllStations(anonymousUser.getId(), userInfo.getId());
             mappingAnonymousHelper.updateUserId(anonymousUser.getId(), userInfo.getId(), "ownerId", Station.class);
             mappingAnonymousHelper.updateUserId(anonymousUser.getId(), userInfo.getId(), "userId", RecentStation.class);
             mappingAnonymousHelper.updateUserId(anonymousUser.getId(), userInfo.getId(), "creatorId", Song.class);
