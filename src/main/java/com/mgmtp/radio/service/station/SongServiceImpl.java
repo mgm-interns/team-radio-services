@@ -273,7 +273,8 @@ public class SongServiceImpl implements SongService {
             }
             if (!listSkippedSongId.isEmpty()) {
                 if (listSkippedSongId.contains(nowPlaying.get().getSongId())) {
-                    SongDTO skippedSong = listSong.stream().filter(songDTO -> songDTO.getId().equals(songId)).findFirst().get();
+                    String skippedSongId = nowPlaying.get().getSongId();
+                    SongDTO skippedSong = listSong.stream().filter(songDTO -> songDTO.getId().equals(skippedSongId)).findFirst().get();
                     stationSongSkipHelper.removeSkipSong(stationId, skippedSong);
                     nowPlaying.get().setSkipped(true);
                         try {
@@ -282,7 +283,6 @@ public class SongServiceImpl implements SongService {
                             e.printStackTrace();
                         }
                         finally {
-                            String skippedSongId = nowPlaying.get().getSongId();
                             nowPlaying = skipSongAndRemoveFromListBySongId(stationId, skippedSongId, listSong, jointTime);
                         }
                 }
