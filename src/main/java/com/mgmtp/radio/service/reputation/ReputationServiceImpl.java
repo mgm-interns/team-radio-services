@@ -8,6 +8,7 @@ import com.mgmtp.radio.sdo.ReputationEventKeys;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,16 +36,12 @@ public class ReputationServiceImpl implements ReputationService {
                 .toStream()
                 .collect(Collectors.toList());
 
-        int reputationIncreasing = 0;
-
         if (!StringUtils.isEmpty(user.getAvatarUrl())
                 && reputationEventLogs.stream().noneMatch(reputationEventLog -> reputationEventLog.getEvent() == ReputationEventKeys.user_update_avatar)) {
 
             ReputationEventLog reputationEventLog =
                     saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_avatar, USER_UPDATE_AVATAR_POINT);
             reputationEventLogRepository.save(reputationEventLog);
-
-            reputationIncreasing += reputationEventLog.getScore();
         }
 
         if (!StringUtils.isEmpty(user.getCoverUrl())
@@ -53,8 +50,6 @@ public class ReputationServiceImpl implements ReputationService {
             ReputationEventLog reputationEventLog =
                     saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_cover, USER_UPDATE_COVER_POINT);
             reputationEventLogRepository.save(reputationEventLog);
-
-            reputationIncreasing += reputationEventLog.getScore();
         }
 
         if (!StringUtils.isEmpty(user.getFirstName())
@@ -63,8 +58,6 @@ public class ReputationServiceImpl implements ReputationService {
             ReputationEventLog reputationEventLog =
                     saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_first_name, USER_UPDATE_INFO_POINT);
             reputationEventLogRepository.save(reputationEventLog);
-
-            reputationIncreasing += reputationEventLog.getScore();
         }
 
         if (!StringUtils.isEmpty(user.getLastName())
@@ -73,8 +66,6 @@ public class ReputationServiceImpl implements ReputationService {
             ReputationEventLog reputationEventLog =
                     saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_last_name, USER_UPDATE_INFO_POINT);
             reputationEventLogRepository.save(reputationEventLog);
-
-            reputationIncreasing += reputationEventLog.getScore();
         }
 
         if (!StringUtils.isEmpty(user.getCountry())
@@ -83,8 +74,6 @@ public class ReputationServiceImpl implements ReputationService {
             ReputationEventLog reputationEventLog =
                     saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_country, USER_UPDATE_INFO_POINT);
             reputationEventLogRepository.save(reputationEventLog);
-
-            reputationIncreasing += reputationEventLog.getScore();
         }
 
         if (!StringUtils.isEmpty(user.getCity())
@@ -93,18 +82,19 @@ public class ReputationServiceImpl implements ReputationService {
             ReputationEventLog reputationEventLog =
                     saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_city, USER_UPDATE_INFO_POINT);
             reputationEventLogRepository.save(reputationEventLog);
-
-            reputationIncreasing += reputationEventLog.getScore();
         }
 
         if (!StringUtils.isEmpty(user.getBio())
                 && reputationEventLogs.stream().noneMatch(reputationEventLog -> reputationEventLog.getEvent() == ReputationEventKeys.user_update_bio)) {
             ReputationEventLog reputationEventLog =
                     saveReputationEventLog(user.getId(), ReputationEventKeys.user_update_bio, USER_UPDATE_INFO_POINT);
-            reputationIncreasing += reputationEventLog.getScore();
+
+            reputationEventLogRepository.save(reputationEventLog);
         }
 
-        user.setReputation(user.getReputation() + reputationIncreasing);
+        Flux<ReputationEventLog> reputationEventLogFlux = reputationEventLogRepository.findByUserId(user.getId());
+        int score = reputationEventLogFlux.toStream().mapToInt(ReputationEventLog::getScore).sum();
+        user.setReputation(score);
         return userRepository.save(user);
     }
 
