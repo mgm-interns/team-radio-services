@@ -13,7 +13,7 @@ public interface StationRepository extends ReactiveMongoRepository<Station, Stri
     @Query("{ $or: [ { '_id': ?#{[0]} }, { 'friendlyId': ?#{[0]} } ] }")
     Mono<Station> retrieveByIdOrFriendlyId(String friendlyId);
     Flux<Station> findByOwnerId(String Id);
-	Mono<Station> findFirstByName(String stationId);
+    Mono<Station> findFirstByNameIgnoreCase(String stationId);
 	Flux<Station> findByOwnerIdAndPrivacy(String ownerId, StationPrivacy privacy);
     Flux<Station> findByIdIn(List<String> listStationId);
     Flux<Station> findByIdInAndPrivacy(List<String> listStationId, StationPrivacy privacy);
