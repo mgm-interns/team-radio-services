@@ -44,6 +44,7 @@ public class SongControllerTest {
 
     @Autowired
     @Qualifier("songMapperImpl")
+    @Mock
     SongMapper songMapper;
 
     @Autowired
@@ -62,7 +63,7 @@ public class SongControllerTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        songController = new SongController(songService,historyService, userService, stationOnlineService, userMapper, null);
+        songController = new SongController(songService,historyService, userService, stationOnlineService, null, null);
         webTestClient = WebTestClient.bindToController(songController).build();
     }
 
@@ -84,7 +85,7 @@ public class SongControllerTest {
 
         //test
         webTestClient.get()
-                .uri(URI.create("/api/v1/station/" + STATION_ID + "/history?limit=2"))
+                .uri(URI.create("/api/v1/station/" + STATION_ID + "/history"))
                 .exchange()
                 .expectStatus()
                 .isOk()
