@@ -74,6 +74,7 @@ public class StationServiceImpl implements StationService {
     private String createFriendlyIdFromStationName(String stationName) {
 	    String friendlyId = Normalizer.normalize(stationName, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
 	    friendlyId = friendlyId.replaceAll("đ", "d").replaceAll("Đ", "D");
+	    friendlyId = friendlyId.toLowerCase();
         friendlyId = friendlyId.replaceAll("\\s+", "-");
         Optional<Station> station = stationRepository.retrieveByIdOrFriendlyId(friendlyId).blockOptional();
         if(station.isPresent()) {
@@ -110,7 +111,7 @@ public class StationServiceImpl implements StationService {
 
 	@Override
 	public boolean existsByName(String name) {
-		return stationRepository.findFirstByName(name)
+		return stationRepository.findFirstByNameIgnoreCase(name)
 			.blockOptional().isPresent();
 	}
 
