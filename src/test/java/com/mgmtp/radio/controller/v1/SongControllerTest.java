@@ -40,14 +40,6 @@ public class SongControllerTest {
     SongService songService;
 
     @Mock
-    StationService stationService;
-
-    @Autowired
-    @Qualifier("songMapperImpl")
-    SongMapper songMapper;
-
-    @Autowired
-    @Qualifier("userMapperImpl")
     UserMapper userMapper;
 
     @Mock
