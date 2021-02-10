@@ -171,7 +171,7 @@ public class SongServiceImpl implements SongService {
                                                    .filter(songDTO -> songDTO.getStatus() == SongStatus.playing)
                                                    .findFirst();
 
-        if (joinTime != 0){
+        if (joinTime != 0 && !nowPlaying.get().isSkipped()){
             nowPlaying = seekTime(listSong, nowPlaying, joinTime, stationId);
         }
 
